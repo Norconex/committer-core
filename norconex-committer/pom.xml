@@ -317,12 +317,12 @@ along with Norconex Committer. If not, see <http://www.gnu.org/licenses/>.
   	<url>http://www.norconex.com</url>
   </organization>
   <scm>
-    <url>https://github.com/Norconex/collectors</url>
-    <connection>scm:git:git@github.com:Norconex/collectors.git</connection>
-    <developerConnection>scm:git:git@github.com:Norconex/collectors.git</developerConnection>
+    <url>https://github.com/Norconex/committer</url>
+    <connection>scm:git:git@github.com:Norconex/committer.git</connection>
+    <developerConnection>scm:git:git@github.com:Norconex/committer.git</developerConnection>
   </scm>
   <issueManagement>
-  	<url>https://github.com/Norconex/collectors/issues</url>
+  	<url>https://github.com/Norconex/committer/issues</url>
   	<system>GitHub</system>
   </issueManagement>
 

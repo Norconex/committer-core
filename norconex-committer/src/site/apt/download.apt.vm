@@ -54,7 +54,7 @@ Download
 * Source
   
   Source code can be obtained on GitHub: 
-  {{https://github.com/Norconex/collectors/tree/master/norconex-committer}}.
+  {{https://github.com/Norconex/committer}}.
   
   Maven users can add the following to their pom.xml:
   

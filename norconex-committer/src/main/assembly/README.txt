@@ -8,7 +8,7 @@ This product website and documentation is located at:
 http://www.norconex.com/product/committer/
 
 Source code can be obtained at:
-https://github.com/Norconex/collectors
+https://github.com/Norconex/committer
 
 Norconex licenses:
 ==================
