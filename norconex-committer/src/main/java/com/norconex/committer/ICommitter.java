@@ -36,7 +36,7 @@ public interface ICommitter extends Serializable {
      * implementations should offer to overwrite this default value when
      * appropriate.
      */
-    static final String DEFAULT_DOCUMENT_REFERENCE = "document.reference";
+    String DEFAULT_DOCUMENT_REFERENCE = "document.reference";
     
     /**
      * Queues a new or modified document.   These queued documents should

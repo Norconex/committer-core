@@ -1,20 +1,20 @@
 /* Copyright 2010-2013 Norconex Inc.
-*
-* This file is part of Norconex Committer.
-*
-* Norconex Committer is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-*
-* Norconex Committer is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with Norconex Committer. If not, see <http://www.gnu.org/licenses/>.
-*/
+ *
+ * This file is part of Norconex Committer.
+ *
+ * Norconex Committer is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Norconex Committer is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Norconex Committer. If not, see <http://www.gnu.org/licenses/>.
+ */
 package com.norconex.committer;
 
 import java.io.File;
@@ -28,58 +28,63 @@ import org.apache.log4j.Logger;
 import com.norconex.commons.lang.map.Properties;
 
 /**
-* Base implementation offering to batch the committing of documents
-* (additions and deletions alike).
+* Basic implementation invoking the {@link #commit()} method every time a given
+* queue size threshold has been reached.  Both additions and deletions count
+* towards the same queue size.
+* It is still left to implementors to decide how to actually queue the 
+* documents and how to perform commits.
+* <p />
+* Consider extending {@link AbstractFileQueueCommitter} if you do not wish
+* to implement your own queue.
 * @author Pascal Essiembre
-* @deprecated use {@link AbstractCommitter}
+* @since 1.1.0
 */
-@Deprecated
-public abstract class BatchableCommitter implements ICommitter {
+public abstract class AbstractCommitter implements ICommitter {
 
     private static final long serialVersionUID = 880638478926236689L;
     private static final Logger LOG = LogManager.getLogger(
-            BatchableCommitter.class);
+            AbstractCommitter.class);
     
-    /** Default batch size. */
-    public static final int DEFAULT_BATCH_SIZE = 1000;
+    /** Default queue size. */
+    public static final int DEFAULT_QUEUE_SIZE = 1000;
     
-    private int batchSize = DEFAULT_BATCH_SIZE;
+    private int queueSize = DEFAULT_QUEUE_SIZE;
     private long docCount;
     
     /**
      * Constructor.
      */
-    public BatchableCommitter() {
+    public AbstractCommitter() {
         super();
     }
     /**
-     * Creates a new instance initialized to the given batch size.
-     * @param batchSize batch size
+     * Constructor.
+     * @param queueSize queue size
      */
-    public BatchableCommitter(int batchSize) {
+    public AbstractCommitter(int queueSize) {
         super();
-        this.batchSize = batchSize;
+        this.queueSize = queueSize;
     }
     
     /**
-     * Gets the batch size.
-     * @return batch size
+     * Gets the queue size.
+     * @return queue size
      */
-    public int getBatchSize() {
-        return batchSize;
+    public int getQueueSize() {
+        return queueSize;
     }
     /**
-     * Sets the batch size.
-     * @param batchSize batch size
+     * Sets the queue size.
+     * @param queueSize queue size
      */
-    public void setBatchSize(int batchSize) {
-        this.batchSize = batchSize;
+    public void setQueueSize(int queueSize) {
+        this.queueSize = queueSize;
     }
 
     @Override
     public final void queueAdd(
             String reference, File document, Properties metadata) {
-        queueBatchableAdd(reference, document, metadata);
+        queueAddittion(reference, document, metadata);
         commitIfReady();
     }
     /**
@@ -88,13 +93,13 @@ public abstract class BatchableCommitter implements ICommitter {
      * @param document document file
      * @param metadata document metadata
      */
-    protected abstract void queueBatchableAdd(
+    protected abstract void queueAddittion(
             String reference, File document, Properties metadata);
 
     @Override
     public final void queueRemove(
             String ref, File document, Properties metadata) {
-        queueBatchableRemove(ref, document, metadata);
+        queueRemoval(ref, document, metadata);
         commitIfReady();
     }
     /**
@@ -103,26 +108,26 @@ public abstract class BatchableCommitter implements ICommitter {
      * @param document document file
      * @param metadata document metadata
      */
-    protected abstract void queueBatchableRemove(
+    protected abstract void queueRemoval(
             String reference, File document, Properties metadata);
     
 
     @SuppressWarnings("nls")
     private void commitIfReady() {
         docCount++;
-        if (docCount % batchSize == 0) {
+        if (docCount % queueSize == 0) {
             if (LOG.isInfoEnabled()) {
-                LOG.info("Batch size reached (" + batchSize
+                LOG.info("Batch size reached (" + queueSize
                         + "). Committing");
             }
             commit();
         }
     }
-    
+
     @Override
     public int hashCode() {
         HashCodeBuilder hashCodeBuilder = new HashCodeBuilder();
-        hashCodeBuilder.append(batchSize);
+        hashCodeBuilder.append(queueSize);
         hashCodeBuilder.append(docCount);
         return hashCodeBuilder.toHashCode();
     }
@@ -135,12 +140,12 @@ public abstract class BatchableCommitter implements ICommitter {
         if (obj == null) {
             return false;
         }
-        if (!(obj instanceof BatchableCommitter)) {
+        if (!(obj instanceof AbstractCommitter)) {
             return false;
         }
-        BatchableCommitter other = (BatchableCommitter) obj;
+        AbstractCommitter other = (AbstractCommitter) obj;
         EqualsBuilder equalsBuilder = new EqualsBuilder();
-        equalsBuilder.append(batchSize, other.batchSize);
+        equalsBuilder.append(queueSize, other.queueSize);
         equalsBuilder.append(docCount, other.docCount);
         return equalsBuilder.isEquals();
     }
@@ -148,7 +153,7 @@ public abstract class BatchableCommitter implements ICommitter {
     @Override
     public String toString() {
         ToStringBuilder builder = new ToStringBuilder(this);
-        builder.append("batchSize", batchSize);
+        builder.append("queueSize", queueSize);
         builder.append("docCount", docCount);
         return builder.toString();
     }

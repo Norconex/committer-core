@@ -27,13 +27,17 @@ import com.norconex.committer.impl.FileSystemCommitter;
 import com.norconex.commons.lang.config.ConfigurationUtil;
 
 
-@SuppressWarnings("nls")
+/**
+ * Tests the {@link FileSystemCommitter}.
+ * @author Pascal Essiembre
+ */
+@SuppressWarnings({"nls", "javadoc"})
 public class FileSystemCommitterTest {
 
     private File tempFile;
     
     @Before
-    public void setUp() throws Exception {
+    public void setUp() throws IOException {
         tempFile = File.createTempFile("FileSystemCommitterTest", ".xml");
     }
 

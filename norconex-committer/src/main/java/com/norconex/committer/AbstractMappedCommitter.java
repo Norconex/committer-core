@@ -34,6 +34,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import com.norconex.commons.lang.config.ConfigurationLoader;
 import com.norconex.commons.lang.config.IXMLConfigurable;
@@ -41,7 +42,7 @@ import com.norconex.commons.lang.map.Properties;
 
 /**
  * <p>A base class batching documents and offering mappings of source id and 
- * content fields to target id and content fields.  
+ * source content fields to target id and target content fields.  
  * Batched documents are queued on the file system.</p>
  * 
  * <h4>ID Mapping:</h4>
@@ -62,18 +63,17 @@ import com.norconex.commons.lang.map.Properties;
  * will use the matching metadata property instead.
  * The default (or constant) <b>target content</b> field is for subclasses
  * to define.  When a content mapping is defined, the 
- * content id field will be deleted (if provided) unless the 
+ * source content field will be deleted (if provided) unless the 
  * <code>keepContentSourceField</code> attribute is set to 
  * <code>true</code>.</p> 
  * 
  * @author Pascal Essiembre
  * @author Pascal Dimassimo
- * @deprecated use {@link AbstractMappedCommitter}
+ * @since 1.1.0
  */
-@Deprecated
 @SuppressWarnings("nls")
-public abstract class BaseCommitter
-        extends FileSystemQueueCommitter implements IXMLConfigurable {
+public abstract class AbstractMappedCommitter
+        extends AbstractBatchCommitter implements IXMLConfigurable {
 
     private static final long serialVersionUID = 5437833425204155264L;
 
@@ -87,18 +87,19 @@ public abstract class BaseCommitter
     private boolean keepContentSourceField;
 
     /**
-     * Constructor.
+     * Creates a new instance.
      */
-    public BaseCommitter() {
+    public AbstractMappedCommitter() {
         super();
     }
     /**
-     * Creates a new instance with the given batch size.
-     * @param batchSize batch size
+     * Creates a new instance with given commit batch size.
+     * @param commitBatchSize commit batch size
      */
-    public BaseCommitter(int batchSize) {
-        super(batchSize);
+    public AbstractMappedCommitter(int commitBatchSize) {
+        super(commitBatchSize);
     }
+
     /**
      * Gets the source field name holding the unique identifier.
      * @return source field name
@@ -109,7 +110,7 @@ public abstract class BaseCommitter
     /**
      * sets the source field name holding the unique identifier.
      * @param idSourceField source field name
-     */
+     */    
     public void setIdSourceField(String idSourceField) {
         this.idSourceField = idSourceField;
     }
@@ -185,10 +186,11 @@ public abstract class BaseCommitter
         this.keepContentSourceField = keepContentSourceField;
     }
 
+
     @Override
-    protected void preCommitAddedDocument(QueuedAddedDocument document)
+    protected void prepareCommitAddition(IAddOperation operation)
             throws IOException {
-        Properties metadata = document.getMetadata();
+        Properties metadata = operation.getMetadata();
 
         //--- source ID -> target ID ---
         if (StringUtils.isNotBlank(idSourceField)
@@ -212,7 +214,7 @@ public abstract class BaseCommitter
                     metadata.remove(contentSourceField);
                 }
             } else {
-                InputStream is = document.getContentStream();
+                InputStream is = operation.getContentStream();
                 metadata.setString(contentTargetField, IOUtils.toString(is));
                 IOUtils.closeQuietly(is);
             }
@@ -256,8 +258,12 @@ public abstract class BaseCommitter
                 writer.writeCharacters(getQueueDir());
                 writer.writeEndElement();
             }
-            writer.writeStartElement("batchSize");
-            writer.writeCharacters(ObjectUtils.toString(getBatchSize()));
+            writer.writeStartElement("queueSize");
+            writer.writeCharacters(ObjectUtils.toString(getQueueSize()));
+            writer.writeEndElement();
+
+            writer.writeStartElement("commitBatchSize");
+            writer.writeCharacters(ObjectUtils.toString(getCommitBatchSize()));
             writer.writeEndElement();
 
             saveToXML(writer);
@@ -271,7 +277,7 @@ public abstract class BaseCommitter
     }
 
     /**
-     * Allows subclasses to write their configuration to XML.
+     * Allows subclasses to write their config to xml
      * 
      * @param writer the xml being written
      * @throws XMLStreamException
@@ -293,8 +299,10 @@ public abstract class BaseCommitter
         setContentTargetField(
                 xml.getString("contentTargetField", contentTargetField));
         setQueueDir(xml.getString("queueDir", DEFAULT_QUEUE_DIR));
-        setBatchSize(xml.getInt("batchSize", 
-                BatchableCommitter.DEFAULT_BATCH_SIZE));
+        setQueueSize(xml.getInt("queueSize", 
+                AbstractBatchCommitter.DEFAULT_QUEUE_SIZE));
+        setCommitBatchSize(xml.getInt("commitBatchSize", 
+                AbstractBatchCommitter.DEFAULT_COMMIT_BATCH_SIZE));
 
         loadFromXml(xml);
     }
@@ -308,11 +316,14 @@ public abstract class BaseCommitter
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder().append(contentSourceField)
+        return new HashCodeBuilder()
+                .appendSuper(super.hashCode())
+                .append(contentSourceField)
                 .append(keepContentSourceField).append(contentTargetField)
                 .append(idSourceField).append(keepIdSourceField)
                 .append(idTargetField).append(getQueueDir())
-                .append(getBatchSize()).toHashCode();
+                .append(getQueueSize()).append(getCommitBatchSize())
+                .toHashCode();
     }
 
     @Override
@@ -323,29 +334,34 @@ public abstract class BaseCommitter
         if (obj == null) {
             return false;
         }
-        if (!(obj instanceof BaseCommitter)) {
+        if (!(obj instanceof AbstractMappedCommitter)) {
             return false;
         }
-        BaseCommitter other = (BaseCommitter) obj;
+        AbstractMappedCommitter other = (AbstractMappedCommitter) obj;
         return new EqualsBuilder()
+                .appendSuper(super.equals(obj))
                 .append(contentSourceField, other.contentSourceField)
                 .append(keepContentSourceField, other.keepContentSourceField)
                 .append(contentTargetField, other.contentTargetField)
                 .append(idSourceField, other.idSourceField)
                 .append(keepIdSourceField, other.keepIdSourceField)
                 .append(idTargetField, other.idTargetField)
-                .append(getBatchSize(), other.getBatchSize())
+                .append(getCommitBatchSize(), other.getCommitBatchSize())
+                .append(getQueueSize(), other.getQueueSize())
                 .append(getQueueDir(), other.getQueueDir()).isEquals();
     }
 
     @Override
     public String toString() {
-        return String.format("BaseCommitter [batchSize=%s, docCount=%s, "
-                + "queue=%s, idTargetField=%s, idSourceField=%s, "
-                + "keepIdSourceField=%s, contentTargetField=%s, "
-                + "contentSourceField=%s, keepContentSourceField=%s]",
-                        getBatchSize(), docCount, getQueueDir(), idTargetField,
-                        idSourceField, keepIdSourceField, contentTargetField,
-                        contentSourceField, keepContentSourceField);
+        ToStringBuilder builder = new ToStringBuilder(this);
+        builder.appendSuper(super.toString());
+        builder.append("docCount", docCount);
+        builder.append("idTargetField", idTargetField);
+        builder.append("idSourceField", idSourceField);
+        builder.append("keepIdSourceField", keepIdSourceField);
+        builder.append("contentTargetField", contentTargetField);
+        builder.append("contentSourceField", contentSourceField);
+        builder.append("keepContentSourceField", keepContentSourceField);
+        return builder.toString();
     }
 }

@@ -32,6 +32,9 @@ import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.SystemUtils;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
@@ -45,8 +48,10 @@ import com.norconex.commons.lang.map.Properties;
 
 
 /**
- * Commits a copy of files on the filesystem.  Mostly useful for 
- * troubleshooting.
+ * Commits a copy of files on the filesystem.  Files are directly saved
+ * to the specified directory (no queuing or commit).  Useful for 
+ * troubleshooting, or used as a file-based queue implementation by 
+ * other committers.
  * <p>
  * XML configuration usage:
  * </p>
@@ -64,15 +69,27 @@ public class FileSystemCommitter implements ICommitter, IXMLConfigurable {
     private static final Logger LOG = 
             LogManager.getLogger(FileSystemCommitter.class);
     
+    /** Default committer directory */
     public static final String DEFAULT_DIRECTORY = "./committer";
     
     private String directory = DEFAULT_DIRECTORY;
 
     private static final int DATE_FOLDER_CHAR_SIZE = 3;
     
+    private static final int CREATE_FILE_MAX_ATTEMPTS = 10;
+    private static final int CREATE_FILE_MS_BEFORE_RETRY = 100;
+    
+    /**
+     * Gets the directory where files are committed.
+     * @return directory
+     */
     public String getDirectory() {
 		return directory;
 	}
+    /**
+     * Sets the directory where files are committed.
+     * @param directory the directory
+     */
 	public void setDirectory(String directory) {
 		this.directory = directory;
 	}
@@ -119,10 +136,17 @@ public class FileSystemCommitter implements ICommitter, IXMLConfigurable {
     	//DO NOTHING
     }
 
-    
+    /**
+     * Gets the directory where documents to be added are stored.
+     * @return directory
+     */
     public File getAddDir() {
         return new File(directory + SystemUtils.FILE_SEPARATOR + "add");
     }
+    /**
+     * Gets the directory where documents to be removed are stored.
+     * @return directory
+     */
     public File getRemoveDir() {
         return new File(directory + SystemUtils.FILE_SEPARATOR + "remove");
     }
@@ -141,7 +165,7 @@ public class FileSystemCommitter implements ICommitter, IXMLConfigurable {
         } while (addFile.exists());
         int attempts = 0;
         Exception ex = null;
-        while (attempts++ < 10) {
+        while (attempts++ < CREATE_FILE_MAX_ATTEMPTS) {
             try {
                 FileUtils.touch(addFile);
                 ex = null;
@@ -149,7 +173,7 @@ public class FileSystemCommitter implements ICommitter, IXMLConfigurable {
             } catch (FileNotFoundException e) {
                 ex = e;
                 LOG.debug("Could not create commit file, retrying...");
-                Sleeper.sleepNanos(100);
+                Sleeper.sleepNanos(CREATE_FILE_MS_BEFORE_RETRY);
             }
         }
         if (ex != null) {
@@ -183,12 +207,11 @@ public class FileSystemCommitter implements ICommitter, IXMLConfigurable {
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result
-                + ((directory == null) ? 0 : directory.hashCode());
-        return result;
+        HashCodeBuilder hashCodeBuilder = new HashCodeBuilder();
+        hashCodeBuilder.append(directory);
+        return hashCodeBuilder.toHashCode();
     }
+    
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -197,22 +220,20 @@ public class FileSystemCommitter implements ICommitter, IXMLConfigurable {
         if (obj == null) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
+        if (!(obj instanceof FileSystemCommitter)) {
             return false;
         }
         FileSystemCommitter other = (FileSystemCommitter) obj;
-        if (directory == null) {
-            if (other.directory != null) {
-                return false;
-            }
-        } else if (!directory.equals(other.directory)) {
-            return false;
-        }
-        return true;
+        EqualsBuilder equalsBuilder = new EqualsBuilder();
+        equalsBuilder.append(directory, other.directory);
+        return equalsBuilder.isEquals();
     }
+
     @Override
     public String toString() {
-        return "FileSystemCommitter [directory=" + directory + "]";
+        ToStringBuilder builder = new ToStringBuilder(this);
+        builder.append("directory", directory);
+        return builder.toString();
     }
 }
 

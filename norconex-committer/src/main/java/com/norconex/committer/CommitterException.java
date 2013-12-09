@@ -25,18 +25,31 @@ public class CommitterException extends RuntimeException {
 
     private static final long serialVersionUID = -805913995358009121L;
 
+    /**
+     * Constructor.
+     */
     public CommitterException() {
         super();
     }
-
+    /**
+     * Constructor.
+     * @param message error message
+     */
     public CommitterException(String message) {
         super(message);
     }
-
+    /**
+     * Constructor.
+     * @param cause original exception
+     */
     public CommitterException(Throwable cause) {
         super(cause);
     }
-
+    /**
+     * Constructor.
+     * @param message error message.
+     * @param cause original exception
+     */
     public CommitterException(String message, Throwable cause) {
         super(message, cause);
     }

@@ -19,13 +19,8 @@ package com.norconex.committer;
 
 import java.io.File;
 import java.io.FileFilter;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.Serializable;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -35,19 +30,28 @@ import com.norconex.commons.lang.io.FileUtil;
 import com.norconex.commons.lang.io.IFileVisitor;
 import com.norconex.commons.lang.map.Properties;
 
+//TODO Maybe offer pluggable implementations for where to queue (FS, DB, etc)?
+
+
 /**
- * Base batching implementation queuing documents on filesystem.
+ * Queues documents on filesystem, leaving only the committing of additions 
+ * and deletions to implement.  Subclasses can optionally implement
+ * {@link #prepareCommitAddition(IAddOperation)} and 
+ * {@link #prepareCommitDeletion(IDeleteOperation)} to manipulate the 
+ * data supplied with the operations before committing takes place.
+ * <p/>
+ * To also control how many documents are sent on each call to 
+ * a remote repository, consider extending {@link AbstractBatchCommitter}.
  * 
  * @author Pascal Essiembre
- * @deprecated use {@link AbstractFileQueueCommitter}
+ * @since 1.1.0
  */
-@Deprecated
 @SuppressWarnings("nls")
-public abstract class FileSystemQueueCommitter extends BatchableCommitter {
+public abstract class AbstractFileQueueCommitter extends AbstractCommitter {
 
     private static final long serialVersionUID = -5775959203678116077L;
 
-    /** Default queue directory. */
+    /** Default directory where to queue files. */
     public static final String DEFAULT_QUEUE_DIR = "./committer-queue";
 
     private static final FileFilter NON_META_FILTER = new FileFilter() {
@@ -56,14 +60,13 @@ public abstract class FileSystemQueueCommitter extends BatchableCommitter {
             return !pathname.getName().endsWith(".meta");
         }
     };
-    
 
     private final FileSystemCommitter queue = new FileSystemCommitter();
 
     /**
      * Constructor.
      */
-    public FileSystemQueueCommitter() {
+    public AbstractFileQueueCommitter() {
         super();
         queue.setDirectory(DEFAULT_QUEUE_DIR);
     }
@@ -71,34 +74,34 @@ public abstract class FileSystemQueueCommitter extends BatchableCommitter {
      * Constructor.
      * @param batchSize batch size
      */
-    public FileSystemQueueCommitter(int batchSize) {
+    public AbstractFileQueueCommitter(int batchSize) {
         super(batchSize);
         queue.setDirectory(DEFAULT_QUEUE_DIR);
     }
 
     /**
-     * Gets the queue directory.
-     * @return queue directory
+     * Gets the directory where queued files are stored.
+     * @return directory
      */
     public String getQueueDir() {
         return queue.getDirectory();
     }
     /**
-     * Sets the queue directory.
-     * @param queueDir queue directory
+     * Sets the directory where queued files are stored.
+     * @param queueDir directory
      */
     public void setQueueDir(String queueDir) {
         this.queue.setDirectory(queueDir);
     }
-
+    
     @Override
-    protected void queueBatchableAdd(
+    protected void queueAddittion(
             String reference, File document, Properties metadata) {
         queue.queueAdd(reference, document, metadata);
     }
 
     @Override
-    protected void queueBatchableRemove(
+    protected void queueRemoval(
             String ref, File document, Properties metadata) {
         queue.queueRemove(ref, document, metadata);
     }
@@ -111,9 +114,9 @@ public abstract class FileSystemQueueCommitter extends BatchableCommitter {
             @Override
             public void visit(File file) {
                 try {
-                    QueuedAddedDocument doc = new QueuedAddedDocument(file);
-                    preCommitAddedDocument(doc);
-                    commitAddedDocument(doc);
+                    IAddOperation op = new FileAddOperation(file);
+                    prepareCommitAddition(op);
+                    commitAddition(op);
                 } catch (IOException e) {
                     throw new CommitterException(
                             "Cannot create document for file: " + file, e);
@@ -126,9 +129,9 @@ public abstract class FileSystemQueueCommitter extends BatchableCommitter {
             @Override
             public void visit(File file) {
                 try {
-                    QueuedDeletedDocument doc = new QueuedDeletedDocument(file);
-                    preCommitDeletedDocument(doc);
-                    commitDeletedDocument(doc);
+                    IDeleteOperation op = new FileDeleteOperation(file);
+                    prepareCommitDeletion(op);
+                    commitDeletion(op);
                 } catch (IOException e) {
                     throw new CommitterException(
                             "Cannot read reference from : " + file, e);
@@ -151,10 +154,10 @@ public abstract class FileSystemQueueCommitter extends BatchableCommitter {
      * storing them if more efficient this way.
      * </p>
      *
-     * @param document the document to commit
+     * @param operation the document operation to perform
      * @throws IOException
      */
-    protected abstract void commitAddedDocument(QueuedAddedDocument document)
+    protected abstract void commitAddition(IAddOperation operation)
             throws IOException;
 
     /**
@@ -169,11 +172,10 @@ public abstract class FileSystemQueueCommitter extends BatchableCommitter {
      * efficient that way.
      * </p>
      *
-     * @param document the document to commit
+     * @param operation the document operation to perform
      * @throws IOException
      */
-    protected abstract void commitDeletedDocument(
-            QueuedDeletedDocument document)
+    protected abstract void commitDeletion(IDeleteOperation operation)
             throws IOException;
 
     /**
@@ -186,111 +188,26 @@ public abstract class FileSystemQueueCommitter extends BatchableCommitter {
     protected abstract void commitComplete();
 
     /**
-     * Optionally performs operations on a document to be added before
+     * Optionally performs actions on a document to be added before
      * actually committing it.  Default implementation does nothing.
-     * @param document document to be added
+     * @param operation addition to be performed
      * @throws IOException
      */
-    protected void preCommitAddedDocument(QueuedAddedDocument document) 
+    protected void prepareCommitAddition(IAddOperation operation) 
             throws IOException {
         // Do nothing by default
     }
     /**
      * Optionally performs operations on a document to be deleted before
      * actually committing it.  Default implementation does nothing.
-     * @param document document to be deleted
+     * @param operation deletion to be performed
      * @throws IOException
      */
-    protected void preCommitDeletedDocument(QueuedDeletedDocument document)
+    protected void prepareCommitDeletion(IDeleteOperation operation)
         throws IOException {
         // Do nothing by default
     }
-    
-    private Properties loadMetadata(File file) throws IOException {
-        Properties metadata = new Properties();
-        File metaFile = new File(file.getAbsolutePath() + ".meta");
-        if (metaFile.exists()) {
-            FileInputStream is = new FileInputStream(metaFile);
-            metadata.load(is);
-            IOUtils.closeQuietly(is);
-        }
-        return metadata;
-    }
 
-    /**
-     * Class representing a document addition.
-     */
-    public final class QueuedAddedDocument implements Serializable {
-        private static final long serialVersionUID = 3695149319924730851L;
-        private final File file;
-        private final Properties metadata;
-
-        private QueuedAddedDocument(File file) throws IOException {
-            this.file = file;
-            metadata = loadMetadata(file);
-        }
-        /**
-         * Gets the metadata.
-         * @return metadata
-         */
-        public Properties getMetadata() {
-            return metadata;
-        }
-        /**
-         * Gets the content as a stream.
-         * @return content stream
-         * @throws IOException problem obtaining content stream
-         */
-        public InputStream getContentStream() throws IOException {
-            return new FileInputStream(file);
-        }
-        /**
-         * Deletes the document from queue.
-         */
-        public void deleteFromQueue() {
-            //TODO use FileUtil.deleteFile(file) ??
-            File metaFile = new File(file.getAbsolutePath() + ".meta");
-            metaFile.delete();
-            file.delete();
-        }
-    }
-
-    /**
-     * Class representing a document deletion.
-     */
-    public final class QueuedDeletedDocument implements Serializable {
-        private static final long serialVersionUID = -4494846630316833501L;
-        private final File file;
-        private final String reference;
-
-        private QueuedDeletedDocument(File file) throws IOException {
-            super();
-            this.file = file;
-            reference = FileUtils.readFileToString(file);
-        }
-        /**
-         * Document reference.
-         * @return reference
-         */
-        public String getReference() {
-            return reference;
-        }
-        /**
-         * Deletes document from queue.
-         */
-        public void deleteFromQueue() {
-            //TODO use FileUtil.deleteFile(file) ??
-            file.delete();
-        }
-    }
-
-    @Override
-    public int hashCode() {
-        HashCodeBuilder hashCodeBuilder = new HashCodeBuilder();
-        hashCodeBuilder.append(queue);
-        return hashCodeBuilder.toHashCode();
-    }
-    
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -299,18 +216,28 @@ public abstract class FileSystemQueueCommitter extends BatchableCommitter {
         if (obj == null) {
             return false;
         }
-        if (!(obj instanceof FileSystemQueueCommitter)) {
+        if (!(obj instanceof AbstractFileQueueCommitter)) {
             return false;
         }
-        FileSystemQueueCommitter other = (FileSystemQueueCommitter) obj;
+        AbstractFileQueueCommitter other = (AbstractFileQueueCommitter) obj;
         EqualsBuilder equalsBuilder = new EqualsBuilder();
+        equalsBuilder.appendSuper(true);
         equalsBuilder.append(queue, other.queue);
         return equalsBuilder.isEquals();
     }
     
     @Override
+    public int hashCode() {
+        HashCodeBuilder hashCodeBuilder = new HashCodeBuilder();
+        hashCodeBuilder.appendSuper(super.hashCode());
+        hashCodeBuilder.append(queue);
+        return hashCodeBuilder.toHashCode();
+    }
+    
+    @Override
     public String toString() {
         ToStringBuilder builder = new ToStringBuilder(this);
+        builder.appendSuper(super.toString());
         builder.append("queue", queue);
         return builder.toString();
     }
