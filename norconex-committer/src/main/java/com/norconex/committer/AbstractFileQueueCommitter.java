@@ -139,6 +139,7 @@ public abstract class AbstractFileQueueCommitter extends AbstractCommitter {
             }
         });
 
+        //TODO move this to finalize() to truly respect the commit size?
         commitComplete();
     }
 

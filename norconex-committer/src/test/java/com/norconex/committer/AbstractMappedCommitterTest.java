@@ -40,13 +40,13 @@ import com.norconex.commons.lang.map.Properties;
  * @author Pascal Dimassimo
  * @author Pascal Essiembre
  */
-@SuppressWarnings("nls")
+@SuppressWarnings({"nls","javadoc"})
 public class AbstractMappedCommitterTest {
 
 
 
     @Rule
-    private TemporaryFolder tempFolder = new TemporaryFolder();
+    public TemporaryFolder tempFolder = new TemporaryFolder();
     private StubCommitter committer;
     private boolean committed;
 
@@ -140,6 +140,7 @@ public class AbstractMappedCommitterTest {
         // Add a doc (it should trigger a commit because batch size is 1)
         committer.setQueueSize(1);
         committer.queueAdd(defaultReference, tempFolder.newFile(), metadata);
+//        committer.commit();
 
         // Get the map generated
         assertEquals(1, committer.getCommitBatch().size());
@@ -183,6 +184,7 @@ public class AbstractMappedCommitterTest {
 
         @Override
         protected void commitComplete() {
+            super.commitComplete();
             committed = true;
         }
 
