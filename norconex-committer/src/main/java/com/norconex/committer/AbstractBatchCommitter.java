@@ -33,6 +33,9 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
  * operations are cached in memory until the commit batch size is reached, then
  * the operations cached so far are sent.
  * <p/>
+ * After being committed, the documents are automatically removed from the 
+ * queue.
+ * <p/>
  * If you need to map original document fields with target repository fields,
  * consider using {@link AbstractMappedCommitter}.
  * 
@@ -99,7 +102,7 @@ public abstract class AbstractBatchCommitter
                 batch = getBatchToCommit();
             }
             if (batch != null) {
-                commitBatch(batch);
+                commitAndCleanBatch(batch);
             }
         }
     }
@@ -109,6 +112,19 @@ public abstract class AbstractBatchCommitter
      * @param batch the group of operations
      */
     protected abstract void commitBatch(List<ICommitOperation> batch);
+   
+    /**
+     * Commits documents and delete them from queue when done.
+     * @param batch the bath of operations to commit.
+     */
+    private void commitAndCleanBatch(List<ICommitOperation> batch) {
+        commitBatch(batch);
+        // Delete queued documents after commit
+        for (ICommitOperation op : batch) {
+            op.delete();
+        }
+        batch.clear();
+    }
     
     private void cacheOperationAndCommitIfReady(ICommitOperation operation) {
         operations.add(operation);
@@ -119,7 +135,7 @@ public abstract class AbstractBatchCommitter
             }
         }
         if (batch != null) {
-            commitBatch(batch);
+            commitAndCleanBatch(batch);
         }
     }
     
