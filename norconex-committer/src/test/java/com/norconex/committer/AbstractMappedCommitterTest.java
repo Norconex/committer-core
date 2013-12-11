@@ -23,6 +23,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.stream.XMLStreamException;
@@ -140,7 +141,7 @@ public class AbstractMappedCommitterTest {
         // Add a doc (it should trigger a commit because batch size is 1)
         committer.setQueueSize(1);
         committer.queueAdd(defaultReference, tempFolder.newFile(), metadata);
-//        committer.commit();
+        committer.commit();
 
         // Get the map generated
         assertEquals(1, committer.getCommitBatch().size());
@@ -156,44 +157,27 @@ public class AbstractMappedCommitterTest {
         private static final long serialVersionUID = 5395010993071444611L;
 
         private List<ICommitOperation> commitBatch;
-        
-        
+                
         @Override
         protected void commitBatch(List<ICommitOperation> batch) {
-            commitBatch = batch;
+            commitBatch = new ArrayList<ICommitOperation>(batch);
         }
-        
         /**
          * @return the operationCount
          */
         public List<ICommitOperation> getCommitBatch() {
             return commitBatch;
         }
-
-//        @Override
-//        protected void commitAddedDocument(QueuedAddedDocument document) 
-//                throws IOException {
-//            listCommitAdd.add(document);
-//        }
-//
-//        @Override
-//        protected void commitDeletedDocument(QueuedDeletedDocument document) 
-//                throws IOException {
-//            //TODO implement me
-//        }
-
         @Override
         protected void commitComplete() {
             super.commitComplete();
             committed = true;
         }
-
         @Override
         protected void saveToXML(XMLStreamWriter writer)
                 throws XMLStreamException {
             // no saving
         }
-
         @Override
         protected void loadFromXml(XMLConfiguration xml) {
             // no loading
