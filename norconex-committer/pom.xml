@@ -22,13 +22,13 @@ along with Norconex Committer. If not, see <http://www.gnu.org/licenses/>.
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.norconex.collectors</groupId>
   <artifactId>norconex-committer</artifactId>
-  <version>1.1.0-SNAPSHOT</version>
+  <version>1.1.0</version>
   <name>Norconex Committer</name>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <site.baseurl/>
-    <currentStableVersion>1.0.1</currentStableVersion>
+    <currentStableVersion>1.1.0</currentStableVersion>
   </properties>
   <inceptionYear>2009</inceptionYear>
 
@@ -76,19 +76,10 @@ along with Norconex Committer. If not, see <http://www.gnu.org/licenses/>.
   </repositories>
   
   <dependencies>
-    <!-- 
-    <dependency>
-		<groupId>org.mockito</groupId>
-		<artifactId>mockito-all</artifactId>
-		<version>1.9.5</version>
-		<scope>test</scope>
-	</dependency>
-     -->
-	
     <dependency>
         <groupId>com.norconex.commons</groupId>
         <artifactId>norconex-commons-lang</artifactId>
-        <version>1.2.0-SNAPSHOT</version>
+        <version>1.2.0</version>
     </dependency>
     <dependency>
     	<groupId>junit</groupId>
@@ -166,7 +157,6 @@ along with Norconex Committer. If not, see <http://www.gnu.org/licenses/>.
         <artifactId>maven-javadoc-plugin</artifactId>
         <version>2.9</version>
         <configuration>
-          <stylesheetfile>${basedir}/src/main/resources/javadoc.css</stylesheetfile>
           <overview>${basedir}/src/main/resources/javadoc-overview.html</overview>
           <show>protected</show>
           <detectLinks>true</detectLinks>
@@ -261,10 +251,33 @@ along with Norconex Committer. If not, see <http://www.gnu.org/licenses/>.
         <artifactId>maven-javadoc-plugin</artifactId>
         <version>2.9</version>
         <configuration>
-          <stylesheetfile>${basedir}/src/main/resources/javadoc.css</stylesheetfile>
           <overview>${basedir}/src/main/resources/javadoc-overview.html</overview>
+          <header><![CDATA[
+            <style>div.aboutLanguage .siteLink {font-size: 2em;}</style>
+            <span class="siteLink">
+              <a href="http://www.norconex.com/product/committer">Norconex Committer</a>
+            </span>
+            ]]>
+          </header>
+          <footer><![CDATA[
+            <script type="text/javascript">
+              var _gaq = _gaq || [];
+              _gaq.push(['_setAccount', 'UA-23162620-1']);
+              _gaq.push(['_setDomainName', 'norconex.com']);
+              _gaq.push(['_trackPageview']);
+              (function() {
+                var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+                ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+                var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+              })();
+            </script>
+            <a style="font-size: 1.4em;" href="https://github.com/norconex/committer/issues">Submit an Issue</a>
+            &nbsp;&nbsp;|&nbsp;&nbsp; 
+            <a style="font-size: 1.4em;" href="http://www.norconex.com">www.norconex.com</a>
+            ]]>
+          </footer>
           <show>protected</show>
-          <detectLinks>true</detectLinks>
+          <detectLinks>false</detectLinks>
         </configuration>
         <reportSets>
           <reportSet>

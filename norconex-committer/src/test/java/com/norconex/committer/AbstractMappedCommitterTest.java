@@ -41,7 +41,7 @@ import com.norconex.commons.lang.map.Properties;
  * @author Pascal Dimassimo
  * @author Pascal Essiembre
  */
-@SuppressWarnings({"nls","javadoc"})
+@SuppressWarnings({"nls"})
 public class AbstractMappedCommitterTest {
 
 

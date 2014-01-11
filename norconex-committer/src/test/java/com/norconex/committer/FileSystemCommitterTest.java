@@ -31,7 +31,7 @@ import com.norconex.commons.lang.config.ConfigurationUtil;
  * Tests the {@link FileSystemCommitter}.
  * @author Pascal Essiembre
  */
-@SuppressWarnings({"nls", "javadoc"})
+@SuppressWarnings({"nls"})
 public class FileSystemCommitterTest {
 
     private File tempFile;
