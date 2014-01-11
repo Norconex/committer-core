@@ -43,7 +43,7 @@ Download
 * Committer Implementations
 
   The core committer library only provides you with a file system committer.
-  The followingi is a list of Committer implementations you can freely use.
+  The following is a list of Committer implementations you can freely use.
   
   * {{{http://www.norconex.com/product/committer-solr/index.html}Solr Committer}} 
 
