@@ -53,9 +53,11 @@ Welcome to Norconex Committer
 
   <<Norconex-supported committer implementations:>>
 
-  * {{{http://www.norconex.com/product/committer-solr/index.html}Solr Committer}} 
+  * {{{http://www.norconex.com/product/committer-solr/}Solr Committer}} 
 
-  * {{{http://www.norconex.com/product/committer-elasticsearch/index.html}Elasticsearch Committer}} 
+  * {{{http://www.norconex.com/product/committer-elasticsearch/}Elasticsearch Committer}} 
+
+  * {{{http://www.norconex.com/product/committer-idol/}IDOL Committer}} 
   
   * More to come...
   
