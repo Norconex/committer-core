@@ -39,7 +39,7 @@ import com.norconex.commons.lang.map.Properties;
  * Base batching implementation queuing documents on filesystem.
  * 
  * @author Pascal Essiembre
- * @deprecated use {@link AbstractFileQueueCommitter}
+ * @deprecated Since 1.1.0. Use {@link AbstractFileQueueCommitter}
  */
 @Deprecated
 @SuppressWarnings("nls")

@@ -118,6 +118,10 @@ public abstract class AbstractBatchCommitter
      * @param batch the bath of operations to commit.
      */
     private void commitAndCleanBatch(List<ICommitOperation> batch) {
+
+        //TODO number of retries
+        //TODO timeout between retries
+        
         commitBatch(batch);
         // Delete queued documents after commit
         for (ICommitOperation op : batch) {

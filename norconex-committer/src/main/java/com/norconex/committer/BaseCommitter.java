@@ -68,7 +68,7 @@ import com.norconex.commons.lang.map.Properties;
  * 
  * @author Pascal Essiembre
  * @author Pascal Dimassimo
- * @deprecated use {@link AbstractMappedCommitter}
+ * @deprecated Since 1.1.0. Use {@link AbstractMappedCommitter}
  */
 @Deprecated
 @SuppressWarnings("nls")

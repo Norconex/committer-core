@@ -31,7 +31,7 @@ import com.norconex.commons.lang.map.Properties;
 * Base implementation offering to batch the committing of documents
 * (additions and deletions alike).
 * @author Pascal Essiembre
-* @deprecated use {@link AbstractCommitter}
+* @deprecated Since 1.1.0. Use {@link AbstractCommitter}
 */
 @Deprecated
 public abstract class BatchableCommitter implements ICommitter {

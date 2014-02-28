@@ -7,6 +7,15 @@
   </properties>
   <body>
 
+    <release version="1.2.0" date="2014-??-??" description="Minor Upgrade">
+      <action dev="essiembp" type="update">
+        AbstractFileQueueCommitter and its subclasses now periodically delete 
+        empty directories under their queue directory. This can greatly reduce 
+        the directory scanning time when dealing with thousands/millions of
+        files, improving performance.
+      </action>
+    </release>
+
     <release version="1.1.0" date="2014-01-10" description="Minor Upgrade">
       <action dev="essiembp" type="update">
         Rewrite of abstract committer classes to make it easier/more intuitive

@@ -20,10 +20,14 @@ package com.norconex.committer;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
+import java.util.Date;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.time.DateUtils;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 import com.norconex.committer.impl.FileSystemCommitter;
 import com.norconex.commons.lang.io.FileUtil;
@@ -51,9 +55,14 @@ public abstract class AbstractFileQueueCommitter extends AbstractCommitter {
 
     private static final long serialVersionUID = -5775959203678116077L;
 
+    private static final Logger LOG = LogManager.getLogger(
+            AbstractFileQueueCommitter.class);
+    
     /** Default directory where to queue files. */
     public static final String DEFAULT_QUEUE_DIR = "./committer-queue";
 
+    private static final int EMPTY_DIRS_DAYS_LIMIT = 10;
+    
     private static final FileFilter NON_META_FILTER = new FileFilter() {
         @Override
         public boolean accept(File pathname) {
@@ -141,6 +150,9 @@ public abstract class AbstractFileQueueCommitter extends AbstractCommitter {
 
         //TODO move this to finalize() to truly respect the commit size?
         commitComplete();
+
+        deleteEmptyOldDirs(queue.getAddDir());
+        deleteEmptyOldDirs(queue.getRemoveDir());
     }
 
     /**
@@ -149,8 +161,7 @@ public abstract class AbstractFileQueueCommitter extends AbstractCommitter {
      * </p>
      * <p>
      * The subclass has the responsibility of deleting the file once the content
-     * is permanently stored by invoking 
-     * {@link QueuedAddedDocument#deleteFromQueue()}. 
+     * is permanently stored. 
      * The subclass may decide to further batch those documents before
      * storing them if more efficient this way.
      * </p>
@@ -167,8 +178,7 @@ public abstract class AbstractFileQueueCommitter extends AbstractCommitter {
      * </p>
      * <p>
      * The subclass has the responsibility of deleting the file once the content
-     * is permanently stored by invoking 
-     * {@link QueuedDeletedDocument#deleteFromQueue()}. The subclass may 
+     * is permanently stored. The subclass may 
      * decide to further batch those deletions before storing them if more
      * efficient that way.
      * </p>
@@ -207,6 +217,20 @@ public abstract class AbstractFileQueueCommitter extends AbstractCommitter {
     protected void prepareCommitDeletion(IDeleteOperation operation)
         throws IOException {
         // Do nothing by default
+    }
+    
+    // Remove empty dirs to avoid the above looping taking too long
+    // when we are dealing with thousands/millions of documents
+    // do it on files 10 seconds old to avoid threading conflicts
+    private void deleteEmptyOldDirs(File parentDir) {
+        final long someTimeAgo = System.currentTimeMillis() 
+                - (DateUtils.MILLIS_PER_SECOND * EMPTY_DIRS_DAYS_LIMIT);
+        Date date = new Date(someTimeAgo);
+        int dirCount = FileUtil.deleteEmptyDirs(parentDir, date);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Deleted " + dirCount + " empty directories under " 
+                    + parentDir);
+        }
     }
 
     @Override
