@@ -67,6 +67,39 @@ import com.norconex.commons.lang.map.Properties;
  * <code>keepContentSourceField</code> attribute is set to 
  * <code>true</code>.</p> 
  * 
+ * <p>Subclasses implementing {@link IXMLConfigurable} should allow this inner 
+ * configuration:</p>
+ * <pre>
+ *      &lt;idSourceField keep="[false|true]"&gt;
+ *         (Name of source field that will be mapped to the IDOL "DREREFERENCE"
+ *         field or whatever "idTargetField" specified.
+ *         Default is the document reference metadata field: 
+ *         "document.reference".  Once re-mapped, the metadata source field is 
+ *         deleted, unless "keep" is set to <code>true</code>.)
+ *      &lt;/idSourceField&gt;
+ *      &lt;idTargetField&gt;
+ *         (Name of IDOL target field where to store a document unique 
+ *         identifier (idSourceField).  If not specified, default 
+ *         is "DREREFERENCE".) 
+ *      &lt;/idTargetField&gt;
+ *      &lt;contentSourceField keep="[false|true]&gt";
+ *         (If you wish to use a metadata field to act as the document 
+ *         "content", you can specify that field here.  Default 
+ *         does not take a metadata field but rather the document content.
+ *         Once re-mapped, the metadata source field is deleted,
+ *         unless "keep" is set to <code>true</code>.)
+ *      &lt;/contentSourceField&gt;
+ *      &lt;contentTargetField&gt;
+ *         (IDOL target field name for a document content/body.
+ *          Default is: DRECONTENT)
+ *      &lt;/contentTargetField&gt;
+ *      &lt;commitBatchSize&gt;
+ *          (max number of documents to send IDOL at once)
+ *      &lt;/commitBatchSize&gt;
+ *      &lt;queueDir&gt;(optional path where to queue files)&lt;/queueDir&gt;
+ *      &lt;queueSize&gt;(max queue size before committing)&lt;/queueSize&gt;
+ * </pre>
+ * 
  * @author Pascal Essiembre
  * @author Pascal Dimassimo
  * @since 1.1.0
@@ -266,6 +299,14 @@ public abstract class AbstractMappedCommitter
             writer.writeCharacters(ObjectUtils.toString(getCommitBatchSize()));
             writer.writeEndElement();
 
+            writer.writeStartElement("maxRetries");
+            writer.writeCharacters(ObjectUtils.toString(getMaxRetries()));
+            writer.writeEndElement();
+
+            writer.writeStartElement("maxRetryWait");
+            writer.writeCharacters(ObjectUtils.toString(getMaxRetryWait()));
+            writer.writeEndElement();
+
             saveToXML(writer);
 
             writer.writeEndElement();
@@ -303,6 +344,8 @@ public abstract class AbstractMappedCommitter
                 AbstractBatchCommitter.DEFAULT_QUEUE_SIZE));
         setCommitBatchSize(xml.getInt("commitBatchSize", 
                 AbstractBatchCommitter.DEFAULT_COMMIT_BATCH_SIZE));
+        setMaxRetries(xml.getInt("maxRetries", 0));
+        setMaxRetryWait(xml.getInt("maxRetryWait", 0));
 
         loadFromXml(xml);
     }

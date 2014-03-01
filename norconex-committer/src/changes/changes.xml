@@ -8,6 +8,14 @@
   <body>
 
     <release version="1.2.0" date="2014-??-??" description="Minor Upgrade">
+      <action dev="essiembp" type="add">
+        New MultipleCommitters class to allow defining multiple committers.
+      </action>
+      <action dev="essiembp" type="add">
+        New configuration options for AbstractBatchCommitter and subclasses:
+        Max number of retries between commit failures, and how long to wait
+        between two attempts.
+      </action>
       <action dev="essiembp" type="update">
         AbstractFileQueueCommitter and its subclasses now periodically delete 
         empty directories under their queue directory. This can greatly reduce 

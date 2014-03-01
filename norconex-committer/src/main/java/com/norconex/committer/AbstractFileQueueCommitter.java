@@ -30,6 +30,7 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 import com.norconex.committer.impl.FileSystemCommitter;
+import com.norconex.commons.lang.config.IXMLConfigurable;
 import com.norconex.commons.lang.io.FileUtil;
 import com.norconex.commons.lang.io.IFileVisitor;
 import com.norconex.commons.lang.map.Properties;
@@ -46,6 +47,13 @@ import com.norconex.commons.lang.map.Properties;
  * <p/>
  * To also control how many documents are sent on each call to 
  * a remote repository, consider extending {@link AbstractBatchCommitter}.
+ * 
+ * <p>Subclasses implementing {@link IXMLConfigurable} should allow this inner 
+ * configuration:</p>
+ * <pre>
+ *      &lt;queueDir&gt;(optional path where to queue files)&lt;/queueDir&gt;
+ *      &lt;queueSize&gt;(max queue size before committing)&lt;/queueSize&gt;
+ * </pre>
  * 
  * @author Pascal Essiembre
  * @since 1.1.0

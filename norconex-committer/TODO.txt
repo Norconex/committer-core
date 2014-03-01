@@ -1,10 +1,4 @@
 
-- Add retry count on commit failure.
-
-- Add retry delay between retries on failure.
-
 - Add committer server
 
 - Add chainable committers??
-
-- Add multiple committers??

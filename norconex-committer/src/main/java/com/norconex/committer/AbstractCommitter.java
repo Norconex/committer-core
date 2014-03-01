@@ -25,20 +25,28 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
+import com.norconex.commons.lang.config.IXMLConfigurable;
 import com.norconex.commons.lang.map.Properties;
 
 /**
-* Basic implementation invoking the {@link #commit()} method every time a given
-* queue size threshold has been reached.  Both additions and deletions count
-* towards the same queue size.
-* It is still left to implementors to decide how to actually queue the 
-* documents and how to perform commits.
-* <p />
-* Consider extending {@link AbstractFileQueueCommitter} if you do not wish
-* to implement your own queue.
-* @author Pascal Essiembre
-* @since 1.1.0
-*/
+ * Basic implementation invoking the {@link #commit()} method every time a given
+ * queue size threshold has been reached.  Both additions and deletions count
+ * towards the same queue size.
+ * It is still left to implementors to decide how to actually queue the 
+ * documents and how to perform commits.
+ * <p />
+ * Consider extending {@link AbstractFileQueueCommitter} if you do not wish
+ * to implement your own queue.
+ * 
+ * <p>Subclasses implementing {@link IXMLConfigurable} should allow this inner 
+ * configuration:</p>
+ * <pre>
+ *      &lt;queueSize&gt;(max queue size before committing)&lt;/queueSize&gt;
+ * </pre>
+ * 
+ * @author Pascal Essiembre
+ * @since 1.1.0
+ */
 public abstract class AbstractCommitter implements ICommitter {
 
     private static final long serialVersionUID = 880638478926236689L;
