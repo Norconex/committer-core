@@ -9,7 +9,7 @@
 
     <release version="1.2.0" date="2014-??-??" description="Minor Upgrade">
       <action dev="essiembp" type="add">
-        New MultipleCommitters class to allow defining multiple committers.
+        New MultiCommitter class allowing the use multiple committers.
       </action>
       <action dev="essiembp" type="add">
         New configuration options for AbstractBatchCommitter and subclasses:

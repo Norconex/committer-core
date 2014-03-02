@@ -31,9 +31,11 @@ import javax.xml.stream.XMLStreamWriter;
 
 import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.commons.configuration.XMLConfiguration;
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
+import com.norconex.committer.CommitterException;
 import com.norconex.committer.ICommitter;
 import com.norconex.commons.lang.config.ConfigurationLoader;
 import com.norconex.commons.lang.config.ConfigurationUtil;
@@ -61,7 +63,7 @@ import com.norconex.commons.lang.map.Properties;
  * @author Pascal Essiembre
  * @since 1.2.0
  */
-public class MultipleCommitters implements ICommitter, IXMLConfigurable {
+public class MultiCommitter implements ICommitter, IXMLConfigurable {
 
     private static final long serialVersionUID = 4409999298134733358L;
     private static final Logger LOG = 
@@ -72,14 +74,14 @@ public class MultipleCommitters implements ICommitter, IXMLConfigurable {
     /**
      * Constructor.
      */
-    public MultipleCommitters() {
+    public MultiCommitter() {
         super();
     }
     /**
      * Constructor.
      * @param committers a list of committers
      */
-    public MultipleCommitters(List<ICommitter> committers) {
+    public MultiCommitter(List<ICommitter> committers) {
         this.committers.addAll(committers);
     }
     
@@ -107,16 +109,38 @@ public class MultipleCommitters implements ICommitter, IXMLConfigurable {
     
     @Override
     public void queueAdd(String reference, File document, Properties metadata) {
-        for (ICommitter committer : committers) {
-            committer.queueAdd(reference, document, metadata);
+        for (int i = 0; i < committers.size(); i++) {
+            ICommitter committer = committers.get(i);
+            File targetFile = new File(
+                    document.getAbsolutePath() + "-multicommit-" + i);
+            try {
+                FileUtils.copyFile(document, targetFile);
+            } catch (IOException e) {
+                throw new CommitterException(
+                        "Cannot copy document for multi-commit addition.  Ref: "
+                                + reference + " File: " + document, e);
+            }
+            committer.queueAdd(reference, targetFile, metadata);
+            targetFile.delete();
         }
     }
 
     @Override
     public void queueRemove(
             String reference, File document, Properties metadata) {
-        for (ICommitter committer : committers) {
-            committer.queueRemove(reference, document, metadata);
+        for (int i = 0; i < committers.size(); i++) {
+            ICommitter committer = committers.get(i);
+            File targetFile = new File(
+                    document.getAbsolutePath() + "-multicommit-" + i);
+            try {
+                FileUtils.copyFile(document, targetFile);
+            } catch (IOException e) {
+                throw new CommitterException(
+                        "Cannot copy document for multi-commit addition.  Ref: "
+                                + reference + " File: " + document, e);
+            }
+            committer.queueRemove(reference, targetFile, metadata);
+            targetFile.delete();
         }
     }
 
