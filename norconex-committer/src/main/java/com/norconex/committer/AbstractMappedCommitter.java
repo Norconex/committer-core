@@ -98,6 +98,8 @@ import com.norconex.commons.lang.map.Properties;
  *      &lt;/commitBatchSize&gt;
  *      &lt;queueDir&gt;(optional path where to queue files)&lt;/queueDir&gt;
  *      &lt;queueSize&gt;(max queue size before committing)&lt;/queueSize&gt;
+ *      &lt;maxRetries&gt;(max retries upon commit failures)&lt;/maxRetries&gt;
+ *      &lt;maxRetryWait&gt;(max delay between retries)&lt;/maxRetryWait&gt;
  * </pre>
  * 
  * @author Pascal Essiembre
