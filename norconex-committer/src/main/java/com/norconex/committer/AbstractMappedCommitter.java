@@ -222,6 +222,7 @@ public abstract class AbstractMappedCommitter
     }
 
 
+    @SuppressWarnings("deprecation")
     @Override
     protected void prepareCommitAddition(IAddOperation operation)
             throws IOException {
@@ -256,6 +257,7 @@ public abstract class AbstractMappedCommitter
         }
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void saveToXML(Writer out) throws IOException {
         XMLOutputFactory factory = XMLOutputFactory.newInstance();
