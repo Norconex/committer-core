@@ -23,12 +23,11 @@
 <head><title>Concrete Implementation</title><meta name="Author" content="Norconex Inc." /></head> 
 
 Creating your own implmementation is done using Java. You have to extend the 
-[ICommitter](./apidocs/com/norconex/committer/ICommitter) interface.  
-Abstract classes can help you get started.  Have a look at the 
+[ICommitter](./apidocs/com/norconex/committer/ICommitter) interface. Abstract 
+classes can help you get started.  Have a look at the 
 [AbstractMappedCommitter](./apidocs/com/norconex/committer/AbstractMappedCommitter)
-class, which handles queuing
-of documents, sending in batches, as well as mapping original document 
-metadata with your repository fields.
+class, which handles queuing of documents, sending in batches, as well as 
+mapping original document metadata with your repository fields.
 
 
 If you are using Maven, simply add the Committer
