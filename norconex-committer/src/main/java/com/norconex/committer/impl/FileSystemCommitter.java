@@ -56,7 +56,7 @@ import com.norconex.commons.lang.map.Properties;
  * XML configuration usage:
  * </p>
  * <pre>
- *  &lt;committer class="com.norconex.committer.FileSystemCommitter"&gt;
+ *  &lt;committer class="com.norconex.committer.impl.FileSystemCommitter"&gt;
  *      &lt;directory&gt;(path where to save files)&lt;/directory&gt;
  *  &lt;/committer&gt;
  * </pre>
