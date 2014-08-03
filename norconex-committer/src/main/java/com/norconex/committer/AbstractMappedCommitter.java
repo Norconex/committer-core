@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.List;
+import java.util.Objects;
 
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -71,16 +72,17 @@ import com.norconex.commons.lang.map.Properties;
  * configuration:</p>
  * <pre>
  *      &lt;idSourceField keep="[false|true]"&gt;
- *         (Name of source field that will be mapped to the IDOL "DREREFERENCE"
- *         field or whatever "idTargetField" specified.
+ *         (Name of source field that will be mapped to the "idTargetField" 
+ *         specified or target repository default field if one is defined
+ *         by the concrete implementation.
  *         Default is the document reference metadata field: 
  *         "document.reference".  Once re-mapped, the metadata source field is 
  *         deleted, unless "keep" is set to <code>true</code>.)
  *      &lt;/idSourceField&gt;
  *      &lt;idTargetField&gt;
- *         (Name of IDOL target field where to store a document unique 
- *         identifier (idSourceField).  If not specified, default 
- *         is "DREREFERENCE".) 
+ *         (Name of target repository field where to store a document unique 
+ *         identifier (idSourceField).  If not specified, behavior is defined
+ *         by the concrete implementation.) 
  *      &lt;/idTargetField&gt;
  *      &lt;contentSourceField keep="[false|true]&gt";
  *         (If you wish to use a metadata field to act as the document 
@@ -90,11 +92,11 @@ import com.norconex.commons.lang.map.Properties;
  *         unless "keep" is set to <code>true</code>.)
  *      &lt;/contentSourceField&gt;
  *      &lt;contentTargetField&gt;
- *         (IDOL target field name for a document content/body.
- *          Default is: DRECONTENT)
+ *         (Target repository field name for a document content/body.
+ *          Default is defined by concrete implementation.)
  *      &lt;/contentTargetField&gt;
  *      &lt;commitBatchSize&gt;
- *          (max number of documents to send IDOL at once)
+ *          (max number of documents to send to target repository at once)
  *      &lt;/commitBatchSize&gt;
  *      &lt;queueDir&gt;(optional path where to queue files)&lt;/queueDir&gt;
  *      &lt;queueSize&gt;(max queue size before committing)&lt;/queueSize&gt;
@@ -221,8 +223,6 @@ public abstract class AbstractMappedCommitter
         this.keepContentSourceField = keepContentSourceField;
     }
 
-
-    @SuppressWarnings("deprecation")
     @Override
     protected void prepareCommitAddition(IAddOperation operation)
             throws IOException {
@@ -234,7 +234,7 @@ public abstract class AbstractMappedCommitter
             metadata.setString(idTargetField, 
                     metadata.getString(idSourceField));
             if (!keepIdSourceField 
-                    && !ObjectUtils.equals(idSourceField, idTargetField)) {
+                    && !Objects.equals(idSourceField, idTargetField)) {
                 metadata.remove(idSourceField);
             }
         }
@@ -245,7 +245,7 @@ public abstract class AbstractMappedCommitter
                 List<String >content = metadata.getStrings(contentSourceField);
                 metadata.setString(contentTargetField, 
                         content.toArray(ArrayUtils.EMPTY_STRING_ARRAY));
-                if (!keepContentSourceField && !ObjectUtils.equals(
+                if (!keepContentSourceField && !Objects.equals(
                         contentSourceField, contentTargetField)) {
                     metadata.remove(contentSourceField);
                 }

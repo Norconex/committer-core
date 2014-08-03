@@ -7,6 +7,18 @@
   </properties>
   <body>
 
+    <release version="1.2.1" date="2014-??-??" description="Minor release">
+      <action dev="essiembp" type="update">
+        Now requires Java 7 or higher.
+      </action>
+      <action dev="essiembp" type="update">
+        AbstractMappedCommitter javadoc update.
+      </action>
+      <action dev="essiembp" type="update">
+        Updated references to deprecated code.
+      </action>
+    </release>
+
     <release version="1.2.0" date="2014-03-09" description="Minor release">
       <action dev="essiembp" type="add">
         New MultiCommitter class allowing the use multiple committers.
