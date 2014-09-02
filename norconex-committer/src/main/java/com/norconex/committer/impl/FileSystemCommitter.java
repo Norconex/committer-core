@@ -41,9 +41,9 @@ import org.apache.log4j.Logger;
 import com.norconex.committer.CommitterException;
 import com.norconex.committer.ICommitter;
 import com.norconex.commons.lang.Sleeper;
-import com.norconex.commons.lang.config.ConfigurationLoader;
+import com.norconex.commons.lang.config.ConfigurationUtil;
 import com.norconex.commons.lang.config.IXMLConfigurable;
-import com.norconex.commons.lang.io.FileUtil;
+import com.norconex.commons.lang.file.FileUtil;
 import com.norconex.commons.lang.map.Properties;
 
 
@@ -184,7 +184,7 @@ public class FileSystemCommitter implements ICommitter, IXMLConfigurable {
 
     @Override
     public void loadFromXML(Reader in) {
-        XMLConfiguration xml = ConfigurationLoader.loadXML(in);
+        XMLConfiguration xml = ConfigurationUtil.newXMLConfiguration(in);
         setDirectory(xml.getString("directory", DEFAULT_DIRECTORY));
     }
     @Override

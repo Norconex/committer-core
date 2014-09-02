@@ -37,7 +37,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-import com.norconex.commons.lang.config.ConfigurationLoader;
+import com.norconex.commons.lang.config.ConfigurationUtil;
 import com.norconex.commons.lang.config.IXMLConfigurable;
 import com.norconex.commons.lang.map.Properties;
 
@@ -332,7 +332,7 @@ public abstract class AbstractMappedCommitter
 
     @Override
     public void loadFromXML(Reader in) {
-        XMLConfiguration xml = ConfigurationLoader.loadXML(in);
+        XMLConfiguration xml = ConfigurationUtil.newXMLConfiguration(in);
         setIdSourceField(xml.getString("idSourceField", idSourceField));
         setKeepIdSourceField(xml.getBoolean("idSourceField[@keep]", 
                 keepIdSourceField));

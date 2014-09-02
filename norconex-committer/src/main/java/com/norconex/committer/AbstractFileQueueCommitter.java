@@ -31,8 +31,8 @@ import org.apache.log4j.Logger;
 
 import com.norconex.committer.impl.FileSystemCommitter;
 import com.norconex.commons.lang.config.IXMLConfigurable;
-import com.norconex.commons.lang.io.FileUtil;
-import com.norconex.commons.lang.io.IFileVisitor;
+import com.norconex.commons.lang.file.FileUtil;
+import com.norconex.commons.lang.file.IFileVisitor;
 import com.norconex.commons.lang.map.Properties;
 
 //TODO Maybe offer pluggable implementations for where to queue (FS, DB, etc)?
