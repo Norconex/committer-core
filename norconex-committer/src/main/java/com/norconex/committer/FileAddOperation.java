@@ -1,4 +1,4 @@
-/* Copyright 2010-2013 Norconex Inc.
+/* Copyright 2010-2014 Norconex Inc.
  * 
  * This file is part of Norconex Committer.
  * 
@@ -23,11 +23,16 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.CharEncoding;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
+import com.norconex.commons.lang.file.FileUtil;
 import com.norconex.commons.lang.map.Properties;
 
 /**
@@ -38,7 +43,10 @@ import com.norconex.commons.lang.map.Properties;
 public class FileAddOperation implements IAddOperation {
 
     private static final long serialVersionUID = -7003290965448748871L;
+    private static final Logger LOG = 
+            LogManager.getLogger(FileAddOperation.class);
 
+    private String reference;
     private final File file;
     private Properties metadata;
     
@@ -53,11 +61,37 @@ public class FileAddOperation implements IAddOperation {
     }
 
     @Override
+    public String getReference() {
+        if (reference != null) {
+            return reference;
+        }
+        try {
+            reference = FileUtils.readFileToString(
+                    new File(file.getAbsolutePath() + ".ref"),
+                    CharEncoding.UTF_8);
+        } catch (IOException e) {
+            throw new CommitterException(
+                    "Could not load reference for " + file);
+        }
+        return reference;
+    }
+    
+    @Override
     public void delete() {
-        //TODO use FileUtil.deleteFile(file) ??
-        File metaFile = new File(file.getAbsolutePath() + ".meta");
-        metaFile.delete();
-        file.delete();
+        File fileToDelete = null;
+        try {
+            fileToDelete = new File(file.getAbsolutePath() + ".meta");
+            FileUtil.delete(fileToDelete);
+
+            fileToDelete = new File(file.getAbsolutePath() + ".ref");
+            FileUtil.delete(fileToDelete);
+
+            fileToDelete = file;
+            FileUtil.delete(fileToDelete);
+            
+        } catch (IOException e) {
+            LOG.error("Could not delete commit file: " + fileToDelete, e);
+        }
     }
 
     @Override

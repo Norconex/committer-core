@@ -1,4 +1,4 @@
-/* Copyright 2010-2013 Norconex Inc.
+/* Copyright 2010-2014 Norconex Inc.
  * 
  * This file is part of Norconex Committer.
  * 
@@ -24,6 +24,10 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
+import com.norconex.commons.lang.file.FileUtil;
 
 /**
  * A file-based deletion operation.
@@ -33,7 +37,9 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 public class FileDeleteOperation implements IDeleteOperation {
 
     private static final long serialVersionUID = 1182738593255366952L;
-
+    private static final Logger LOG = 
+            LogManager.getLogger(FileDeleteOperation.class);
+    
     private final String reference;
     private final File file;
     
@@ -59,8 +65,11 @@ public class FileDeleteOperation implements IDeleteOperation {
 
     @Override
     public void delete() {
-        //TODO use FileUtil.deleteFile(file) ??
-        file.delete();
+        try {
+            FileUtil.delete(file);
+        } catch (IOException e) {
+            LOG.error("Could not delete commit file: " + file, e);
+        }
     }
 
     @Override

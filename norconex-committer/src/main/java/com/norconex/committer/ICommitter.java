@@ -1,4 +1,4 @@
-/* Copyright 2010-2013 Norconex Inc.
+/* Copyright 2010-2014 Norconex Inc.
  * 
  * This file is part of Norconex Committer.
  * 
@@ -17,7 +17,7 @@
  */
 package com.norconex.committer;
 
-import java.io.File;
+import java.io.InputStream;
 import java.io.Serializable;
 
 import com.norconex.commons.lang.map.Properties;
@@ -39,25 +39,29 @@ public interface ICommitter extends Serializable {
     String DEFAULT_DOCUMENT_REFERENCE = "document.reference";
     
     /**
-     * Queues a new or modified document.   These queued documents should
-     * be sent to their target destination when commit is called.
+     * Adds a new or modified document to the target destination.  
+     * Implementations may decide to queue the addition request instead until 
+     * commit is called, or a certain threshold is reached.
      * @param reference document reference (e.g. URL)
-     * @param document text document 
+     * @param content document content
      * @param metadata document metadata
+     * @since 2.0.0
      */
-    void queueAdd(String reference, File document, Properties metadata);    
+    void add(String reference, InputStream content, Properties metadata);
 
     /**
-     * Queues a document for removal.   These queued documents should
-     * be sent to their target destination for deletion when commit is called.
+     * Removes a document from the target destination.  
+     * Implementations may decide to queue the removal request instead until 
+     * commit is called, or a certain threshold is reached.
      * @param reference document reference (e.g. URL)
-     * @param document text document 
      * @param metadata document metadata
+     * @since 2.0.0
      */
-    void queueRemove(String reference, File document, Properties metadata);    
-
+    void remove(String reference, Properties metadata);
+        
     /**
-     * Commits queued documents.  Effectively apply the additions and removals.
+     * Commits documents.  Effectively apply the additions and removals.  
+     * May not be necessary for some implementations.
      */
     void commit();
 }

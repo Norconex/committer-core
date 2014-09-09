@@ -1,4 +1,4 @@
-/* Copyright 2010-2013 Norconex Inc.
+/* Copyright 2010-2014 Norconex Inc.
  *
  * This file is part of Norconex Committer.
  *
@@ -17,7 +17,7 @@
  */
 package com.norconex.committer;
 
-import java.io.File;
+import java.io.InputStream;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -32,7 +32,7 @@ import com.norconex.commons.lang.map.Properties;
  * Basic implementation invoking the {@link #commit()} method every time a given
  * queue size threshold has been reached.  Both additions and deletions count
  * towards the same queue size.
- * It is still left to implementors to decide how to actually queue the 
+ * It is left to implementors to decide how to actually queue the 
  * documents and how to perform commits.
  * <p />
  * Consider extending {@link AbstractFileQueueCommitter} if you do not wish
@@ -90,35 +90,34 @@ public abstract class AbstractCommitter implements ICommitter {
     }
 
     @Override
-    public final void queueAdd(
-            String reference, File document, Properties metadata) {
-        queueAddittion(reference, document, metadata);
+    public final void add(
+            String reference, InputStream content, Properties metadata) {
+        queueAddition(reference, content, metadata);
         commitIfReady();
     }
     /**
      * Queues a document to be added.
      * @param reference document reference
-     * @param document document file
+     * @param content document content
      * @param metadata document metadata
      */
-    protected abstract void queueAddittion(
-            String reference, File document, Properties metadata);
+    protected abstract void queueAddition(
+            String reference, InputStream content, Properties metadata);
 
     @Override
-    public final void queueRemove(
-            String ref, File document, Properties metadata) {
-        queueRemoval(ref, document, metadata);
+    public final void remove(
+            String reference, Properties metadata) {
+        queueRemoval(reference, metadata);
         commitIfReady();
     }
     /**
      * Queues a document to be deleted.
      * @param reference document reference
-     * @param document document file
+     * @param content document content
      * @param metadata document metadata
      */
     protected abstract void queueRemoval(
-            String reference, File document, Properties metadata);
-    
+            String reference, Properties metadata);
 
     @SuppressWarnings("nls")
     private void commitIfReady() {

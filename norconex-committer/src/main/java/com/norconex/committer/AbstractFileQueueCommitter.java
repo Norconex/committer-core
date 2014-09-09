@@ -1,4 +1,4 @@
-/* Copyright 2010-2013 Norconex Inc.
+/* Copyright 2010-2014 Norconex Inc.
  * 
  * This file is part of Norconex Committer.
  * 
@@ -20,6 +20,7 @@ package com.norconex.committer;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Date;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -112,15 +113,14 @@ public abstract class AbstractFileQueueCommitter extends AbstractCommitter {
     }
     
     @Override
-    protected void queueAddittion(
-            String reference, File document, Properties metadata) {
-        queue.queueAdd(reference, document, metadata);
+    protected void queueAddition(String reference, InputStream content,
+            Properties metadata) {
+        queue.add(reference, content, metadata);
     }
 
     @Override
-    protected void queueRemoval(
-            String ref, File document, Properties metadata) {
-        queue.queueRemove(ref, document, metadata);
+    protected void queueRemoval(String ref, Properties metadata) {
+        queue.remove(ref, metadata);
     }
 
     @Override

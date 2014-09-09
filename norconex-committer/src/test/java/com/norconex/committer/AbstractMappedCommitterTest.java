@@ -1,4 +1,4 @@
-/* Copyright 2010-2013 Norconex Inc.
+/* Copyright 2010-2014 Norconex Inc.
  * 
  * This file is part of Norconex Committer.
  * 
@@ -21,7 +21,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,10 +29,9 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
 import org.apache.commons.configuration.XMLConfiguration;
+import org.apache.commons.io.input.NullInputStream;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 
 import com.norconex.commons.lang.map.Properties;
 
@@ -46,8 +44,8 @@ public class AbstractMappedCommitterTest {
 
 
 
-    @Rule
-    public TemporaryFolder tempFolder = new TemporaryFolder();
+//    @Rule
+//    public TemporaryFolder tempFolder = new TemporaryFolder();
     private StubCommitter committer;
     private boolean committed;
 
@@ -65,8 +63,8 @@ public class AbstractMappedCommitterTest {
     @Before
     public void setup() throws IOException {
         committer = new StubCommitter();
-        File queue = tempFolder.newFolder("queue");
-        committer.setQueueDir(queue.toString());
+//        File queue = tempFolder.newFolder("queue");
+//        committer.setQueueDir(queue.toString());
 
         committed = false;
 //        listCommitAdd.clear();
@@ -82,7 +80,7 @@ public class AbstractMappedCommitterTest {
     @Test
     public void testNoCommit() throws IOException {
         // Default batch size is 1000, so no commit should occur
-        committer.queueAdd(defaultReference, tempFolder.newFile(), metadata);
+        committer.add(defaultReference, new NullInputStream(0), metadata);
         assertFalse(committed);
     }
 
@@ -93,7 +91,7 @@ public class AbstractMappedCommitterTest {
     @Test
     public void testCommit() throws IOException {
         committer.setQueueSize(1);
-        committer.queueAdd(defaultReference, tempFolder.newFile(), metadata);
+        committer.add(defaultReference, new NullInputStream(0), metadata);
         assertTrue(committed);
     }
 
@@ -115,7 +113,7 @@ public class AbstractMappedCommitterTest {
 
         // Add a doc (it should trigger a commit because batch size is 1)
         committer.setQueueSize(1);
-        committer.queueAdd(defaultReference, tempFolder.newFile(), metadata);
+        committer.add(defaultReference, new NullInputStream(0), metadata);
 
         // Get the map generated
         assertEquals(1, committer.getCommitBatch().size());
@@ -140,7 +138,7 @@ public class AbstractMappedCommitterTest {
 
         // Add a doc (it should trigger a commit because batch size is 1)
         committer.setQueueSize(1);
-        committer.queueAdd(defaultReference, tempFolder.newFile(), metadata);
+        committer.add(defaultReference, new NullInputStream(0), metadata);
         committer.commit();
 
         // Get the map generated

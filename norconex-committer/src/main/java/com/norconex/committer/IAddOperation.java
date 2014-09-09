@@ -1,4 +1,4 @@
-/* Copyright 2010-2013 Norconex Inc.
+/* Copyright 2010-2014 Norconex Inc.
  * 
  * This file is part of Norconex Committer.
  * 
@@ -30,6 +30,8 @@ import com.norconex.commons.lang.map.Properties;
  */
 public interface IAddOperation extends ICommitOperation {
 
+    String getReference();
+    
     /**
      * Gets the metadata.
      * @return metadata

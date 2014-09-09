@@ -17,7 +17,7 @@
  */
 package com.norconex.committer.impl;
 
-import java.io.File;
+import java.io.InputStream;
 
 import org.apache.commons.lang.time.StopWatch;
 import org.apache.log4j.LogManager;
@@ -59,8 +59,8 @@ public class NilCommitter implements ICommitter  {
     }
 
     @Override
-    public synchronized void queueAdd(
-            String reference, File document, Properties metadata) {
+    public synchronized void add(
+            String reference, InputStream content, Properties metadata) {
         addCount++;
         if (LOG.isDebugEnabled()) {
             LOG.debug("Queing addition of " + reference);
@@ -71,8 +71,7 @@ public class NilCommitter implements ICommitter  {
     }
 
     @Override
-    public synchronized void queueRemove(
-            String reference, File document, Properties metadata) {
+    public synchronized void remove(String reference, Properties metadata) {
         removeCount++;
         if (LOG.isDebugEnabled()) {
             LOG.debug("Queing deletion of " + reference);

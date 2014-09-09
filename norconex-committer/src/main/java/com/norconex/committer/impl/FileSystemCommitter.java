@@ -1,4 +1,4 @@
-/* Copyright 2010-2013 Norconex Inc.
+/* Copyright 2010-2014 Norconex Inc.
  * 
  * This file is part of Norconex Committer.
  * 
@@ -18,11 +18,12 @@
 package com.norconex.committer.impl;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Reader;
 import java.io.Writer;
+import java.util.UUID;
 
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -31,19 +32,16 @@ import javax.xml.stream.XMLStreamWriter;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.SystemUtils;
+import org.apache.commons.lang3.CharEncoding;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.time.DateFormatUtils;
 
 import com.norconex.committer.CommitterException;
 import com.norconex.committer.ICommitter;
-import com.norconex.commons.lang.Sleeper;
 import com.norconex.commons.lang.config.ConfigurationUtil;
 import com.norconex.commons.lang.config.IXMLConfigurable;
-import com.norconex.commons.lang.file.FileUtil;
 import com.norconex.commons.lang.map.Properties;
 
 
@@ -66,18 +64,11 @@ import com.norconex.commons.lang.map.Properties;
 public class FileSystemCommitter implements ICommitter, IXMLConfigurable {
 
     private static final long serialVersionUID = 567796374790003396L;
-    private static final Logger LOG = 
-            LogManager.getLogger(FileSystemCommitter.class);
     
     /** Default committer directory */
     public static final String DEFAULT_DIRECTORY = "./committer";
     
     private String directory = DEFAULT_DIRECTORY;
-
-    private static final int DATE_FOLDER_CHAR_SIZE = 3;
-    
-    private static final int CREATE_FILE_MAX_ATTEMPTS = 10;
-    private static final int CREATE_FILE_MS_BEFORE_RETRY = 100;
     
     /**
      * Gets the directory where files are committed.
@@ -95,36 +86,44 @@ public class FileSystemCommitter implements ICommitter, IXMLConfigurable {
 	}
 
 	@Override
-    public void queueAdd(String reference, File document, Properties metadata) {
+    public void add(
+            String reference, InputStream content, Properties metadata) {
         File dir = getAddDir();
         if (!dir.exists()) {
             dir.mkdirs();
         }
         try {
             File targetFile = createFile(dir);
-            FileUtil.moveFile(document, targetFile);
+
+            // Content
+            FileUtils.copyInputStreamToFile(content, targetFile);
+
+            // Metadata
             FileOutputStream out = new FileOutputStream(
                     new File(targetFile.getAbsolutePath() + ".meta"));
             metadata.store(out, "");
             IOUtils.closeQuietly(out);
+            
+            // Reference
+            FileUtils.writeStringToFile(
+                    new File(targetFile.getAbsolutePath() + ".ref"),
+                    reference, CharEncoding.UTF_8);
+            
         } catch (IOException e) {
             throw new CommitterException(
-            		"Cannot queue document addition.  Ref: " + reference
-                  + " File: " + document, e);
+            		"Cannot queue document addition.  Ref: " + reference, e);
         }
     }
     @Override
-    public void queueRemove(
-            String reference, File document, Properties metadata) {
+    public void remove(String reference, Properties metadata) {
         File dir = getRemoveDir();
         if (!dir.exists()) {
             dir.mkdirs();
         }
         try {
             File targetFile = createFile(dir);
-            org.apache.commons.io.FileUtils.writeStringToFile(
-            		targetFile, reference);
-            document.delete();
+            FileUtils.writeStringToFile(
+                    targetFile, reference, CharEncoding.UTF_8);
         } catch (IOException e) {
             throw new CommitterException(
             		"Cannot queue document removal.  Ref: " + reference, e);
@@ -141,45 +140,31 @@ public class FileSystemCommitter implements ICommitter, IXMLConfigurable {
      * @return directory
      */
     public File getAddDir() {
-        return new File(directory + SystemUtils.FILE_SEPARATOR + "add");
+        return new File(directory, "add");
     }
     /**
      * Gets the directory where documents to be removed are stored.
      * @return directory
      */
     public File getRemoveDir() {
-        return new File(directory + SystemUtils.FILE_SEPARATOR + "remove");
+        return new File(directory, "remove");
     }
+    
     private synchronized File createFile(File dir) throws IOException {
-        File addFile = null;
-        do {
-            String time = Long.toString(System.currentTimeMillis());
-            StringBuilder b = new StringBuilder();
-            for (int i = 0; i < time.length(); i++) {
-                if (i % DATE_FOLDER_CHAR_SIZE == 0) {
-                    b.append(SystemUtils.FILE_SEPARATOR);
-                }
-                b.append(time.charAt(i));
-            }
-            addFile = new File(dir.getAbsolutePath() + b.toString());
-        } while (addFile.exists());
-        int attempts = 0;
-        Exception ex = null;
-        while (attempts++ < CREATE_FILE_MAX_ATTEMPTS) {
-            try {
-                FileUtils.touch(addFile);
-                ex = null;
-                break;
-            } catch (FileNotFoundException e) {
-                ex = e;
-                LOG.debug("Could not create commit file, retrying...");
-                Sleeper.sleepNanos(CREATE_FILE_MS_BEFORE_RETRY);
+
+        // Create date directory
+        File dateDir = new File(dir, DateFormatUtils.format(
+                System.currentTimeMillis(), "yyyy/MM-dd/hh/mm/ss"));
+        if (!dateDir.exists()) {
+            if (!dateDir.mkdirs()) {
+                throw new IOException(
+                        "Could not create commit directory: " + dateDir);
             }
         }
-        if (ex != null) {
-            throw new CommitterException("Could not create commit file.", ex);
-        }
-        return addFile;
+        
+        // Create file
+        File file = new File(dateDir, UUID.randomUUID().toString());
+        return file;
     }
 
     @Override
