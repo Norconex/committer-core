@@ -24,9 +24,11 @@ package com.norconex.committer;
  * @since 1.1.0
  */
 public interface IDeleteOperation extends ICommitOperation {
+
     /**
      * Gets the document reference.
-     * @return reference
+     * @return document reference
      */
     String getReference();
+
 }

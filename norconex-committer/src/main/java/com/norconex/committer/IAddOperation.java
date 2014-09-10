@@ -30,6 +30,10 @@ import com.norconex.commons.lang.map.Properties;
  */
 public interface IAddOperation extends ICommitOperation {
 
+    /**
+     * Gets the document reference.
+     * @return document reference
+     */
     String getReference();
     
     /**

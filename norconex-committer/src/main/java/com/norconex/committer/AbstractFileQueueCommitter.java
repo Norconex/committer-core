@@ -68,14 +68,15 @@ public abstract class AbstractFileQueueCommitter extends AbstractCommitter {
             AbstractFileQueueCommitter.class);
     
     /** Default directory where to queue files. */
-    public static final String DEFAULT_QUEUE_DIR = "./committer-queue";
+    public static final String DEFAULT_QUEUE_DIR = "committer-queue";
 
     private static final int EMPTY_DIRS_DAYS_LIMIT = 10;
     
     private static final FileFilter NON_META_FILTER = new FileFilter() {
         @Override
         public boolean accept(File pathname) {
-            return !pathname.getName().endsWith(".meta");
+            return !pathname.getName().endsWith(".meta")
+                    && !pathname.getName().endsWith(".ref");
         }
     };
 

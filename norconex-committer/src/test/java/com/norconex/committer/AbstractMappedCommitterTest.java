@@ -21,6 +21,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +32,9 @@ import javax.xml.stream.XMLStreamWriter;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.io.input.NullInputStream;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 import com.norconex.commons.lang.map.Properties;
 
@@ -44,8 +47,8 @@ public class AbstractMappedCommitterTest {
 
 
 
-//    @Rule
-//    public TemporaryFolder tempFolder = new TemporaryFolder();
+    @Rule
+    public TemporaryFolder tempFolder = new TemporaryFolder();
     private StubCommitter committer;
     private boolean committed;
 
@@ -63,14 +66,13 @@ public class AbstractMappedCommitterTest {
     @Before
     public void setup() throws IOException {
         committer = new StubCommitter();
-//        File queue = tempFolder.newFolder("queue");
-//        committer.setQueueDir(queue.toString());
+        File queue = tempFolder.newFolder("queue");
+        committer.setQueueDir(queue.toString());
 
         committed = false;
 //        listCommitAdd.clear();
         metadata.clear();
-        metadata.addString(
-                ICommitter.DEFAULT_DOCUMENT_REFERENCE, defaultReference);
+        metadata.addString("myreference", defaultReference);
     }
 
     /**
@@ -100,13 +102,13 @@ public class AbstractMappedCommitterTest {
      * @throws IOException could not create temporary file
      */
     @Test
-    public void testSetSourceAndTargetId() throws IOException {
+    public void testSetSourceAndTargetReference() throws IOException {
 
         // Set a different source and target id
         String customSourceId = "mysourceid";
-        committer.setIdSourceField(customSourceId);
+        committer.setSourceReferenceField(customSourceId);
         String customTargetId = "mytargetid";
-        committer.setIdTargetField(customTargetId);
+        committer.setTargetReferenceField(customTargetId);
 
         // Store the source id value in metadata
         metadata.addString(customSourceId, defaultReference);
@@ -124,7 +126,8 @@ public class AbstractMappedCommitterTest {
         assertEquals(defaultReference, docMeta.getString(customTargetId));
 
         // Check that customSourceId was removed (default behavior)
-        assertFalse(defaultReference, docMeta.containsKey(customSourceId));
+        assertFalse("Source reference field was not removed.", 
+                docMeta.containsKey(customSourceId));
     }
 
     /**
@@ -134,7 +137,7 @@ public class AbstractMappedCommitterTest {
     @Test
     public void testKeepSourceId() throws IOException {
 
-        committer.setKeepIdSourceField(true);
+        committer.setKeepReferenceSourceField(true);
 
         // Add a doc (it should trigger a commit because batch size is 1)
         committer.setQueueSize(1);
@@ -146,8 +149,7 @@ public class AbstractMappedCommitterTest {
         IAddOperation op = (IAddOperation) committer.getCommitBatch().get(0);
 
         // Check that the source id is still there
-        assertTrue(op.getMetadata().containsKey(
-                ICommitter.DEFAULT_DOCUMENT_REFERENCE));
+        assertTrue(op.getMetadata().containsKey("myreference"));
     }
     
     class StubCommitter extends AbstractMappedCommitter {
