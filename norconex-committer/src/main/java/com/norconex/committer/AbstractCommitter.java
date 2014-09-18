@@ -139,7 +139,7 @@ public abstract class AbstractCommitter implements ICommitter {
     @SuppressWarnings("nls")
     private void commitIfReady() {
         docCount++;
-        if (docCount % queueSize == 0) {
+        if (queueSize == 0 || docCount % queueSize == 0) {
             if (LOG.isInfoEnabled()) {
                 LOG.info("Max queue size reached (" + queueSize
                         + "). Committing");

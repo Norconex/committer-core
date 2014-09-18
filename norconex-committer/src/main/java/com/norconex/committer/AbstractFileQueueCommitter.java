@@ -87,14 +87,15 @@ public abstract class AbstractFileQueueCommitter extends AbstractCommitter {
      * Constructor.
      */
     public AbstractFileQueueCommitter() {
-        this(calculateInitialBatchSize());
+        super();
+        queue.setDirectory(DEFAULT_QUEUE_DIR);
     }
     /**
      * Constructor.
-     * @param batchSize batch size
+     * @param queueSize max queue size
      */
-    private AbstractFileQueueCommitter(int batchSize) {
-        super(batchSize);
+    public AbstractFileQueueCommitter(int queueSize) {
+        super(queueSize);
         queue.setDirectory(DEFAULT_QUEUE_DIR);
     }
 
@@ -271,11 +272,6 @@ public abstract class AbstractFileQueueCommitter extends AbstractCommitter {
         }
     }
 
-    private static int calculateInitialBatchSize() {
-        return 0;
-    }
-    
-    
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
