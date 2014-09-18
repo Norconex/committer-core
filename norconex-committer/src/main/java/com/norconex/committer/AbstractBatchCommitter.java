@@ -20,7 +20,9 @@ package com.norconex.committer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
+import org.apache.commons.collections4.set.ListOrderedSet;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -74,8 +76,8 @@ public abstract class AbstractBatchCommitter
     private int maxRetries;
     private long maxRetryWait;
 
-    private final List<ICommitOperation> operations = 
-            Collections.synchronizedList(new ArrayList<ICommitOperation>());
+    private final Set<ICommitOperation> operations = 
+            Collections.synchronizedSet(new ListOrderedSet<ICommitOperation>());
 
     /**
      * Constructor.

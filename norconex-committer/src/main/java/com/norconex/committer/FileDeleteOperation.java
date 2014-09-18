@@ -22,7 +22,6 @@ import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -41,20 +40,20 @@ public class FileDeleteOperation implements IDeleteOperation {
             LogManager.getLogger(FileDeleteOperation.class);
     
     private final String reference;
-    private final File file;
+    private final File refFile;
     
     /**
      * Constructor.
-     * @param file the file to be deleted
+     * @param refFile the file to be deleted
      */
-    public FileDeleteOperation(File file) {
+    public FileDeleteOperation(File refFile) {
         super();
-        this.file = file;
+        this.refFile = refFile;
         try {
-            this.reference = FileUtils.readFileToString(file);
+            this.reference = FileUtils.readFileToString(refFile);
         } catch (IOException e) {
             throw new CommitterException(
-                    "Cannot obtain reference from file " + file, e);
+                    "Cannot obtain reference from file " + refFile, e);
         }
     }
     
@@ -66,18 +65,15 @@ public class FileDeleteOperation implements IDeleteOperation {
     @Override
     public void delete() {
         try {
-            FileUtil.delete(file);
+            FileUtil.delete(refFile);
         } catch (IOException e) {
-            LOG.error("Could not delete commit file: " + file, e);
+            LOG.error("Could not delete commit file: " + refFile, e);
         }
     }
 
     @Override
     public int hashCode() {
-        HashCodeBuilder hashCodeBuilder = new HashCodeBuilder();
-        hashCodeBuilder.append(reference);
-        hashCodeBuilder.append(file);
-        return hashCodeBuilder.toHashCode();
+        return refFile.hashCode();
     }
     
     @Override
@@ -94,7 +90,7 @@ public class FileDeleteOperation implements IDeleteOperation {
         FileDeleteOperation other = (FileDeleteOperation) obj;
         EqualsBuilder equalsBuilder = new EqualsBuilder();
         equalsBuilder.append(reference, other.reference);
-        equalsBuilder.append(file, other.file);
+        equalsBuilder.append(refFile, other.refFile);
         return equalsBuilder.isEquals();
     }
     
@@ -102,7 +98,7 @@ public class FileDeleteOperation implements IDeleteOperation {
     public String toString() {
         ToStringBuilder builder = new ToStringBuilder(this);
         builder.append("reference", reference);
-        builder.append("file", file);
+        builder.append("refFile", refFile);
         return builder.toString();
     }
 }

@@ -57,7 +57,7 @@ public abstract class AbstractCommitter implements ICommitter {
     public static final int DEFAULT_QUEUE_SIZE = 1000;
     
     private int queueSize = DEFAULT_QUEUE_SIZE;
-    private long docCount;
+    private long docCount = -1;
     
     /**
      * Constructor.
@@ -92,6 +92,7 @@ public abstract class AbstractCommitter implements ICommitter {
     @Override
     public final void add(
             String reference, InputStream content, Properties metadata) {
+        ensureInitialDocCount();
         queueAddition(reference, content, metadata);
         commitIfReady();
     }
@@ -107,9 +108,19 @@ public abstract class AbstractCommitter implements ICommitter {
     @Override
     public final void remove(
             String reference, Properties metadata) {
+        ensureInitialDocCount();
         queueRemoval(reference, metadata);
         commitIfReady();
     }
+
+    /**
+     * Gets the initial document count, in case there are already documents
+     * in the queue the first time the committer is used.  Otherwise, 
+     * returns zero.
+     * @return zero or the initial number of documents in the queue
+     */
+    protected abstract long getInitialQueueDocCount();
+    
     /**
      * Queues a document to be deleted.
      * @param reference document reference
@@ -119,12 +130,18 @@ public abstract class AbstractCommitter implements ICommitter {
     protected abstract void queueRemoval(
             String reference, Properties metadata);
 
+    private synchronized void ensureInitialDocCount() {
+        if (docCount == -1) {
+            docCount = getInitialQueueDocCount();
+        }
+    }
+    
     @SuppressWarnings("nls")
     private void commitIfReady() {
         docCount++;
         if (docCount % queueSize == 0) {
             if (LOG.isInfoEnabled()) {
-                LOG.info("Batch size reached (" + queueSize
+                LOG.info("Max queue size reached (" + queueSize
                         + "). Committing");
             }
             commit();

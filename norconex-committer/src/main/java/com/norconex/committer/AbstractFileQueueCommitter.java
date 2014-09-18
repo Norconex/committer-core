@@ -26,6 +26,7 @@ import java.util.Date;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.mutable.MutableLong;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -70,30 +71,29 @@ public abstract class AbstractFileQueueCommitter extends AbstractCommitter {
     /** Default directory where to queue files. */
     public static final String DEFAULT_QUEUE_DIR = "committer-queue";
 
-    private static final int EMPTY_DIRS_DAYS_LIMIT = 10;
+    private static final int EMPTY_DIRS_SECONDS_LIMIT = 10;
     
-    private static final FileFilter NON_META_FILTER = new FileFilter() {
+    private static final FileFilter REF_FILTER = new FileFilter() {
         @Override
         public boolean accept(File pathname) {
-            return !pathname.getName().endsWith(".meta")
-                    && !pathname.getName().endsWith(".ref");
+            return pathname.getName().endsWith(
+                    FileSystemCommitter.EXTENSION_REFERENCE);
         }
     };
-
+    
     private final FileSystemCommitter queue = new FileSystemCommitter();
 
     /**
      * Constructor.
      */
     public AbstractFileQueueCommitter() {
-        super();
-        queue.setDirectory(DEFAULT_QUEUE_DIR);
+        this(calculateInitialBatchSize());
     }
     /**
      * Constructor.
      * @param batchSize batch size
      */
-    public AbstractFileQueueCommitter(int batchSize) {
+    private AbstractFileQueueCommitter(int batchSize) {
         super(batchSize);
         queue.setDirectory(DEFAULT_QUEUE_DIR);
     }
@@ -114,6 +114,28 @@ public abstract class AbstractFileQueueCommitter extends AbstractCommitter {
     }
     
     @Override
+    protected long getInitialQueueDocCount() {
+        final MutableLong fileCount = new MutableLong();
+
+        // --- Additions ---
+        FileUtil.visitAllFiles(queue.getAddDir(), new IFileVisitor() {
+            @Override
+            public void visit(File file) {
+                fileCount.increment();
+            }
+        }, REF_FILTER);
+
+        // --- Deletions ---
+        FileUtil.visitAllFiles(queue.getRemoveDir(), new IFileVisitor() {
+            @Override
+            public void visit(File file) {
+                fileCount.increment();
+            }
+        });
+        return fileCount.longValue();
+    }
+    
+    @Override
     protected void queueAddition(String reference, InputStream content,
             Properties metadata) {
         queue.add(reference, content, metadata);
@@ -127,29 +149,36 @@ public abstract class AbstractFileQueueCommitter extends AbstractCommitter {
     @Override
     public void commit() {
 
+        //TODO to make sure the same file is not picked by two threads,
+        // we synchronize the portion that gets them and we move them.
+        
         // --- Additions ---
         FileUtil.visitAllFiles(queue.getAddDir(), new IFileVisitor() {
             @Override
             public void visit(File file) {
                 try {
-                    IAddOperation op = new FileAddOperation(file);
-                    prepareCommitAddition(op);
-                    commitAddition(op);
+                    if (file.exists()) {
+                        IAddOperation op = new FileAddOperation(file);
+                        prepareCommitAddition(op);
+                        commitAddition(op);
+                    }
                 } catch (IOException e) {
                     throw new CommitterException(
                             "Cannot create document for file: " + file, e);
                 }
             }
-        }, NON_META_FILTER);
+        }, REF_FILTER);
 
         // --- Deletions ---
         FileUtil.visitAllFiles(queue.getRemoveDir(), new IFileVisitor() {
             @Override
             public void visit(File file) {
                 try {
-                    IDeleteOperation op = new FileDeleteOperation(file);
-                    prepareCommitDeletion(op);
-                    commitDeletion(op);
+                    if (file.exists()) {
+                        IDeleteOperation op = new FileDeleteOperation(file);
+                        prepareCommitDeletion(op);
+                        commitDeletion(op);
+                    }
                 } catch (IOException e) {
                     throw new CommitterException(
                             "Cannot read reference from : " + file, e);
@@ -233,7 +262,7 @@ public abstract class AbstractFileQueueCommitter extends AbstractCommitter {
     // do it on files 10 seconds old to avoid threading conflicts
     private void deleteEmptyOldDirs(File parentDir) {
         final long someTimeAgo = System.currentTimeMillis() 
-                - (DateUtils.MILLIS_PER_SECOND * EMPTY_DIRS_DAYS_LIMIT);
+                - (DateUtils.MILLIS_PER_SECOND * EMPTY_DIRS_SECONDS_LIMIT);
         Date date = new Date(someTimeAgo);
         int dirCount = FileUtil.deleteEmptyDirs(parentDir, date);
         if (LOG.isDebugEnabled()) {
@@ -242,6 +271,11 @@ public abstract class AbstractFileQueueCommitter extends AbstractCommitter {
         }
     }
 
+    private static int calculateInitialBatchSize() {
+        return 0;
+    }
+    
+    
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {

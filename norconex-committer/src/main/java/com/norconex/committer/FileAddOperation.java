@@ -26,12 +26,13 @@ import java.io.InputStream;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.CharEncoding;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
+import com.norconex.committer.impl.FileSystemCommitter;
 import com.norconex.commons.lang.file.FileUtil;
 import com.norconex.commons.lang.map.Properties;
 
@@ -46,33 +47,56 @@ public class FileAddOperation implements IAddOperation {
     private static final Logger LOG = 
             LogManager.getLogger(FileAddOperation.class);
 
-    private String reference;
-    private final File file;
-    private Properties metadata;
-    
+    private final String reference;
+    private final File contentFile;
+    private final File metaFile;
+    private final File refFile;
+    private final Properties metadata;
+    private final int hashCode;
 
     /**
      * Constructor.
-     * @param file the file to be added
+     * @param refFile the reference file to be added
      */
-    public FileAddOperation(File file) {
+    public FileAddOperation(File refFile) {
         super();
-        this.file = file;
+        this.hashCode = refFile.hashCode();
+        this.refFile = refFile;
+
+        String basePath = StringUtils.removeEnd(
+                refFile.getAbsolutePath(), 
+                FileSystemCommitter.EXTENSION_REFERENCE);
+        this.contentFile = new File(
+                basePath + FileSystemCommitter.EXTENSION_CONTENT);
+        this.metaFile = new File( 
+                basePath + FileSystemCommitter.EXTENSION_METADATA);
+        try {
+            this.reference = FileUtils.readFileToString(
+                    refFile, CharEncoding.UTF_8);
+        } catch (IOException e) {
+            throw new CommitterException(
+                    "Could not load reference for " + refFile, e);
+        }
+        this.metadata = new Properties();
+        synchronized (metadata) {
+            if (metaFile.exists()) {
+                FileInputStream is = null;
+                try {
+                    is = new FileInputStream(metaFile);
+                    metadata.load(is);
+                } catch (IOException e) {
+                    throw new CommitterException(
+                            "Could not load metadata for " + metaFile, e);
+                } finally {
+                    IOUtils.closeQuietly(is);
+                }
+            }
+        }
+
     }
 
     @Override
     public String getReference() {
-        if (reference != null) {
-            return reference;
-        }
-        try {
-            reference = FileUtils.readFileToString(
-                    new File(file.getAbsolutePath() + ".ref"),
-                    CharEncoding.UTF_8);
-        } catch (IOException e) {
-            throw new CommitterException(
-                    "Could not load reference for " + file);
-        }
         return reference;
     }
     
@@ -80,13 +104,13 @@ public class FileAddOperation implements IAddOperation {
     public void delete() {
         File fileToDelete = null;
         try {
-            fileToDelete = new File(file.getAbsolutePath() + ".meta");
+            fileToDelete = metaFile;
             FileUtil.delete(fileToDelete);
 
-            fileToDelete = new File(file.getAbsolutePath() + ".ref");
+            fileToDelete = refFile;
             FileUtil.delete(fileToDelete);
 
-            fileToDelete = file;
+            fileToDelete = contentFile;
             FileUtil.delete(fileToDelete);
             
         } catch (IOException e) {
@@ -96,44 +120,22 @@ public class FileAddOperation implements IAddOperation {
 
     @Override
     public Properties getMetadata() {
-        if (metadata != null) {
-            return metadata;
-        }
-        metadata = new Properties();
-        synchronized (metadata) {
-            File metaFile = new File(file.getAbsolutePath() + ".meta");
-            if (metaFile.exists()) {
-                FileInputStream is = null;
-                try {
-                    is = new FileInputStream(metaFile);
-                    metadata.load(is);
-                } catch (IOException e) {
-                    throw new CommitterException(
-                            "Could not load metadata for " + file, e);
-                } finally {
-                    IOUtils.closeQuietly(is);
-                }
-            }
-        }
         return metadata;
     }
 
     @Override
     public InputStream getContentStream() {
         try {
-            return new FileInputStream(file);
+            return new FileInputStream(contentFile);
         } catch (FileNotFoundException e) {
             throw new CommitterException(
-                    "Could not obtain content stream for " + file, e);
+                    "Could not obtain content stream for " + contentFile, e);
         }
     }
     
     @Override
     public int hashCode() {
-        HashCodeBuilder hashCodeBuilder = new HashCodeBuilder();
-        hashCodeBuilder.append(file);
-        hashCodeBuilder.append(metadata);
-        return hashCodeBuilder.toHashCode();
+        return hashCode;
     }
 
     @Override
@@ -149,7 +151,7 @@ public class FileAddOperation implements IAddOperation {
         }
         FileAddOperation other = (FileAddOperation) obj;
         EqualsBuilder equalsBuilder = new EqualsBuilder();
-        equalsBuilder.append(file, other.file);
+        equalsBuilder.append(contentFile, other.contentFile);
         equalsBuilder.append(metadata, other.metadata);
         return equalsBuilder.isEquals();
     }
@@ -157,7 +159,7 @@ public class FileAddOperation implements IAddOperation {
     @Override
     public String toString() {
         ToStringBuilder builder = new ToStringBuilder(this);
-        builder.append("file", file);
+        builder.append("file", contentFile);
         builder.append("metadata", metadata);
         return builder.toString();
     }

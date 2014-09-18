@@ -68,6 +68,10 @@ public class FileSystemCommitter implements ICommitter, IXMLConfigurable {
     /** Default committer directory */
     public static final String DEFAULT_DIRECTORY = "committer";
     
+    public static final String EXTENSION_CONTENT = ".cntnt";
+    public static final String EXTENSION_METADATA = ".meta";
+    public static final String EXTENSION_REFERENCE = ".ref";
+    
     private String directory = DEFAULT_DIRECTORY;
     
     /**
@@ -96,17 +100,18 @@ public class FileSystemCommitter implements ICommitter, IXMLConfigurable {
             File targetFile = createFile(dir);
 
             // Content
-            FileUtils.copyInputStreamToFile(content, targetFile);
+            FileUtils.copyInputStreamToFile(content, 
+                    new File(targetFile.getAbsolutePath() + EXTENSION_CONTENT));
 
             // Metadata
-            FileOutputStream out = new FileOutputStream(
-                    new File(targetFile.getAbsolutePath() + ".meta"));
+            FileOutputStream out = new FileOutputStream(new File(
+                    targetFile.getAbsolutePath() + EXTENSION_METADATA));
             metadata.store(out, "");
             IOUtils.closeQuietly(out);
             
             // Reference
-            FileUtils.writeStringToFile(
-                    new File(targetFile.getAbsolutePath() + ".ref"),
+            FileUtils.writeStringToFile(new File(
+                    targetFile.getAbsolutePath() + EXTENSION_REFERENCE),
                     reference, CharEncoding.UTF_8);
             
         } catch (IOException e) {
@@ -122,8 +127,9 @@ public class FileSystemCommitter implements ICommitter, IXMLConfigurable {
         }
         try {
             File targetFile = createFile(dir);
-            FileUtils.writeStringToFile(
-                    targetFile, reference, CharEncoding.UTF_8);
+            FileUtils.writeStringToFile(new File(
+                    targetFile.getAbsolutePath() + EXTENSION_REFERENCE),
+                    reference, CharEncoding.UTF_8);
         } catch (IOException e) {
             throw new CommitterException(
             		"Cannot queue document removal.  Ref: " + reference, e);
