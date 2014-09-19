@@ -31,6 +31,7 @@ import javax.xml.stream.XMLStreamWriter;
 
 import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.commons.configuration.XMLConfiguration;
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
@@ -38,6 +39,7 @@ import com.norconex.committer.ICommitter;
 import com.norconex.commons.lang.config.ConfigurationUtil;
 import com.norconex.commons.lang.config.IXMLConfigurable;
 import com.norconex.commons.lang.io.CachedInputStream;
+import com.norconex.commons.lang.io.CachedStreamFactory;
 import com.norconex.commons.lang.map.Properties;
 
 /**
@@ -108,7 +110,10 @@ public class MultiCommitter implements ICommitter, IXMLConfigurable {
     @Override
     public void add(
             String reference, InputStream content, Properties metadata) {
-        CachedInputStream cachedInputStream = new CachedInputStream(content);
+        CachedStreamFactory factory = new CachedStreamFactory(
+                (int) FileUtils.ONE_MB, (int) FileUtils.ONE_MB);
+        
+        CachedInputStream cachedInputStream = factory.newInputStream(content);
         
         for (int i = 0; i < committers.size(); i++) {
             ICommitter committer = committers.get(i);
