@@ -191,7 +191,6 @@ public abstract class AbstractFileQueueCommitter extends AbstractCommitter {
         while (filesToCommit.size() < queueSize) {
             
             File file = null;
-            ICommitOperation op = null;
             Boolean addOrRemove = null;
             
             // Take files evenly from both stack, and make sure stacks are
@@ -228,14 +227,12 @@ public abstract class AbstractFileQueueCommitter extends AbstractCommitter {
                 continue;
             }
             
-            if (addOrRemove) {
-                op = new FileAddOperation(file);
-            } else {
-                op = new FileDeleteOperation(file);
-            }
-                        
             // Current thread will be committing this file
-            filesToCommit.add(op);
+            if (addOrRemove) {
+                filesToCommit.add(new FileAddOperation(file));
+            } else {
+                filesToCommit.add(new FileDeleteOperation(file));
+            }
         }
         
         LOG.info(String.format("Committing %s files", filesToCommit.size()));
