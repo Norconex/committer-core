@@ -21,7 +21,12 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Stack;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -82,6 +87,12 @@ public abstract class AbstractFileQueueCommitter extends AbstractCommitter {
     };
     
     private final FileSystemCommitter queue = new FileSystemCommitter();
+    
+    /**
+     * Files currently being committed
+     */
+    protected final ConcurrentHashMap<File, Thread> filesCommitting = 
+            new ConcurrentHashMap<>();
 
     /**
      * Constructor.
@@ -150,48 +161,112 @@ public abstract class AbstractFileQueueCommitter extends AbstractCommitter {
     @Override
     public void commit() {
 
-        //TODO to make sure the same file is not picked by two threads,
-        // we synchronize the portion that gets them and we move them.
-        
         // --- Additions ---
+        final Stack<File> filesToAdd = new Stack<>();
         FileUtil.visitAllFiles(queue.getAddDir(), new IFileVisitor() {
             @Override
             public void visit(File file) {
-                try {
-                    if (file.exists()) {
-                        IAddOperation op = new FileAddOperation(file);
-                        prepareCommitAddition(op);
-                        commitAddition(op);
-                    }
-                } catch (IOException e) {
-                    throw new CommitterException(
-                            "Cannot create document for file: " + file, e);
-                }
+                filesToAdd.add(file);
             }
         }, REF_FILTER);
 
         // --- Deletions ---
+        final Stack<File> filesToRemove = new Stack<>();
         FileUtil.visitAllFiles(queue.getRemoveDir(), new IFileVisitor() {
             @Override
             public void visit(File file) {
-                try {
-                    if (file.exists()) {
-                        IDeleteOperation op = new FileDeleteOperation(file);
-                        prepareCommitDeletion(op);
-                        commitDeletion(op);
-                    }
-                } catch (IOException e) {
-                    throw new CommitterException(
-                            "Cannot read reference from : " + file, e);
-                }
+                filesToRemove.add(file);
             }
         });
 
-        //TODO move this to finalize() to truly respect the commit size?
+        // Nothing left to commit. This happens if multiple threads are 
+        // committing at the same time and no more files are available for the 
+        // current thread to commit. This should happen rarely in practice.
+        if (filesToAdd.isEmpty() && filesToRemove.isEmpty()) {
+            return;
+        }
+        
+        // Don't commit more than queue size
+        List<ICommitOperation> filesToCommit = new ArrayList<>();
+        while (filesToCommit.size() < queueSize) {
+            
+            File file = null;
+            ICommitOperation op = null;
+            Boolean addOrRemove = null;
+            
+            // Take files evenly from both stack, and make sure stacks are
+            // not empty before calling pop().
+            if (!filesToAdd.isEmpty() && 
+                (filesToCommit.size() % 2 == 0 || filesToRemove.isEmpty())) {
+                file = filesToAdd.pop();
+                addOrRemove = true;
+            } else if (!filesToRemove.isEmpty()) {
+                file = filesToRemove.pop();
+                addOrRemove = false;
+            }
+            
+            // If no more files available in both list, quit loop. This happens 
+            // if multiple threads tries to commit at once and there is less 
+            // than queueSize files to commit. This should happen rarely in
+            // practice.
+            if (file == null) {
+                break;
+            }
+            
+            // Current thread tries to own this file. If the file is already own
+            // by another thread, continue and attempt to grab another file.
+            if (filesCommitting.putIfAbsent(
+                    file, Thread.currentThread()) != null) {
+                continue;
+            }
+            
+            // A file might have already been committed and cleanup from 
+            // the map, but still returned by the directory listing. Ignore 
+            // those. It is important to make this check AFTER the current  
+            // thread got ownership of the file. 
+            if (!file.exists()) {
+                continue;
+            }
+            
+            if (addOrRemove) {
+                op = new FileAddOperation(file);
+            } else {
+                op = new FileDeleteOperation(file);
+            }
+                        
+            // Current thread will be committing this file
+            filesToCommit.add(op);
+        }
+        
+        LOG.info(String.format("Committing %s files", filesToCommit.size()));
+        for (ICommitOperation op : filesToCommit) {
+            try {
+                if (op instanceof FileAddOperation) {
+                    prepareCommitAddition((IAddOperation) op);
+                    commitAddition((IAddOperation) op);
+                } else {
+                    prepareCommitDeletion((IDeleteOperation) op);
+                    commitDeletion((IDeleteOperation) op);
+                }
+            } catch (IOException e) {
+                throw new CommitterException(
+                        "Cannot read reference from : " + op, e);
+            }
+        }
+
         commitComplete();
 
         deleteEmptyOldDirs(queue.getAddDir());
         deleteEmptyOldDirs(queue.getRemoveDir());
+        
+        // Cleanup committed files from map that might have been deleted
+        Iterator<File> iter = filesCommitting.keySet().iterator();
+        while (iter.hasNext()){
+           File file = iter.next();
+           if (!file.exists()) {
+               iter.remove();
+           }
+        }
     }
 
     /**

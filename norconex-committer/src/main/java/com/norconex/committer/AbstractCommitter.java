@@ -18,6 +18,7 @@
 package com.norconex.committer;
 
 import java.io.InputStream;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -56,8 +57,8 @@ public abstract class AbstractCommitter implements ICommitter {
     /** Default queue size. */
     public static final int DEFAULT_QUEUE_SIZE = 1000;
     
-    private int queueSize = DEFAULT_QUEUE_SIZE;
-    private long docCount = -1;
+    protected int queueSize = DEFAULT_QUEUE_SIZE;
+    private AtomicLong docCount = null;
     
     /**
      * Constructor.
@@ -131,15 +132,15 @@ public abstract class AbstractCommitter implements ICommitter {
             String reference, Properties metadata);
 
     private synchronized void ensureInitialDocCount() {
-        if (docCount == -1) {
-            docCount = getInitialQueueDocCount();
+        if (docCount == null) {
+            docCount = new AtomicLong(getInitialQueueDocCount());
         }
     }
     
     @SuppressWarnings("nls")
     private void commitIfReady() {
-        docCount++;
-        if (queueSize == 0 || docCount % queueSize == 0) {
+        long count = docCount.incrementAndGet();
+        if (queueSize == 0 || count % queueSize == 0) {
             if (LOG.isInfoEnabled()) {
                 LOG.info("Max queue size reached (" + queueSize
                         + "). Committing");
