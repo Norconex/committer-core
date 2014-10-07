@@ -68,8 +68,6 @@ import com.norconex.commons.lang.map.Properties;
 @SuppressWarnings("nls")
 public abstract class AbstractFileQueueCommitter extends AbstractCommitter {
 
-    private static final long serialVersionUID = -5775959203678116077L;
-
     private static final Logger LOG = LogManager.getLogger(
             AbstractFileQueueCommitter.class);
     

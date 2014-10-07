@@ -50,7 +50,6 @@ import com.norconex.commons.lang.map.Properties;
  */
 public abstract class AbstractCommitter implements ICommitter {
 
-    private static final long serialVersionUID = 880638478926236689L;
     private static final Logger LOG = LogManager.getLogger(
             AbstractCommitter.class);
     

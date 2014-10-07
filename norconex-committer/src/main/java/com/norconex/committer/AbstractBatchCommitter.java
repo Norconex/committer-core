@@ -64,8 +64,6 @@ import com.norconex.commons.lang.config.IXMLConfigurable;
 public abstract class AbstractBatchCommitter 
         extends AbstractFileQueueCommitter {
 
-    private static final long serialVersionUID = 9162884038430884000L;
-
     private static final Logger LOG = LogManager.getLogger(
             AbstractBatchCommitter.class);
     

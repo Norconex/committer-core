@@ -29,8 +29,8 @@ public class AbstractFileQueueCommitterTest {
         
         final AtomicInteger counter = new AtomicInteger();
 
-        final AbstractFileQueueCommitter committer = new AbstractFileQueueCommitter() {
-            private static final long serialVersionUID = 1L;
+        final AbstractFileQueueCommitter committer = 
+                new AbstractFileQueueCommitter() {
 
             @Override
             protected void commitAddition(IAddOperation operation)
@@ -53,13 +53,15 @@ public class AbstractFileQueueCommitterTest {
         
         File queue = temp.newFolder();
         committer.setQueueDir(queue.getPath());
-        // Use a bigger number to make sure the files are not committed while they are added.
+        // Use a bigger number to make sure the files are not 
+        // committed while they are added.
         committer.setQueueSize(1000);
 
         // Queue 50 files for additions
         for (int i = 0; i < 50; i++) {
             Properties metadata = new Properties();
-            committer.add(Integer.toString(i), IOUtils.toInputStream("hello world!"), metadata);
+            committer.add(Integer.toString(i), 
+                    IOUtils.toInputStream("hello world!"), metadata);
         }
         // Queue 50 files for deletions
         for (int i = 50; i < 100; i++) {
