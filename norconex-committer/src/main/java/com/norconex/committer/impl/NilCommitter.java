@@ -43,13 +43,14 @@ import com.norconex.commons.lang.map.Properties;
  */
 public class NilCommitter implements ICommitter  {
 
-    private static final long serialVersionUID = -8276220684343961238L;
     private static final Logger LOG = LogManager.getLogger(NilCommitter.class);
+    
+    private static final int LOG_TIME_BATCH_SIZE = 100;
     
     private long addCount = 0;
     private long removeCount = 0;
     private StopWatch watch = new StopWatch();
-
+    
     /**
      * Constructor.
      */
@@ -65,7 +66,7 @@ public class NilCommitter implements ICommitter  {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Queing addition of " + reference);
         }
-        if (addCount % 100 == 0) {
+        if (addCount % LOG_TIME_BATCH_SIZE == 0) {
             LOG.info(addCount + " additions queued in: " + watch.toString());
         }
     }
@@ -76,7 +77,7 @@ public class NilCommitter implements ICommitter  {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Queing deletion of " + reference);
         }
-        if (removeCount % 100 == 0) {
+        if (removeCount % LOG_TIME_BATCH_SIZE == 0) {
             LOG.info(removeCount + " deletions queued in " + watch.toString());
         }
     }

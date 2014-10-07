@@ -94,7 +94,12 @@ public class FileSystemCommitter implements ICommitter, IXMLConfigurable {
             String reference, InputStream content, Properties metadata) {
         File dir = getAddDir();
         if (!dir.exists()) {
-            dir.mkdirs();
+            try {
+                FileUtils.forceMkdir(dir);
+            } catch (IOException e) {
+                throw new CommitterException(
+                        "Cannot create addition directory: " + dir, e);
+            }
         }
         try {
             File targetFile = createFile(dir);
@@ -123,7 +128,12 @@ public class FileSystemCommitter implements ICommitter, IXMLConfigurable {
     public void remove(String reference, Properties metadata) {
         File dir = getRemoveDir();
         if (!dir.exists()) {
-            dir.mkdirs();
+            try {
+                FileUtils.forceMkdir(dir);
+            } catch (IOException e) {
+                throw new CommitterException(
+                        "Cannot create removal directory: " + dir, e);
+            }
         }
         try {
             File targetFile = createFile(dir);
@@ -169,8 +179,7 @@ public class FileSystemCommitter implements ICommitter, IXMLConfigurable {
         }
         
         // Create file
-        File file = new File(dateDir, UUID.randomUUID().toString());
-        return file;
+        return new File(dateDir, UUID.randomUUID().toString());
     }
 
     @Override

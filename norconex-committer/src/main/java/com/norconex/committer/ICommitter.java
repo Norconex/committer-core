@@ -18,7 +18,6 @@
 package com.norconex.committer;
 
 import java.io.InputStream;
-import java.io.Serializable;
 
 import com.norconex.commons.lang.map.Properties;
 
@@ -27,7 +26,7 @@ import com.norconex.commons.lang.map.Properties;
  * @author Pascal Essiembre
  */
 @SuppressWarnings("nls")
-public interface ICommitter extends Serializable {
+public interface ICommitter {
 
     /**
      * Adds a new or modified document to the target destination.  

@@ -112,41 +112,18 @@ public class MultiCommitter implements ICommitter, IXMLConfigurable {
             String reference, InputStream content, Properties metadata) {
         CachedStreamFactory factory = new CachedStreamFactory(
                 (int) FileUtils.ONE_MB, (int) FileUtils.ONE_MB);
-        
         CachedInputStream cachedInputStream = factory.newInputStream(content);
-        
         for (int i = 0; i < committers.size(); i++) {
             ICommitter committer = committers.get(i);
-//            File targetFile = new File(
-//                    content.getAbsolutePath() + "-multicommit-" + i);
-//            try {
-//                FileUtils.copyFile(content, targetFile);
-//            } catch (IOException e) {
-//                throw new CommitterException(
-//                        "Cannot copy document for multi-commit addition.  Ref: "
-//                                + reference, e);
-//            }
             committer.add(reference, cachedInputStream, metadata);
-//            targetFile.delete();
         }
     }
 
     @Override
     public void remove(String reference, Properties metadata) {
-        
         for (int i = 0; i < committers.size(); i++) {
             ICommitter committer = committers.get(i);
-//            File targetFile = new File(
-//                    document.getAbsolutePath() + "-multicommit-" + i);
-//            try {
-//                FileUtils.copyFile(document, targetFile);
-//            } catch (IOException e) {
-//                throw new CommitterException(
-//                        "Cannot copy document for multi-commit addition.  Ref: "
-//                                + reference + " File: " + document, e);
-//            }
             committer.remove(reference, metadata);
-//            targetFile.delete();
         }
     }
 
