@@ -45,15 +45,10 @@ import com.norconex.commons.lang.map.Properties;
 @SuppressWarnings({"nls"})
 public class AbstractMappedCommitterTest {
 
-
-
     @Rule
     public TemporaryFolder tempFolder = new TemporaryFolder();
     private StubCommitter committer;
     private boolean committed;
-
-//    private List<QueuedAddedDocument> listCommitAdd = 
-//            new ArrayList<QueuedAddedDocument>();
 
     private Properties metadata = new Properties();
 
@@ -70,7 +65,6 @@ public class AbstractMappedCommitterTest {
         committer.setQueueDir(queue.toString());
 
         committed = false;
-//        listCommitAdd.clear();
         metadata.clear();
         metadata.addString("myreference", defaultReference);
     }
@@ -153,8 +147,6 @@ public class AbstractMappedCommitterTest {
     }
     
     class StubCommitter extends AbstractMappedCommitter {
-
-        private static final long serialVersionUID = 5395010993071444611L;
 
         private List<ICommitOperation> commitBatch;
                 

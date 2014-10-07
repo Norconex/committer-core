@@ -65,7 +65,6 @@ import com.norconex.commons.lang.map.Properties;
  */
 public class MultiCommitter implements ICommitter, IXMLConfigurable {
 
-    private static final long serialVersionUID = 4409999298134733358L;
     private static final Logger LOG = 
             LogManager.getLogger(FileSystemCommitter.class);
     

@@ -63,8 +63,6 @@ import com.norconex.commons.lang.map.Properties;
 @SuppressWarnings("nls")
 public class FileSystemCommitter implements ICommitter, IXMLConfigurable {
 
-    private static final long serialVersionUID = 567796374790003396L;
-    
     /** Default committer directory */
     public static final String DEFAULT_DIRECTORY = "committer";
     

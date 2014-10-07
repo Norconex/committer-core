@@ -139,8 +139,6 @@ import com.norconex.commons.lang.map.Properties;
 public abstract class AbstractMappedCommitter
         extends AbstractBatchCommitter implements IXMLConfigurable {
 
-    private static final long serialVersionUID = 5437833425204155264L;
-
     private long docCount;
 
     private String targetReferenceField;
