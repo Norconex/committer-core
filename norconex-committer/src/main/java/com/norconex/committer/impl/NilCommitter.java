@@ -19,7 +19,7 @@ package com.norconex.committer.impl;
 
 import java.io.InputStream;
 
-import org.apache.commons.lang.time.StopWatch;
+import org.apache.commons.lang3.time.StopWatch;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
