@@ -67,7 +67,7 @@ import com.norconex.commons.lang.map.Properties;
  * 
  * When both a source and target reference 
  * fields are defined, the source reference field will be deleted unless the 
- * <code>keepReferenceSourceField</code> attribute is set to <code>true</code>. 
+ * <code>keepSourceReferenceField</code> attribute is set to <code>true</code>. 
  * 
  * <h2>Content Mapping:</h2>
  * 
@@ -77,7 +77,7 @@ import com.norconex.commons.lang.map.Properties;
  * 
  * The default source document content is the actual document content 
  * (obtained internally using {@link IAddOperation#getContentStream()}).  
- * Defining a <code>contentSourceField</code>
+ * Defining a <code>sourceContentField</code>
  * will use the matching metadata property instead.
  * 
  * <h4>Target document content</h4>
@@ -89,9 +89,10 @@ import com.norconex.commons.lang.map.Properties;
  * 
  * When both a source and target content fields are defined, the 
  * source content field will be deleted unless the 
- * <code>keepContentSourceField</code> attribute is set to 
+ * <code>keepSourceContentField</code> attribute is set to 
  * <code>true</code>. 
  * 
+ * <a id="xml-config"></a>
  * <h4>XML Configuration</h4>
  * 
  * <p>Subclasses implementing {@link IXMLConfigurable} should allow this inner 
@@ -111,17 +112,17 @@ import com.norconex.commons.lang.map.Properties;
  *         If not specified, behavior is defined 
  *         by the concrete implementation.) 
  *      &lt;/targetReferenceField&gt;
- *      &lt;contentSourceField keep="[false|true]"&gt
+ *      &lt;sourceContentField keep="[false|true]"&gt
  *         (If you wish to use a metadata field to act as the document 
  *         "content", you can specify that field here.  Default 
  *         does not take a metadata field but rather the document content.
  *         Once re-mapped, the metadata source field is deleted,
  *         unless "keep" is set to <code>true</code>.)
- *      &lt;/contentSourceField&gt;
- *      &lt;contentTargetField&gt;
+ *      &lt;/sourceContentField&gt;
+ *      &lt;targetContentField&gt;
  *         (Target repository field name for a document content/body.
  *          Default is defined by concrete implementation.)
- *      &lt;/contentTargetField&gt;
+ *      &lt;/targetContentField&gt;
  *      &lt;commitBatchSize&gt;
  *          (max number of documents to send to target repository at once)
  *      &lt;/commitBatchSize&gt;
@@ -141,13 +142,17 @@ public abstract class AbstractMappedCommitter
 
     private long docCount;
 
-    private String targetReferenceField;
+    // Source fields
     private String sourceReferenceField;
-    private boolean keepReferenceSourceField;
-    private String contentTargetField;
-    private String contentSourceField;
-    private boolean keepContentSourceField;
+    private String sourceContentField;
+    private boolean keepSourceReferenceField;
+    private boolean keepSourceContentField;
 
+    // Target fields
+    private String targetReferenceField;
+    private String targetContentField;
+
+    
     /**
      * Creates a new instance.
      */
@@ -194,59 +199,59 @@ public abstract class AbstractMappedCommitter
      * Gets the target field where to store the document content.
      * @return target field name
      */
-    public String getContentTargetField() {
-        return contentTargetField;
+    public String getTargetContentField() {
+        return targetContentField;
     }
     /**
      * Sets the target field where to store the document content.
-     * @param contentTargetField target field name
+     * @param targetContentField target field name
      */
-    public void setContentTargetField(String contentTargetField) {
-        this.contentTargetField = contentTargetField;
+    public void setTargetContentField(String targetContentField) {
+        this.targetContentField = targetContentField;
     }
     /**
      * Gets the source field name holding the document content.
      * @return source field name
      */
-    public String getContentSourceField() {
-        return contentSourceField;
+    public String getSourceContentField() {
+        return sourceContentField;
     }
     /**
      * Sets the source field name holding the document content.
-     * @param contentSourceField source field name
+     * @param sourceContentField source field name
      */
-    public void setContentSourceField(String contentSourceField) {
-        this.contentSourceField = contentSourceField;
+    public void setSourceContentField(String sourceContentField) {
+        this.sourceContentField = sourceContentField;
     }
     /**
      * Whether to keep the reference source field or not, once mapped.
      * @return <code>true</code> when keeping source reference field
      */
-    public boolean isKeepReferenceSourceField() {
-        return keepReferenceSourceField;
+    public boolean isKeepSourceReferenceField() {
+        return keepSourceReferenceField;
     }
     /**
      * Sets whether to keep the ID source field or not, once mapped.
-     * @param keepReferenceSourceField <code>true</code> when keeping 
+     * @param keepSourceReferenceField <code>true</code> when keeping 
      * source reference field
      */
-    public void setKeepReferenceSourceField(boolean keepReferenceSourceField) {
-        this.keepReferenceSourceField = keepReferenceSourceField;
+    public void setKeepSourceReferenceField(boolean keepSourceReferenceField) {
+        this.keepSourceReferenceField = keepSourceReferenceField;
     }
     /**
      * Whether to keep the content source field or not, once mapped.
      * @return <code>true</code> when keeping content source field
      */
-    public boolean isKeepContentSourceField() {
-        return keepContentSourceField;
+    public boolean isKeepSourceContentField() {
+        return keepSourceContentField;
     }
     /**
      * Sets whether to keep the content source field or not, once mapped.
-     * @param keepContentSourceField <code>true</code> when keeping content 
+     * @param keepSourceContentField <code>true</code> when keeping content 
      * source field
      */
-    public void setKeepContentSourceField(boolean keepContentSourceField) {
-        this.keepContentSourceField = keepContentSourceField;
+    public void setKeepSourceContentField(boolean keepSourceContentField) {
+        this.keepSourceContentField = keepSourceContentField;
     }
 
     @Override
@@ -264,7 +269,7 @@ public abstract class AbstractMappedCommitter
         if (StringUtils.isNotBlank(targetReferenceField)) {
             metadata.setString(targetReferenceField, referenceValue);
         }
-        if (!keepReferenceSourceField 
+        if (!keepSourceReferenceField 
                 && StringUtils.isNotBlank(sourceReferenceField)
                 && StringUtils.isNotBlank(targetReferenceField)
                 && !Objects.equals(
@@ -273,18 +278,18 @@ public abstract class AbstractMappedCommitter
         }
 
         //--- source content -> target content ---
-        if (StringUtils.isNotBlank(contentTargetField)) {
-            if (StringUtils.isNotBlank(contentSourceField)) {
-                List<String >content = metadata.getStrings(contentSourceField);
-                metadata.setString(contentTargetField, 
+        if (StringUtils.isNotBlank(targetContentField)) {
+            if (StringUtils.isNotBlank(sourceContentField)) {
+                List<String >content = metadata.getStrings(sourceContentField);
+                metadata.setString(targetContentField, 
                         content.toArray(ArrayUtils.EMPTY_STRING_ARRAY));
-                if (!keepContentSourceField && !Objects.equals(
-                        contentSourceField, contentTargetField)) {
-                    metadata.remove(contentSourceField);
+                if (!keepSourceContentField && !Objects.equals(
+                        sourceContentField, targetContentField)) {
+                    metadata.remove(sourceContentField);
                 }
             } else {
                 InputStream is = operation.getContentStream();
-                metadata.setString(contentTargetField, IOUtils.toString(is));
+                metadata.setString(targetContentField, IOUtils.toString(is));
                 IOUtils.closeQuietly(is);
             }
         }
@@ -302,7 +307,7 @@ public abstract class AbstractMappedCommitter
             if (sourceReferenceField != null) {
                 writer.writeStartElement("sourceReferenceField");
                 writer.writeAttribute(
-                        "keep", Boolean.toString(keepReferenceSourceField));
+                        "keep", Boolean.toString(keepSourceReferenceField));
                 writer.writeCharacters(sourceReferenceField);
                 writer.writeEndElement();
             }
@@ -311,16 +316,16 @@ public abstract class AbstractMappedCommitter
                 writer.writeCharacters(targetReferenceField);
                 writer.writeEndElement();
             }
-            if (contentSourceField != null) {
-                writer.writeStartElement("contentSourceField");
+            if (sourceContentField != null) {
+                writer.writeStartElement("sourceContentField");
                 writer.writeAttribute("keep",
-                        Boolean.toString(keepContentSourceField));
-                writer.writeCharacters(contentSourceField);
+                        Boolean.toString(keepSourceContentField));
+                writer.writeCharacters(sourceContentField);
                 writer.writeEndElement();
             }
-            if (contentTargetField != null) {
-                writer.writeStartElement("contentTargetField");
-                writer.writeCharacters(contentTargetField);
+            if (targetContentField != null) {
+                writer.writeStartElement("targetContentField");
+                writer.writeCharacters(targetContentField);
                 writer.writeEndElement();
             }
             if (getQueueDir() != null) {
@@ -367,15 +372,15 @@ public abstract class AbstractMappedCommitter
     public void loadFromXML(Reader in) {
         XMLConfiguration xml = ConfigurationUtil.newXMLConfiguration(in);
         setSourceReferenceField(xml.getString("sourceReferenceField", sourceReferenceField));
-        setKeepReferenceSourceField(xml.getBoolean("sourceReferenceField[@keep]", 
-                keepReferenceSourceField));
+        setKeepSourceReferenceField(xml.getBoolean("sourceReferenceField[@keep]", 
+                keepSourceReferenceField));
         setTargetReferenceField(xml.getString("targetReferenceField", targetReferenceField));
-        setContentSourceField(
-                xml.getString("contentSourceField", contentSourceField));
-        setKeepContentSourceField(xml.getBoolean("contentSourceField[@keep]", 
-                keepContentSourceField));
-        setContentTargetField(
-                xml.getString("contentTargetField", contentTargetField));
+        setSourceContentField(
+                xml.getString("sourceContentField", sourceContentField));
+        setKeepSourceContentField(xml.getBoolean("sourceContentField[@keep]", 
+                keepSourceContentField));
+        setTargetContentField(
+                xml.getString("targetContentField", targetContentField));
         setQueueDir(xml.getString("queueDir", DEFAULT_QUEUE_DIR));
         setQueueSize(xml.getInt("queueSize", 
                 AbstractBatchCommitter.DEFAULT_QUEUE_SIZE));
@@ -398,9 +403,9 @@ public abstract class AbstractMappedCommitter
     public int hashCode() {
         return new HashCodeBuilder()
                 .appendSuper(super.hashCode())
-                .append(contentSourceField)
-                .append(keepContentSourceField).append(contentTargetField)
-                .append(sourceReferenceField).append(keepReferenceSourceField)
+                .append(sourceContentField)
+                .append(keepSourceContentField).append(targetContentField)
+                .append(sourceReferenceField).append(keepSourceReferenceField)
                 .append(targetReferenceField).append(getQueueDir())
                 .append(getQueueSize()).append(getCommitBatchSize())
                 .toHashCode();
@@ -420,11 +425,11 @@ public abstract class AbstractMappedCommitter
         AbstractMappedCommitter other = (AbstractMappedCommitter) obj;
         return new EqualsBuilder()
                 .appendSuper(super.equals(obj))
-                .append(contentSourceField, other.contentSourceField)
-                .append(keepContentSourceField, other.keepContentSourceField)
-                .append(contentTargetField, other.contentTargetField)
+                .append(sourceContentField, other.sourceContentField)
+                .append(keepSourceContentField, other.keepSourceContentField)
+                .append(targetContentField, other.targetContentField)
                 .append(sourceReferenceField, other.sourceReferenceField)
-                .append(keepReferenceSourceField, other.keepReferenceSourceField)
+                .append(keepSourceReferenceField, other.keepSourceReferenceField)
                 .append(targetReferenceField, other.targetReferenceField)
                 .append(getCommitBatchSize(), other.getCommitBatchSize())
                 .append(getQueueSize(), other.getQueueSize())
@@ -438,10 +443,10 @@ public abstract class AbstractMappedCommitter
         builder.append("docCount", docCount);
         builder.append("targetReferenceField", targetReferenceField);
         builder.append("sourceReferenceField", sourceReferenceField);
-        builder.append("keepReferenceSourceField", keepReferenceSourceField);
-        builder.append("contentTargetField", contentTargetField);
-        builder.append("contentSourceField", contentSourceField);
-        builder.append("keepContentSourceField", keepContentSourceField);
+        builder.append("keepSourceReferenceField", keepSourceReferenceField);
+        builder.append("targetContentField", targetContentField);
+        builder.append("sourceContentField", sourceContentField);
+        builder.append("keepSourceContentField", keepSourceContentField);
         return builder.toString();
     }
 }

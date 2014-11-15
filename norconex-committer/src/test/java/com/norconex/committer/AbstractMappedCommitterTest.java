@@ -134,7 +134,7 @@ public class AbstractMappedCommitterTest {
     @Test
     public void testKeepSourceId() throws IOException {
 
-        committer.setKeepReferenceSourceField(true);
+        committer.setKeepSourceReferenceField(true);
 
         // Add a doc (it should trigger a commit because batch size is 1)
         committer.setQueueSize(1);
