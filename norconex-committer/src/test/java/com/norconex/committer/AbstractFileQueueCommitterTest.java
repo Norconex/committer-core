@@ -17,6 +17,9 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
+import com.norconex.committer.core.AbstractFileQueueCommitter;
+import com.norconex.committer.core.IAddOperation;
+import com.norconex.committer.core.IDeleteOperation;
 import com.norconex.commons.lang.map.Properties;
 
 public class AbstractFileQueueCommitterTest {

@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Norconex Committer. If not, see <http://www.gnu.org/licenses/>.
  */
-package com.norconex.committer.impl;
+package com.norconex.committer.core.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,7 +35,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
-import com.norconex.committer.ICommitter;
+import com.norconex.committer.core.ICommitter;
 import com.norconex.commons.lang.config.ConfigurationUtil;
 import com.norconex.commons.lang.config.IXMLConfigurable;
 import com.norconex.commons.lang.io.CachedInputStream;
@@ -50,7 +50,7 @@ import com.norconex.commons.lang.map.Properties;
  * XML configuration usage:
  * </p>
  * <pre>
- *  &lt;committer class="com.norconex.committer.impl.MultipleCommitters"&gt;
+ *  &lt;committer class="com.norconex.committer.core.impl.MultipleCommitters"&gt;
  *      &lt;committer class="(committer class)"&gt;
  *          (Commmitter-specific configuration here)
  *      &lt;/committer&gt;

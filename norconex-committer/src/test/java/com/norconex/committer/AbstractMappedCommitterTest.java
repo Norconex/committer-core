@@ -36,6 +36,9 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
+import com.norconex.committer.core.AbstractMappedCommitter;
+import com.norconex.committer.core.IAddOperation;
+import com.norconex.committer.core.ICommitOperation;
 import com.norconex.commons.lang.map.Properties;
 
 /**

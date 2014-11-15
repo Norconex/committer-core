@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Norconex Committer. If not, see <http://www.gnu.org/licenses/>.
  */
-package com.norconex.committer;
+package com.norconex.committer.core;
 
 /**
  * Operation representing a document to be deleted from the

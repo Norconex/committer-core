@@ -23,7 +23,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.norconex.committer.impl.FileSystemCommitter;
+import com.norconex.committer.core.impl.FileSystemCommitter;
 import com.norconex.commons.lang.config.ConfigurationUtil;
 
 

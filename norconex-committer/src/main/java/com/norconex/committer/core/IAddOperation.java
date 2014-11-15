@@ -15,26 +15,38 @@
  * You should have received a copy of the GNU General Public License
  * along with Norconex Committer. If not, see <http://www.gnu.org/licenses/>.
  */
-package com.norconex.committer;
+package com.norconex.committer.core;
 
-import java.io.Serializable;
+import java.io.IOException;
+import java.io.InputStream;
+
+import com.norconex.commons.lang.map.Properties;
 
 /**
- * Implementations represent the different types of commit operations that
- * can take place on a remote repository, and hold all necessary information
- * for a successful commit.
- * <p/>
- * {@link IAddOperation} and {@link IDeleteOperation} are the two types of 
- * operations typically used by most repositories.
- * 
+ * Operation representing a new or updated document to be added to the
+ * target repository.
  * @author Pascal Essiembre
  * @since 1.1.0
  */
-public interface ICommitOperation extends Serializable {
+public interface IAddOperation extends ICommitOperation {
 
     /**
-     * Deletes the operation.  Typically removes it from
-     * a memory or filesystem queue, or others
+     * Gets the document reference.
+     * @return document reference
      */
-    void delete();
+    String getReference();
+    
+    /**
+     * Gets the metadata.
+     * @return metadata
+     */
+    Properties getMetadata();
+
+    /**
+     * Gets the content as a stream
+     * @return content stream
+     * @throws IOException
+     */
+    InputStream getContentStream() throws IOException;
+
 }

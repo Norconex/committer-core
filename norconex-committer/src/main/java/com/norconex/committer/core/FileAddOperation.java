@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Norconex Committer. If not, see <http://www.gnu.org/licenses/>.
  */
-package com.norconex.committer;
+package com.norconex.committer.core;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -32,7 +32,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
-import com.norconex.committer.impl.FileSystemCommitter;
+import com.norconex.committer.core.impl.FileSystemCommitter;
 import com.norconex.commons.lang.file.FileUtil;
 import com.norconex.commons.lang.map.Properties;
 

@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Norconex Committer. If not, see <http://www.gnu.org/licenses/>.
  */
-package com.norconex.committer.impl;
+package com.norconex.committer.core.impl;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -38,8 +38,8 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.time.DateFormatUtils;
 
-import com.norconex.committer.CommitterException;
-import com.norconex.committer.ICommitter;
+import com.norconex.committer.core.CommitterException;
+import com.norconex.committer.core.ICommitter;
 import com.norconex.commons.lang.config.ConfigurationUtil;
 import com.norconex.commons.lang.config.IXMLConfigurable;
 import com.norconex.commons.lang.map.Properties;
@@ -54,7 +54,7 @@ import com.norconex.commons.lang.map.Properties;
  * XML configuration usage:
  * </p>
  * <pre>
- *  &lt;committer class="com.norconex.committer.impl.FileSystemCommitter"&gt;
+ *  &lt;committer class="com.norconex.committer.core.impl.FileSystemCommitter"&gt;
  *      &lt;directory&gt;(path where to save files)&lt;/directory&gt;
  *  &lt;/committer&gt;
  * </pre>
