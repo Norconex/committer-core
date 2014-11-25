@@ -24,6 +24,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>    
     <site.baseurl/>
   </properties>
   <inceptionYear>2009</inceptionYear>
@@ -277,6 +278,17 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+        <groupId>org.sonatype.plugins</groupId>
+        <artifactId>nexus-staging-maven-plugin</artifactId>
+        <version>1.6.3</version>
+        <extensions>true</extensions>
+        <configuration>
+          <serverId>ossrh</serverId>
+          <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+          <autoReleaseAfterClose>false</autoReleaseAfterClose>
+        </configuration>
+      </plugin>    
     </plugins>  
   </build>
 
@@ -324,7 +336,7 @@
           <header><![CDATA[
             <style>div.aboutLanguage .siteLink {font-size: 2em;}</style>
             <span class="siteLink">
-              <a target="_top" href="http://www.norconex.com/product/committer">Norconex Committer</a>
+              <a target="_top" href="http://www.norconex.com/collectors/committer-core">Norconex Committer Core</a>
             </span>
             ]]>
           </header>
@@ -340,7 +352,7 @@
                 var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
               })();
             </script>
-            <a style="font-size: 1.4em;" target="_top" href="https://github.com/norconex/committer/issues">Submit an Issue</a>
+            <a style="font-size: 1.4em;" target="_top" href="https://github.com/Norconex/committer-core/issues">Submit an Issue</a>
             &nbsp;&nbsp;|&nbsp;&nbsp; 
             <a style="font-size: 1.4em;" target="_top" href="http://www.norconex.com">www.norconex.com</a>
             ]]>
@@ -363,7 +375,7 @@
     </plugins>
   </reporting>  
 
-  <url>http://norconex.com/product/committer-core</url>
+  <url>http://norconex.com/collectors/committer-core</url>
   <organization>
   	<name>Norconex Inc.</name>
   	<url>http://www.norconex.com</url>
