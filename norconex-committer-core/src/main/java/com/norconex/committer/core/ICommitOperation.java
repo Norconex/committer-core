@@ -20,7 +20,7 @@ import java.io.Serializable;
  * Implementations represent the different types of commit operations that
  * can take place on a remote repository, and hold all necessary information
  * for a successful commit.
- * <p/>
+ * <br><br>
  * {@link IAddOperation} and {@link IDeleteOperation} are the two types of 
  * operations typically used by most repositories.
  * 

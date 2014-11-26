@@ -48,7 +48,7 @@ import com.norconex.commons.lang.map.Properties;
  * {@link #prepareCommitAddition(IAddOperation)} and 
  * {@link #prepareCommitDeletion(IDeleteOperation)} to manipulate the 
  * data supplied with the operations before committing takes place.
- * <p/>
+ * <br><br>
  * To also control how many documents are sent on each call to 
  * a remote repository, consider extending {@link AbstractBatchCommitter}.
  * 
