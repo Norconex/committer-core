@@ -269,7 +269,7 @@
   <distributionManagement>
     <site>
       <id>norconex-site-deployment</id>
-      <url>${site.baseurl}/committer-core/latest</url>
+      <url>${site.baseurl}/collectors/committer-core/latest</url>
     </site>
     <snapshotRepository>
       <id>ossrh</id>
