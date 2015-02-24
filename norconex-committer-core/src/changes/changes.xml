@@ -7,6 +7,15 @@
   </properties>
   <body>
 
+    <release version="2.0.1-SNAPSHOT" date="????-??-??" description="Maintenance release">
+      <action dev="essiembre" type="update">
+        Added Sonatype repository to pom.xml for snapshot releases.
+      </action>
+      <action dev="essiembre" type="update">
+        Upgraded Norconex Commons Lang to 1.6.0.
+      </action>
+    </release>
+
     <release version="2.0.0" date="2014-11-25" description="Major release">
       <action dev="essiembre" type="update">
         Now licensed under The Apache License, Version 2.0.
