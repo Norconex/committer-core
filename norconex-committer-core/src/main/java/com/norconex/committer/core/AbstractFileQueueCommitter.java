@@ -273,7 +273,7 @@ public abstract class AbstractFileQueueCommitter extends AbstractCommitter {
      * </p>
      *
      * @param operation the document operation to perform
-     * @throws IOException
+     * @throws IOException problem to commit addition
      */
     protected abstract void commitAddition(IAddOperation operation)
             throws IOException;
@@ -290,7 +290,7 @@ public abstract class AbstractFileQueueCommitter extends AbstractCommitter {
      * </p>
      *
      * @param operation the document operation to perform
-     * @throws IOException
+     * @throws IOException problem committing deletion
      */
     protected abstract void commitDeletion(IDeleteOperation operation)
             throws IOException;
@@ -300,7 +300,6 @@ public abstract class AbstractFileQueueCommitter extends AbstractCommitter {
      * 
      * For example, if the subclass decided to batch documents to commit, it may
      * decide to store all remaining documents on that event.
-     * 
      */
     protected abstract void commitComplete();
 
@@ -308,7 +307,7 @@ public abstract class AbstractFileQueueCommitter extends AbstractCommitter {
      * Optionally performs actions on a document to be added before
      * actually committing it.  Default implementation does nothing.
      * @param operation addition to be performed
-     * @throws IOException
+     * @throws IOException problem preparing commit addition
      */
     protected void prepareCommitAddition(IAddOperation operation) 
             throws IOException {
@@ -318,7 +317,7 @@ public abstract class AbstractFileQueueCommitter extends AbstractCommitter {
      * Optionally performs operations on a document to be deleted before
      * actually committing it.  Default implementation does nothing.
      * @param operation deletion to be performed
-     * @throws IOException
+     * @throws IOException problem preparing commit deletion
      */
     protected void prepareCommitDeletion(IDeleteOperation operation)
         throws IOException {

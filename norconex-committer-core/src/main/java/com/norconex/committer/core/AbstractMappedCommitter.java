@@ -1,4 +1,4 @@
-/* Copyright 2010-2014 Norconex Inc.
+/* Copyright 2010-2015 Norconex Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,51 +43,48 @@ import com.norconex.commons.lang.map.Properties;
  * and source content fields to target reference and target content fields.  
  * Batched documents are queued on the file system.</p>
  * 
- * <h2>Reference Mapping:</h2>
+ * <h3>Reference Mapping:</h3>
  * 
  * <h4>Source document reference</h4>
  * 
- * By default the document reference from the source document comes from 
+ * <p>By default the document reference from the source document comes from 
  * document reference value passed to the Committer (obtained internally
  * using {@link IAddOperation#getReference()} 
  * or {@link IDeleteOperation#getReference()}).  
  * If you wish to ignore that original document
  * reference and use a metadata field instead, use the 
- * {@link #setSourceReferenceField(String)} method to do so.
+ * {@link #setSourceReferenceField(String)} method to do so.</p>
  * 
  * <h4>Target document reference</h4>
  * 
- * The default (or constant) target reference
- * field is for subclasses to define.  
+ * <p>The default (or constant) target reference
+ * field is for subclasses to define.</p>
  * 
- * <p />
- * 
- * When both a source and target reference 
+ * <p>When both a source and target reference 
  * fields are defined, the source reference field will be deleted unless the 
  * <code>keepSourceReferenceField</code> attribute is set to <code>true</code>. 
+ * </p>
  * 
- * <h2>Content Mapping:</h2>
+ * <h3>Content Mapping:</h3>
  * 
- * Content typically only occurs when committing additions.
+ * <p>Content typically only occurs when committing additions.</p>
  * 
  * <h4>Source document content</h4>
  * 
- * The default source document content is the actual document content 
+ * <p>The default source document content is the actual document content 
  * (obtained internally using {@link IAddOperation#getContentStream()}).  
  * Defining a <code>sourceContentField</code>
- * will use the matching metadata property instead.
+ * will use the matching metadata property instead.</p>
  * 
  * <h4>Target document content</h4>
  * 
- * The default (or constant) <b>target content</b> field is for subclasses
- * to define.  
+ * <p>The default (or constant) <b>target content</b> field is for subclasses
+ * to define.</p> 
  * 
- * <p />
- * 
- * When both a source and target content fields are defined, the 
+ * <p>When both a source and target content fields are defined, the 
  * source content field will be deleted unless the 
  * <code>keepSourceContentField</code> attribute is set to 
- * <code>true</code>. 
+ * <code>true</code>.</p>
  * 
  * <a id="xml-config"></a>
  * <h4>XML Configuration</h4>
@@ -109,7 +106,7 @@ import com.norconex.commons.lang.map.Properties;
  *         If not specified, behavior is defined 
  *         by the concrete implementation.) 
  *      &lt;/targetReferenceField&gt;
- *      &lt;sourceContentField keep="[false|true]"&gt
+ *      &lt;sourceContentField keep="[false|true]"&gt;
  *         (If you wish to use a metadata field to act as the document 
  *         "content", you can specify that field here.  Default 
  *         does not take a metadata field but rather the document content.
@@ -360,7 +357,7 @@ public abstract class AbstractMappedCommitter
      * Allows subclasses to write their config to xml
      * 
      * @param writer the xml being written
-     * @throws XMLStreamException
+     * @throws XMLStreamException problem saving to XML
      */
     protected abstract void saveToXML(XMLStreamWriter writer)
             throws XMLStreamException;
@@ -392,7 +389,7 @@ public abstract class AbstractMappedCommitter
     /**
      * Allows subclasses to load their config from xml
      * 
-     * @param xml
+     * @param xml XML configuration
      */
     protected abstract void loadFromXml(XMLConfiguration xml);
 
