@@ -21,8 +21,9 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Stack;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -157,23 +158,23 @@ public abstract class AbstractFileQueueCommitter extends AbstractCommitter {
     public void commit() {
 
         // --- Additions ---
-        final Stack<File> filesToAdd = new Stack<>();
+    	final Queue<File> filesToAdd = new LinkedList<File>();
         FileUtil.visitAllFiles(queue.getAddDir(), new IFileVisitor() {
             @Override
             public void visit(File file) {
-                filesToAdd.add(file);
+                 filesToAdd.add(file);
             }
         }, REF_FILTER);
-
+        
         // --- Deletions ---
-        final Stack<File> filesToRemove = new Stack<>();
+        final Queue<File> filesToRemove = new LinkedList<File>();
         FileUtil.visitAllFiles(queue.getRemoveDir(), new IFileVisitor() {
             @Override
             public void visit(File file) {
                 filesToRemove.add(file);
             }
         });
-
+        
         // Nothing left to commit. This happens if multiple threads are 
         // committing at the same time and no more files are available for the 
         // current thread to commit. This should happen rarely in practice.
@@ -187,15 +188,15 @@ public abstract class AbstractFileQueueCommitter extends AbstractCommitter {
             
             File file = null;
             Boolean addOrRemove = null;
-            
+
             // Take files evenly from both stack, and make sure stacks are
             // not empty before calling pop().
             if (!filesToAdd.isEmpty() && 
                 (filesToCommit.size() % 2 == 0 || filesToRemove.isEmpty())) {
-                file = filesToAdd.pop();
+            	file = filesToAdd.remove();
                 addOrRemove = true;
             } else if (!filesToRemove.isEmpty()) {
-                file = filesToRemove.pop();
+            	file = filesToRemove.remove();
                 addOrRemove = false;
             }
             
@@ -261,7 +262,7 @@ public abstract class AbstractFileQueueCommitter extends AbstractCommitter {
         }
     }
 
-    /**
+	/**
      * <p>
      * Allow subclasses to commit a file to be added.
      * </p>
