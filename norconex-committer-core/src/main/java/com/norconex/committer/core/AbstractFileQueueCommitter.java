@@ -158,7 +158,7 @@ public abstract class AbstractFileQueueCommitter extends AbstractCommitter {
     public void commit() {
 
         // --- Additions ---
-    	final Queue<File> filesToAdd = new ConcurrentLinkedQueue<File>();
+        final Queue<File> filesToAdd = new ConcurrentLinkedQueue<File>();
         FileUtil.visitAllFiles(queue.getAddDir(), new IFileVisitor() {
             @Override
             public void visit(File file) {
