@@ -2,3 +2,7 @@
 - Add committer server
 
 - Add chainable committers??
+
+The method commit in AbstractFileQueueCommitter does not respect the order of the add and delete sent by the client. 
+The order of operation is kept only if the command for add/delete for the same file are done with more than 1000 miliseconds apart.
+I suggest to create an auto increment number like 2015/03/15/14/30/23/0001/fileNameHere
