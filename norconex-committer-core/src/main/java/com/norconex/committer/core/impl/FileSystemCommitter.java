@@ -74,17 +74,17 @@ public class FileSystemCommitter implements ICommitter, IXMLConfigurable {
      * @return directory
      */
     public String getDirectory() {
-		return directory;
-	}
+        return directory;
+    }
     /**
      * Sets the directory where files are committed.
      * @param directory the directory
      */
-	public void setDirectory(String directory) {
-		this.directory = directory;
-	}
+    public void setDirectory(String directory) {
+        this.directory = directory;
+    }
 
-	@Override
+    @Override
     public void add(
             String reference, InputStream content, Properties metadata) {
         File dir = getAddDir();
@@ -116,7 +116,7 @@ public class FileSystemCommitter implements ICommitter, IXMLConfigurable {
             
         } catch (IOException e) {
             throw new CommitterException(
-            		"Cannot queue document addition.  Ref: " + reference, e);
+                    "Cannot queue document addition.  Ref: " + reference, e);
         }
     }
     @Override
@@ -137,13 +137,13 @@ public class FileSystemCommitter implements ICommitter, IXMLConfigurable {
                     reference, CharEncoding.UTF_8);
         } catch (IOException e) {
             throw new CommitterException(
-            		"Cannot queue document removal.  Ref: " + reference, e);
+                    "Cannot queue document removal.  Ref: " + reference, e);
         }
     }
 
     @Override
     public void commit() {
-    	//DO NOTHING
+        //DO NOTHING
     }
 
     /**

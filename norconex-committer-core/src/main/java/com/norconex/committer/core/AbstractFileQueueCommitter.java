@@ -1,4 +1,4 @@
-/* Copyright 2010-2014 Norconex Inc.
+/* Copyright 2010-2015 Norconex Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -158,7 +158,7 @@ public abstract class AbstractFileQueueCommitter extends AbstractCommitter {
     public void commit() {
 
         // --- Additions ---
-    	final Queue<File> filesToAdd = new ConcurrentLinkedQueue<File>();
+        final Queue<File> filesToAdd = new ConcurrentLinkedQueue<File>();
         FileUtil.visitAllFiles(queue.getAddDir(), new IFileVisitor() {
             @Override
             public void visit(File file) {
@@ -193,10 +193,10 @@ public abstract class AbstractFileQueueCommitter extends AbstractCommitter {
             // not empty before calling pop().
             if (!filesToAdd.isEmpty() && 
                 (filesToCommit.size() % 2 == 0 || filesToRemove.isEmpty())) {
-            	file = filesToAdd.remove();
+                file = filesToAdd.remove();
                 addOrRemove = true;
             } else if (!filesToRemove.isEmpty()) {
-            	file = filesToRemove.remove();
+                file = filesToRemove.remove();
                 addOrRemove = false;
             }
             
@@ -262,7 +262,7 @@ public abstract class AbstractFileQueueCommitter extends AbstractCommitter {
         }
     }
 
-	/**
+    /**
      * <p>
      * Allow subclasses to commit a file to be added.
      * </p>
