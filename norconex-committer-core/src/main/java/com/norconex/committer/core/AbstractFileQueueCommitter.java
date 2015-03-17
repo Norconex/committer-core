@@ -21,10 +21,10 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -158,7 +158,7 @@ public abstract class AbstractFileQueueCommitter extends AbstractCommitter {
     public void commit() {
 
         // --- Additions ---
-    	final Queue<File> filesToAdd = new LinkedList<File>();
+    	final Queue<File> filesToAdd = new ConcurrentLinkedQueue<File>();
         FileUtil.visitAllFiles(queue.getAddDir(), new IFileVisitor() {
             @Override
             public void visit(File file) {
@@ -167,7 +167,7 @@ public abstract class AbstractFileQueueCommitter extends AbstractCommitter {
         }, REF_FILTER);
         
         // --- Deletions ---
-        final Queue<File> filesToRemove = new LinkedList<File>();
+        final Queue<File> filesToRemove = new ConcurrentLinkedQueue<File>();
         FileUtil.visitAllFiles(queue.getRemoveDir(), new IFileVisitor() {
             @Override
             public void visit(File file) {
