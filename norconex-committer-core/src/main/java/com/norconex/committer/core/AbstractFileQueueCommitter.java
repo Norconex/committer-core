@@ -125,21 +125,14 @@ public abstract class AbstractFileQueueCommitter extends AbstractCommitter {
     protected long getInitialQueueDocCount() {
         final MutableLong fileCount = new MutableLong();
 
-        // --- Additions ---
-        FileUtil.visitAllFiles(queue.getAddDir(), new IFileVisitor() {
+        // --- Additions and Deletions ---
+        FileUtil.visitAllFiles(
+                new File(queue.getDirectory()), new IFileVisitor() {
             @Override
             public void visit(File file) {
                 fileCount.increment();
             }
         }, REF_FILTER);
-
-        // --- Deletions ---
-        FileUtil.visitAllFiles(queue.getRemoveDir(), new IFileVisitor() {
-            @Override
-            public void visit(File file) {
-                fileCount.increment();
-            }
-        });
         return fileCount.longValue();
     }
     
@@ -157,28 +150,22 @@ public abstract class AbstractFileQueueCommitter extends AbstractCommitter {
     @Override
     public void commit() {
 
-        // --- Additions ---
-        final Queue<File> filesToAdd = new ConcurrentLinkedQueue<File>();
-        FileUtil.visitAllFiles(queue.getAddDir(), new IFileVisitor() {
+        // Get all files to be committed, relying on natural ordering which 
+        // will be in file creation order.
+        final Queue<File> filesPending = new ConcurrentLinkedQueue<File>();
+        FileUtil.visitAllFiles(
+                new File(queue.getDirectory()), new IFileVisitor() {
             @Override
             public void visit(File file) {
-                 filesToAdd.add(file);
+                 filesPending.add(file);
             }
         }, REF_FILTER);
-        
-        // --- Deletions ---
-        final Queue<File> filesToRemove = new ConcurrentLinkedQueue<File>();
-        FileUtil.visitAllFiles(queue.getRemoveDir(), new IFileVisitor() {
-            @Override
-            public void visit(File file) {
-                filesToRemove.add(file);
-            }
-        });
+
         
         // Nothing left to commit. This happens if multiple threads are 
         // committing at the same time and no more files are available for the 
         // current thread to commit. This should happen rarely in practice.
-        if (filesToAdd.isEmpty() && filesToRemove.isEmpty()) {
+        if (filesPending.isEmpty()) {
             return;
         }
         
@@ -186,19 +173,7 @@ public abstract class AbstractFileQueueCommitter extends AbstractCommitter {
         List<ICommitOperation> filesToCommit = new ArrayList<>();
         while (filesToCommit.size() < queueSize) {
             
-            File file = null;
-            Boolean addOrRemove = null;
-
-            // Take files evenly from both stack, and make sure stacks are
-            // not empty before calling pop().
-            if (!filesToAdd.isEmpty() && 
-                (filesToCommit.size() % 2 == 0 || filesToRemove.isEmpty())) {
-                file = filesToAdd.remove();
-                addOrRemove = true;
-            } else if (!filesToRemove.isEmpty()) {
-                file = filesToRemove.remove();
-                addOrRemove = false;
-            }
+            File file = filesPending.poll();
             
             // If no more files available in both list, quit loop. This happens 
             // if multiple threads tries to commit at once and there is less 
@@ -224,14 +199,17 @@ public abstract class AbstractFileQueueCommitter extends AbstractCommitter {
             }
             
             // Current thread will be committing this file
-            if (addOrRemove) {
+            if (file.getAbsolutePath().contains("-add")) {
                 filesToCommit.add(new FileAddOperation(file));
             } else {
                 filesToCommit.add(new FileDeleteOperation(file));
             }
         }
         
-        LOG.info(String.format("Committing %s files", filesToCommit.size()));
+        if (LOG.isInfoEnabled()) {
+            LOG.info(String.format("Committing %s files", 
+                    filesToCommit.size()));
+        }
         for (ICommitOperation op : filesToCommit) {
             try {
                 if (op instanceof FileAddOperation) {
@@ -249,8 +227,7 @@ public abstract class AbstractFileQueueCommitter extends AbstractCommitter {
 
         commitComplete();
 
-        deleteEmptyOldDirs(queue.getAddDir());
-        deleteEmptyOldDirs(queue.getRemoveDir());
+        deleteEmptyOldDirs(new File(queue.getDirectory()));
         
         // Cleanup committed files from map that might have been deleted
         Iterator<File> iter = filesCommitting.keySet().iterator();

@@ -10,8 +10,7 @@
     <release version="2.0.1-SNAPSHOT" date="????-??-??" description="Maintenance release">
       <action dev="martinfou" type="update">
         Queued items in classes deriving AbstractFileQueueCommitter are now 
-        sent to Solr in the same order they were sent to the committer
-        (was previously sent in reverse order).
+        sent to Solr in the same order they were sent to the committer.
       </action>
       <action dev="essiembre" type="update">
         Added Sonatype repository to pom.xml for snapshot releases.
