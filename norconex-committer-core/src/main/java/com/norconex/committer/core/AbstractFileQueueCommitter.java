@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -230,12 +230,12 @@ public abstract class AbstractFileQueueCommitter extends AbstractCommitter {
         deleteEmptyOldDirs(new File(queue.getDirectory()));
         
         // Cleanup committed files from map that might have been deleted
-        Iterator<File> iter = filesCommitting.keySet().iterator();
-        while (iter.hasNext()){
-           File file = iter.next();
-           if (!file.exists()) {
-               iter.remove();
-           }
+        Enumeration<File> en = filesCommitting.keys();
+        while (en.hasMoreElements()) {
+            File file = (File) en.nextElement();
+            if (!file.exists()) {
+                filesCommitting.remove(file);
+            }
         }
     }
 

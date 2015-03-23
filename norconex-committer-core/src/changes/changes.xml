@@ -21,6 +21,12 @@
       <action dev="essiembre" type="update">
         Javadoc updates.
       </action>
+      <action dev="essiembre" type="fix">
+        Changed a reference to ConcurrentHashMap .ketSet() to keys() in 
+        AbstractFileQueueCommitter because the iterator returned by the first 
+        one has changed between Java 7 and Java 8, which can cause a 
+        java.lang.NoSuchMethodError runtime error.
+      </action>
     </release>
 
     <release version="2.0.0" date="2014-11-25" description="Major release">
