@@ -199,10 +199,14 @@ public abstract class AbstractFileQueueCommitter extends AbstractCommitter {
             }
             
             // Current thread will be committing this file
-            if (file.getAbsolutePath().contains("-add")) {
+            if (file.getAbsolutePath().contains(
+                    FileSystemCommitter.FILE_SUFFIX_ADD)) {
                 filesToCommit.add(new FileAddOperation(file));
-            } else {
+            } else if (file.getAbsolutePath().contains(
+                    FileSystemCommitter.FILE_SUFFIX_REMOVE)) {
                 filesToCommit.add(new FileDeleteOperation(file));
+            } else {
+                LOG.error("Unsupported file to commit: " + file);
             }
         }
         

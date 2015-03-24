@@ -67,6 +67,9 @@ public class FileSystemCommitter implements ICommitter, IXMLConfigurable {
     public static final String EXTENSION_METADATA = ".meta";
     public static final String EXTENSION_REFERENCE = ".ref";
     
+    public static final String FILE_SUFFIX_ADD = "-add";
+    public static final String FILE_SUFFIX_REMOVE = "-del";
+    
     private String directory = DEFAULT_DIRECTORY;
     
     /**
@@ -88,7 +91,7 @@ public class FileSystemCommitter implements ICommitter, IXMLConfigurable {
     public void add(
             String reference, InputStream content, Properties metadata) {
         try {
-            File targetFile = createFile("add");
+            File targetFile = createFile(FILE_SUFFIX_ADD);
 
             // Content
             FileUtils.copyInputStreamToFile(content, 
@@ -113,7 +116,7 @@ public class FileSystemCommitter implements ICommitter, IXMLConfigurable {
     @Override
     public void remove(String reference, Properties metadata) {
         try {
-            File targetFile = createFile("del");
+            File targetFile = createFile(FILE_SUFFIX_REMOVE);
             FileUtils.writeStringToFile(new File(
                     targetFile.getAbsolutePath() + EXTENSION_REFERENCE),
                     reference, CharEncoding.UTF_8);
@@ -147,7 +150,7 @@ public class FileSystemCommitter implements ICommitter, IXMLConfigurable {
         return new File(directory); 
     }
     
-    private synchronized File createFile(String type) throws IOException {
+    private synchronized File createFile(String suffix) throws IOException {
         // Create date directory
         File dateDir = new File(directory, DateFormatUtils.format(
                 System.currentTimeMillis(), "yyyy/MM-dd/hh/mm/ss"));
@@ -160,7 +163,7 @@ public class FileSystemCommitter implements ICommitter, IXMLConfigurable {
             }
         }
         // Create file
-        return new File(dateDir, TimeIdGenerator.next() + "-" + type);
+        return new File(dateDir, TimeIdGenerator.next() + suffix);
     }
 
     @Override
