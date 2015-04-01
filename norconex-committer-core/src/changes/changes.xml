@@ -16,7 +16,7 @@
         Added Sonatype repository to pom.xml for snapshot releases.
       </action>
       <action dev="essiembre" type="update">
-        Upgraded Norconex Commons Lang to 1.6.0.
+        Library updates: Norconex Commons Lang to 1.6.0, JUnit 4.12.
       </action>
       <action dev="essiembre" type="update">
         Javadoc updates.

@@ -54,12 +54,12 @@
     <dependency>
         <groupId>com.norconex.commons</groupId>
         <artifactId>norconex-commons-lang</artifactId>
-        <version>1.6.0-SNAPSHOT</version>
+        <version>1.6.0</version>
     </dependency>
     <dependency>
     	<groupId>junit</groupId>
     	<artifactId>junit</artifactId>
-    	<version>4.11</version>
+    	<version>4.12</version>
     	<scope>test</scope>
     </dependency>
   </dependencies>
@@ -70,7 +70,7 @@
         <resource>
             <directory>${project.build.testSourceDirectory}</directory>
             <includes>
-                <include>**/*.html</include>
+                <include>**</include>
             </includes>
         </resource>
         <resource>
@@ -83,6 +83,13 @@
                 <exclude>**/*.java</exclude>
             </excludes>
         </resource>
+        <resource>
+            <filtering>false</filtering>
+            <directory>src/main/resources</directory>
+            <includes>
+                <include>**</include>
+            </includes>
+        </resource>
     </resources>  
     <extensions>
       <extension>
@@ -90,11 +97,6 @@
         <artifactId>wagon-ssh</artifactId>
         <version>1.0</version>
       </extension>
-      <extension>  
-        <groupId>org.springframework.build.aws</groupId>  
-        <artifactId>org.springframework.build.aws.maven</artifactId>  
-        <version>3.0.0.RELEASE</version>  
-      </extension>  
     </extensions>
     <pluginManagement>
         <plugins>
@@ -134,10 +136,11 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>2.3.2</version>
+        <version>3.2</version>
         <configuration>
           <source>1.7</source>
           <target>1.7</target>
+          <encoding>UTF-8</encoding>
         </configuration>
       </plugin> 
       <plugin>
@@ -181,7 +184,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <version>2.9.1</version>
+        <version>2.10.2</version>
         <configuration>
           <overview>${basedir}/src/main/javadoc/overview.html</overview>
           <show>protected</show>
@@ -207,7 +210,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
-        <version>2.2.1</version>
+        <version>2.4</version>
         <executions>
           <execution>
             <id>attach-sources</id>
@@ -220,7 +223,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
-        <version>2.2</version>
+        <version>2.6</version>
         <executions>
           <execution>
             <goals>
@@ -232,7 +235,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-gpg-plugin</artifactId>
-        <version>1.5</version>
+        <version>1.6</version>
         <executions>
           <execution>
             <id>sign-artifacts</id>
@@ -300,7 +303,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-project-info-reports-plugin</artifactId>
-        <version>2.6</version>
+        <version>2.7</version>
         <!-- 
         <configuration>
           <dependencyLocationsEnabled>false</dependencyLocationsEnabled>
