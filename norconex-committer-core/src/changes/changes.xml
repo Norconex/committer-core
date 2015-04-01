@@ -7,13 +7,16 @@
   </properties>
   <body>
 
-    <release version="2.0.1-SNAPSHOT" date="????-??-??" description="Maintenance release">
+    <release version="2.0.1" date="2015-03-31" description="Maintenance release">
       <action dev="martinfou" type="update">
         Queued items in classes deriving AbstractFileQueueCommitter are now 
         sent to Solr in the same order they were sent to the committer.
       </action>
       <action dev="essiembre" type="update">
         Added Sonatype repository to pom.xml for snapshot releases.
+      </action>
+      <action dev="essiembre" type="update">
+        Updated several maven plugins and added SonarQube maven plugin.
       </action>
       <action dev="essiembre" type="update">
         Library updates: Norconex Commons Lang to 1.6.0, JUnit 4.12.
