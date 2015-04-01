@@ -1,4 +1,4 @@
-/* Copyright 2010-2014 Norconex Inc.
+/* Copyright 2010-2015 Norconex Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
+import java.util.Enumeration;
 import java.util.List;
-import java.util.Stack;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -48,7 +49,7 @@ import com.norconex.commons.lang.map.Properties;
  * {@link #prepareCommitAddition(IAddOperation)} and 
  * {@link #prepareCommitDeletion(IDeleteOperation)} to manipulate the 
  * data supplied with the operations before committing takes place.
- * <p/>
+ * <br><br>
  * To also control how many documents are sent on each call to 
  * a remote repository, consider extending {@link AbstractBatchCommitter}.
  * 
@@ -124,21 +125,14 @@ public abstract class AbstractFileQueueCommitter extends AbstractCommitter {
     protected long getInitialQueueDocCount() {
         final MutableLong fileCount = new MutableLong();
 
-        // --- Additions ---
-        FileUtil.visitAllFiles(queue.getAddDir(), new IFileVisitor() {
+        // --- Additions and Deletions ---
+        FileUtil.visitAllFiles(
+                new File(queue.getDirectory()), new IFileVisitor() {
             @Override
             public void visit(File file) {
                 fileCount.increment();
             }
         }, REF_FILTER);
-
-        // --- Deletions ---
-        FileUtil.visitAllFiles(queue.getRemoveDir(), new IFileVisitor() {
-            @Override
-            public void visit(File file) {
-                fileCount.increment();
-            }
-        });
         return fileCount.longValue();
     }
     
@@ -156,28 +150,22 @@ public abstract class AbstractFileQueueCommitter extends AbstractCommitter {
     @Override
     public void commit() {
 
-        // --- Additions ---
-        final Stack<File> filesToAdd = new Stack<>();
-        FileUtil.visitAllFiles(queue.getAddDir(), new IFileVisitor() {
+        // Get all files to be committed, relying on natural ordering which 
+        // will be in file creation order.
+        final Queue<File> filesPending = new ConcurrentLinkedQueue<File>();
+        FileUtil.visitAllFiles(
+                new File(queue.getDirectory()), new IFileVisitor() {
             @Override
             public void visit(File file) {
-                filesToAdd.add(file);
+                 filesPending.add(file);
             }
         }, REF_FILTER);
 
-        // --- Deletions ---
-        final Stack<File> filesToRemove = new Stack<>();
-        FileUtil.visitAllFiles(queue.getRemoveDir(), new IFileVisitor() {
-            @Override
-            public void visit(File file) {
-                filesToRemove.add(file);
-            }
-        });
-
+        
         // Nothing left to commit. This happens if multiple threads are 
         // committing at the same time and no more files are available for the 
         // current thread to commit. This should happen rarely in practice.
-        if (filesToAdd.isEmpty() && filesToRemove.isEmpty()) {
+        if (filesPending.isEmpty()) {
             return;
         }
         
@@ -185,19 +173,7 @@ public abstract class AbstractFileQueueCommitter extends AbstractCommitter {
         List<ICommitOperation> filesToCommit = new ArrayList<>();
         while (filesToCommit.size() < queueSize) {
             
-            File file = null;
-            Boolean addOrRemove = null;
-            
-            // Take files evenly from both stack, and make sure stacks are
-            // not empty before calling pop().
-            if (!filesToAdd.isEmpty() && 
-                (filesToCommit.size() % 2 == 0 || filesToRemove.isEmpty())) {
-                file = filesToAdd.pop();
-                addOrRemove = true;
-            } else if (!filesToRemove.isEmpty()) {
-                file = filesToRemove.pop();
-                addOrRemove = false;
-            }
+            File file = filesPending.poll();
             
             // If no more files available in both list, quit loop. This happens 
             // if multiple threads tries to commit at once and there is less 
@@ -223,14 +199,21 @@ public abstract class AbstractFileQueueCommitter extends AbstractCommitter {
             }
             
             // Current thread will be committing this file
-            if (addOrRemove) {
+            if (file.getAbsolutePath().contains(
+                    FileSystemCommitter.FILE_SUFFIX_ADD)) {
                 filesToCommit.add(new FileAddOperation(file));
-            } else {
+            } else if (file.getAbsolutePath().contains(
+                    FileSystemCommitter.FILE_SUFFIX_REMOVE)) {
                 filesToCommit.add(new FileDeleteOperation(file));
+            } else {
+                LOG.error("Unsupported file to commit: " + file);
             }
         }
         
-        LOG.info(String.format("Committing %s files", filesToCommit.size()));
+        if (LOG.isInfoEnabled()) {
+            LOG.info(String.format("Committing %s files", 
+                    filesToCommit.size()));
+        }
         for (ICommitOperation op : filesToCommit) {
             try {
                 if (op instanceof FileAddOperation) {
@@ -248,16 +231,15 @@ public abstract class AbstractFileQueueCommitter extends AbstractCommitter {
 
         commitComplete();
 
-        deleteEmptyOldDirs(queue.getAddDir());
-        deleteEmptyOldDirs(queue.getRemoveDir());
+        deleteEmptyOldDirs(new File(queue.getDirectory()));
         
         // Cleanup committed files from map that might have been deleted
-        Iterator<File> iter = filesCommitting.keySet().iterator();
-        while (iter.hasNext()){
-           File file = iter.next();
-           if (!file.exists()) {
-               iter.remove();
-           }
+        Enumeration<File> en = filesCommitting.keys();
+        while (en.hasMoreElements()) {
+            File file = (File) en.nextElement();
+            if (!file.exists()) {
+                filesCommitting.remove(file);
+            }
         }
     }
 
@@ -273,7 +255,7 @@ public abstract class AbstractFileQueueCommitter extends AbstractCommitter {
      * </p>
      *
      * @param operation the document operation to perform
-     * @throws IOException
+     * @throws IOException problem to commit addition
      */
     protected abstract void commitAddition(IAddOperation operation)
             throws IOException;
@@ -290,7 +272,7 @@ public abstract class AbstractFileQueueCommitter extends AbstractCommitter {
      * </p>
      *
      * @param operation the document operation to perform
-     * @throws IOException
+     * @throws IOException problem committing deletion
      */
     protected abstract void commitDeletion(IDeleteOperation operation)
             throws IOException;
@@ -300,7 +282,6 @@ public abstract class AbstractFileQueueCommitter extends AbstractCommitter {
      * 
      * For example, if the subclass decided to batch documents to commit, it may
      * decide to store all remaining documents on that event.
-     * 
      */
     protected abstract void commitComplete();
 
@@ -308,7 +289,7 @@ public abstract class AbstractFileQueueCommitter extends AbstractCommitter {
      * Optionally performs actions on a document to be added before
      * actually committing it.  Default implementation does nothing.
      * @param operation addition to be performed
-     * @throws IOException
+     * @throws IOException problem preparing commit addition
      */
     protected void prepareCommitAddition(IAddOperation operation) 
             throws IOException {
@@ -318,7 +299,7 @@ public abstract class AbstractFileQueueCommitter extends AbstractCommitter {
      * Optionally performs operations on a document to be deleted before
      * actually committing it.  Default implementation does nothing.
      * @param operation deletion to be performed
-     * @throws IOException
+     * @throws IOException problem preparing commit deletion
      */
     protected void prepareCommitDeletion(IDeleteOperation operation)
         throws IOException {

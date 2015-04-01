@@ -42,7 +42,7 @@ public interface IAddOperation extends ICommitOperation {
     /**
      * Gets the content as a stream
      * @return content stream
-     * @throws IOException
+     * @throws IOException problem obtaining content stream
      */
     InputStream getContentStream() throws IOException;
 

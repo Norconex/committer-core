@@ -27,15 +27,17 @@ import com.norconex.commons.lang.config.IXMLConfigurable;
 import com.norconex.commons.lang.map.Properties;
 
 /**
+ * <p>
  * Basic implementation invoking the {@link #commit()} method every time a given
  * queue size threshold has been reached.  Both additions and deletions count
  * towards the same queue size.
  * It is left to implementors to decide how to actually queue the 
  * documents and how to perform commits.
- * <p />
+ * </p>
+ * <p>
  * Consider extending {@link AbstractFileQueueCommitter} if you do not wish
  * to implement your own queue.
- * 
+ * </p>
  * <p>Subclasses implementing {@link IXMLConfigurable} should allow this inner 
  * configuration:</p>
  * <pre>
@@ -121,7 +123,6 @@ public abstract class AbstractCommitter implements ICommitter {
     /**
      * Queues a document to be deleted.
      * @param reference document reference
-     * @param content document content
      * @param metadata document metadata
      */
     protected abstract void queueRemoval(

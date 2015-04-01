@@ -36,10 +36,10 @@ import com.norconex.commons.lang.config.IXMLConfigurable;
  * to be sent in one requests to the target repository.  To achieve this,
  * operations are cached in memory until the commit batch size is reached, then
  * the operations cached so far are sent.
- * <p/>
+ * <br><br>
  * After being committed, the documents are automatically removed from the 
  * queue.
- * <p/>
+ * <br><br>
  * If you need to map original document fields with target repository fields,
  * consider using {@link AbstractMappedCommitter}.
  * 

@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.io.Writer;
-import java.util.UUID;
 
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -37,6 +36,7 @@ import org.apache.commons.lang3.time.DateFormatUtils;
 
 import com.norconex.committer.core.CommitterException;
 import com.norconex.committer.core.ICommitter;
+import com.norconex.commons.lang.TimeIdGenerator;
 import com.norconex.commons.lang.config.ConfigurationUtil;
 import com.norconex.commons.lang.config.IXMLConfigurable;
 import com.norconex.commons.lang.map.Properties;
@@ -67,6 +67,9 @@ public class FileSystemCommitter implements ICommitter, IXMLConfigurable {
     public static final String EXTENSION_METADATA = ".meta";
     public static final String EXTENSION_REFERENCE = ".ref";
     
+    public static final String FILE_SUFFIX_ADD = "-add";
+    public static final String FILE_SUFFIX_REMOVE = "-del";
+    
     private String directory = DEFAULT_DIRECTORY;
     
     /**
@@ -74,30 +77,21 @@ public class FileSystemCommitter implements ICommitter, IXMLConfigurable {
      * @return directory
      */
     public String getDirectory() {
-		return directory;
-	}
+        return directory;
+    }
     /**
      * Sets the directory where files are committed.
      * @param directory the directory
      */
-	public void setDirectory(String directory) {
-		this.directory = directory;
-	}
-
-	@Override
+    public void setDirectory(String directory) {
+        this.directory = directory;
+    }
+    
+    @Override
     public void add(
             String reference, InputStream content, Properties metadata) {
-        File dir = getAddDir();
-        if (!dir.exists()) {
-            try {
-                FileUtils.forceMkdir(dir);
-            } catch (IOException e) {
-                throw new CommitterException(
-                        "Cannot create addition directory: " + dir, e);
-            }
-        }
         try {
-            File targetFile = createFile(dir);
+            File targetFile = createFile(FILE_SUFFIX_ADD);
 
             // Content
             FileUtils.copyInputStreamToFile(content, 
@@ -116,65 +110,60 @@ public class FileSystemCommitter implements ICommitter, IXMLConfigurable {
             
         } catch (IOException e) {
             throw new CommitterException(
-            		"Cannot queue document addition.  Ref: " + reference, e);
+                    "Cannot queue document addition.  Ref: " + reference, e);
         }
     }
     @Override
     public void remove(String reference, Properties metadata) {
-        File dir = getRemoveDir();
-        if (!dir.exists()) {
-            try {
-                FileUtils.forceMkdir(dir);
-            } catch (IOException e) {
-                throw new CommitterException(
-                        "Cannot create removal directory: " + dir, e);
-            }
-        }
         try {
-            File targetFile = createFile(dir);
+            File targetFile = createFile(FILE_SUFFIX_REMOVE);
             FileUtils.writeStringToFile(new File(
                     targetFile.getAbsolutePath() + EXTENSION_REFERENCE),
                     reference, CharEncoding.UTF_8);
         } catch (IOException e) {
             throw new CommitterException(
-            		"Cannot queue document removal.  Ref: " + reference, e);
+                    "Cannot queue document removal.  Ref: " + reference, e);
         }
     }
 
     @Override
     public void commit() {
-    	//DO NOTHING
+        //DO NOTHING
     }
 
     /**
      * Gets the directory where documents to be added are stored.
      * @return directory
+     * @deprecated since 2.0.1
      */
+    @Deprecated
     public File getAddDir() {
-        return new File(directory, "add");
+        return new File(directory);
     }
     /**
      * Gets the directory where documents to be removed are stored.
      * @return directory
+     * @deprecated since 2.0.1
      */
+    @Deprecated
     public File getRemoveDir() {
-        return new File(directory, "remove");
+        return new File(directory); 
     }
     
-    private synchronized File createFile(File dir) throws IOException {
-
+    private synchronized File createFile(String suffix) throws IOException {
         // Create date directory
-        File dateDir = new File(dir, DateFormatUtils.format(
+        File dateDir = new File(directory, DateFormatUtils.format(
                 System.currentTimeMillis(), "yyyy/MM-dd/hh/mm/ss"));
         if (!dateDir.exists()) {
-            if (!dateDir.mkdirs()) {
-                throw new IOException(
-                        "Could not create commit directory: " + dateDir);
+            try {
+                FileUtils.forceMkdir(dateDir);
+            } catch (IOException e) {
+                throw new CommitterException(
+                        "Cannot create commit directory: " + dateDir, e); 
             }
         }
-        
         // Create file
-        return new File(dateDir, UUID.randomUUID().toString());
+        return new File(dateDir, TimeIdGenerator.next() + suffix);
     }
 
     @Override
