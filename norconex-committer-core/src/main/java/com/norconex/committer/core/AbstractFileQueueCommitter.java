@@ -29,6 +29,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.log4j.LogManager;
@@ -333,7 +334,7 @@ public abstract class AbstractFileQueueCommitter extends AbstractCommitter {
         }
         AbstractFileQueueCommitter other = (AbstractFileQueueCommitter) obj;
         EqualsBuilder equalsBuilder = new EqualsBuilder();
-        equalsBuilder.appendSuper(true);
+        equalsBuilder.appendSuper(super.equals(other));
         equalsBuilder.append(queue, other.queue);
         return equalsBuilder.isEquals();
     }
@@ -348,7 +349,8 @@ public abstract class AbstractFileQueueCommitter extends AbstractCommitter {
     
     @Override
     public String toString() {
-        ToStringBuilder builder = new ToStringBuilder(this);
+        ToStringBuilder builder = 
+                new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
         builder.appendSuper(super.toString());
         builder.append("queue", queue);
         return builder.toString();

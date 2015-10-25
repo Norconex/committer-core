@@ -33,6 +33,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 import com.norconex.commons.lang.config.ConfigurationUtil;
 import com.norconex.commons.lang.config.IXMLConfigurable;
@@ -398,10 +399,11 @@ public abstract class AbstractMappedCommitter
         return new HashCodeBuilder()
                 .appendSuper(super.hashCode())
                 .append(sourceContentField)
-                .append(keepSourceContentField).append(targetContentField)
-                .append(sourceReferenceField).append(keepSourceReferenceField)
-                .append(targetReferenceField).append(getQueueDir())
-                .append(getQueueSize()).append(getCommitBatchSize())
+                .append(keepSourceContentField)
+                .append(targetContentField)
+                .append(sourceReferenceField)
+                .append(keepSourceReferenceField)
+                .append(targetReferenceField)
                 .toHashCode();
     }
 
@@ -425,14 +427,13 @@ public abstract class AbstractMappedCommitter
                 .append(sourceReferenceField, other.sourceReferenceField)
                 .append(keepSourceReferenceField, other.keepSourceReferenceField)
                 .append(targetReferenceField, other.targetReferenceField)
-                .append(getCommitBatchSize(), other.getCommitBatchSize())
-                .append(getQueueSize(), other.getQueueSize())
-                .append(getQueueDir(), other.getQueueDir()).isEquals();
+                .isEquals();
     }
 
     @Override
     public String toString() {
-        ToStringBuilder builder = new ToStringBuilder(this);
+        ToStringBuilder builder = 
+                new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
         builder.appendSuper(super.toString());
         builder.append("docCount", docCount);
         builder.append("targetReferenceField", targetReferenceField);

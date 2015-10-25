@@ -16,6 +16,9 @@ package com.norconex.committer.core.impl;
 
 import java.io.InputStream;
 
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -86,4 +89,22 @@ public class NilCommitter implements ICommitter  {
         LOG.info("Total elapsed time: " + watch.toString());
     }
 
+    @Override
+    public boolean equals(final Object other) {
+        if (!(other instanceof MultiCommitter)) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder().toHashCode();
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+                .toString();
+    }  
 }

@@ -1,4 +1,4 @@
-/* Copyright 2010-2014 Norconex Inc.
+/* Copyright 2010-2015 Norconex Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import org.apache.commons.collections4.set.ListOrderedSet;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
@@ -218,6 +219,7 @@ public abstract class AbstractBatchCommitter
     @Override
     public int hashCode() {
         HashCodeBuilder hashCodeBuilder = new HashCodeBuilder();
+        hashCodeBuilder.appendSuper(super.hashCode());
         hashCodeBuilder.append(commitBatchSize);
         hashCodeBuilder.append(maxRetries);
         hashCodeBuilder.append(maxRetryWait);
@@ -238,6 +240,7 @@ public abstract class AbstractBatchCommitter
         }
         AbstractBatchCommitter other = (AbstractBatchCommitter) obj;
         EqualsBuilder equalsBuilder = new EqualsBuilder();
+        equalsBuilder.appendSuper(super.equals(other));
         equalsBuilder.append(commitBatchSize, other.commitBatchSize);
         equalsBuilder.append(maxRetries, other.maxRetries);
         equalsBuilder.append(maxRetryWait, other.maxRetryWait);
@@ -247,7 +250,8 @@ public abstract class AbstractBatchCommitter
     
     @Override
     public String toString() {
-        ToStringBuilder builder = new ToStringBuilder(this);
+        ToStringBuilder builder = 
+                new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
         builder.appendSuper(super.toString());
         builder.append("commitBatchSize", commitBatchSize);
         builder.append("maxRetries", maxRetries);
