@@ -1,4 +1,4 @@
-/* Copyright 2010-2015 Norconex Inc.
+/* Copyright 2010-2016 Norconex Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ import com.norconex.commons.lang.map.Properties;
  * XML configuration usage:
  * </p>
  * <pre>
- *  &lt;committer class="com.norconex.committer.core.impl.MultipleCommitters"&gt;
+ *  &lt;committer class="com.norconex.committer.core.impl.MultiCommitter"&gt;
  *      &lt;committer class="(committer class)"&gt;
  *          (Commmitter-specific configuration here)
  *      &lt;/committer&gt;
