@@ -7,6 +7,12 @@
   </properties>
   <body>
 
+    <release version="2.0.4-SNAPSHOT" date="2016-??-??" description="Maintenance release">
+      <action dev="essiembre" type="update">
+        Maven dependency updates: Norconex Commons Lang 1.9.0.
+      </action>
+    </release>
+
     <release version="2.0.3" date="2015-11-03" description="Maintenance release">
       <action dev="essiembre" type="update">
         Saved and loaded configuration-related classes are now equal.
