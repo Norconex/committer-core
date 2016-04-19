@@ -1,4 +1,4 @@
-/* Copyright 2010-2015 Norconex Inc.
+/* Copyright 2010-2016 Norconex Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -134,8 +134,6 @@ import com.norconex.commons.lang.map.Properties;
 @SuppressWarnings("nls")
 public abstract class AbstractMappedCommitter
         extends AbstractBatchCommitter implements IXMLConfigurable {
-
-    private long docCount;
 
     // Source fields
     private String sourceReferenceField;
@@ -435,7 +433,6 @@ public abstract class AbstractMappedCommitter
         ToStringBuilder builder = 
                 new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
         builder.appendSuper(super.toString());
-        builder.append("docCount", docCount);
         builder.append("targetReferenceField", targetReferenceField);
         builder.append("sourceReferenceField", sourceReferenceField);
         builder.append("keepSourceReferenceField", keepSourceReferenceField);
