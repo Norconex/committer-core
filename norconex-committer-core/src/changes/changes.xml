@@ -9,7 +9,15 @@
 
     <release version="2.0.4-SNAPSHOT" date="2016-??-??" description="Maintenance release">
       <action dev="essiembre" type="update">
-        Maven dependency updates: Norconex Commons Lang 1.9.0.
+        Maven dependency updates: Norconex Commons Lang 1.9.1.
+      </action>
+      <action dev="essiembre" type="update">
+        Now assumes UTF-8 where OS default was used for 
+        AbstractMappedCommitter and FileDeleteOperation.
+      </action>
+      <action dev="essiembre" type="fix">
+        Fixed MultiCommitter not sending "content" to certain committers
+        after it was consumed by the first committer defined.
       </action>
     </release>
 

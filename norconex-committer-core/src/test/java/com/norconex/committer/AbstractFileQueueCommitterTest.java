@@ -1,4 +1,4 @@
-/* Copyright 2010-2014 Norconex Inc.
+/* Copyright 2010-2016 Norconex Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.CharEncoding;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -77,8 +78,8 @@ public class AbstractFileQueueCommitterTest {
         // Queue 50 files for additions
         for (int i = 0; i < 50; i++) {
             Properties metadata = new Properties();
-            committer.add(Integer.toString(i), 
-                    IOUtils.toInputStream("hello world!"), metadata);
+            committer.add(Integer.toString(i), IOUtils.toInputStream(
+                    "hello world!", CharEncoding.UTF_8), metadata);
         }
         // Queue 50 files for deletions
         for (int i = 50; i < 100; i++) {

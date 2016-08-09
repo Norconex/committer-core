@@ -1,5 +1,5 @@
 <!-- 
-   Copyright 2014 Norconex Inc.
+   Copyright 2014-2016 Norconex Inc.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@
     <dependency>
         <groupId>com.norconex.commons</groupId>
         <artifactId>norconex-commons-lang</artifactId>
-        <version>1.9.0</version>
+        <version>1.9.1</version>
     </dependency>
     <dependency>
     	<groupId>junit</groupId>
@@ -64,7 +64,6 @@
     </dependency>
   </dependencies>
 
-  <description>Norconex Committer is a java library and command line application used to route content to local or remote target repositories, such as a search engine index.	</description>
   <build>
     <resources>
         <resource>
@@ -193,8 +192,13 @@
         <configuration>
           <overview>${basedir}/src/main/javadoc/overview.html</overview>
           <show>protected</show>
-          <detectLinks>true</detectLinks>
+          <nodeprecated>false</nodeprecated>
           <source>1.7</source>
+          <detectLinks>false</detectLinks>
+          <links>
+            <link>https://www.norconex.com/product/commons-lang/apidocs/</link>
+            <link>https://commons.apache.org/proper/commons-configuration/javadocs/v1.10/apidocs/</link>
+          </links>
         </configuration>
         <executions>
           <execution>
@@ -317,11 +321,10 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-project-info-reports-plugin</artifactId>
         <version>2.7</version>
-        <!-- 
         <configuration>
+          <dependencyDetailsEnabled>false</dependencyDetailsEnabled>
           <dependencyLocationsEnabled>false</dependencyLocationsEnabled>
         </configuration>
-         -->
         <reportSets>
           <reportSet>
             <reports>
@@ -332,13 +335,13 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <version>2.9.1</version>
+        <version>2.10.2</version>
         <configuration>
           <overview>${basedir}/src/main/javadoc/overview.html</overview>
           <header><![CDATA[
             <style>div.aboutLanguage .siteLink {font-size: 2em;}</style>
             <span class="siteLink">
-              <a target="_top" href="http://www.norconex.com/collectors/committer-core">Norconex Committer Core</a>
+              <a target="_top" href="https://www.norconex.com/collectors/committer-core">Norconex Committer Core</a>
             </span>
             ]]>
           </header>
@@ -356,12 +359,17 @@
             </script>
             <a style="font-size: 1.4em;" target="_top" href="https://github.com/Norconex/committer-core/issues">Submit an Issue</a>
             &nbsp;&nbsp;|&nbsp;&nbsp; 
-            <a style="font-size: 1.4em;" target="_top" href="http://www.norconex.com">www.norconex.com</a>
+            <a style="font-size: 1.4em;" target="_top" href="https://www.norconex.com">www.norconex.com</a>
             ]]>
           </footer>
           <show>protected</show>
-          <detectLinks>false</detectLinks>
+          <nodeprecated>false</nodeprecated>
           <source>1.7</source>
+          <detectLinks>false</detectLinks>
+          <links>
+            <link>https://www.norconex.com/product/commons-lang/apidocs/</link>
+            <link>https://commons.apache.org/proper/commons-configuration/javadocs/v1.10/apidocs/</link>
+          </links>
         </configuration>
         <reportSets>
           <reportSet>
@@ -377,20 +385,21 @@
     </plugins>
   </reporting>  
 
-  <url>http://norconex.com/collectors/committer-core</url>
   <organization>
-  	<name>Norconex Inc.</name>
-  	<url>http://www.norconex.com</url>
+    <name>Norconex Inc.</name>
+    <url>https://www.norconex.com</url>
   </organization>
+  <url>http://norconex.com/collectors/committer-core</url>
+  <description>Norconex Committer is a java library and command line application used to route content to local or remote target repositories, such as a search engine index.   </description>
+  <issueManagement>
+  	<url>https://github.com/Norconex/committer-core/issues</url>
+  	<system>GitHub</system>
+  </issueManagement>
   <scm>
     <url>https://github.com/Norconex/committer-core</url>
     <connection>scm:git:git@github.com:Norconex/committer-core.git</connection>
     <developerConnection>scm:git:git@github.com:Norconex/committer-core.git</developerConnection>
   </scm>
-  <issueManagement>
-  	<url>https://github.com/Norconex/committer-core/issues</url>
-  	<system>GitHub</system>
-  </issueManagement>
 
   <developers>
     <developer>
@@ -398,20 +407,9 @@
         <name>Pascal Essiembre</name>
         <email>pascal.essiembre@norconex.com</email>
         <organization>Norconex Inc.</organization>
-        <organizationUrl>http://www.norconex.com</organizationUrl>
+        <organizationUrl>https://www.norconex.com</organizationUrl>
         <roles>
           <role>project leader</role>
-          <role>developer</role>
-        </roles>
-        <timezone>-4</timezone>
-    </developer>
-    <developer>
-        <id>pascaldimassimo</id>
-        <name>Pascal Dimassimo</name>
-        <email>pascal.dimassimo@norconex.com</email>
-        <organization>Norconex Inc.</organization>
-        <organizationUrl>http://www.norconex.com</organizationUrl>
-        <roles>
           <role>developer</role>
         </roles>
         <timezone>-4</timezone>

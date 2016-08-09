@@ -28,6 +28,7 @@ import javax.xml.stream.XMLStreamWriter;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.CharEncoding;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -282,7 +283,8 @@ public abstract class AbstractMappedCommitter
                 }
             } else {
                 InputStream is = operation.getContentStream();
-                metadata.setString(targetContentField, IOUtils.toString(is));
+                metadata.setString(targetContentField, 
+                        IOUtils.toString(is, CharEncoding.UTF_8));
                 IOUtils.closeQuietly(is);
             }
         }

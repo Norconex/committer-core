@@ -110,12 +110,20 @@ public class MultiCommitter implements ICommitter, IXMLConfigurable {
     @Override
     public void add(
             String reference, InputStream content, Properties metadata) {
-        CachedStreamFactory factory = new CachedStreamFactory(
-                (int) FileUtils.ONE_MB, (int) FileUtils.ONE_MB);
-        CachedInputStream cachedInputStream = factory.newInputStream(content);
+        
+        CachedInputStream cachedInputStream = null;
+        if (content instanceof CachedInputStream) {
+            cachedInputStream = (CachedInputStream) content;
+        } else {
+            CachedStreamFactory factory = new CachedStreamFactory(
+                    (int) FileUtils.ONE_MB, (int) FileUtils.ONE_MB);
+            cachedInputStream = factory.newInputStream(content);
+        }
+        
         for (int i = 0; i < committers.size(); i++) {
             ICommitter committer = committers.get(i);
             committer.add(reference, cachedInputStream, metadata);
+            cachedInputStream.rewind();
         }
     }
 

@@ -1,4 +1,4 @@
-/* Copyright 2010-2014 Norconex Inc.
+/* Copyright 2010-2016 Norconex Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.CharEncoding;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -48,7 +49,8 @@ public class FileDeleteOperation implements IDeleteOperation {
         super();
         this.refFile = refFile;
         try {
-            this.reference = FileUtils.readFileToString(refFile);
+            this.reference = 
+                    FileUtils.readFileToString(refFile, CharEncoding.UTF_8);
         } catch (IOException e) {
             throw new CommitterException(
                     "Cannot obtain reference from file " + refFile, e);
