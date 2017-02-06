@@ -69,7 +69,7 @@ public class MultiCommitter implements ICommitter, IXMLConfigurable {
     private static final Logger LOG = 
             LogManager.getLogger(FileSystemCommitter.class);
     
-    private final List<ICommitter> committers = new ArrayList<ICommitter>();
+    private final List<ICommitter> committers = new ArrayList<>();
 
     /**
      * Constructor.
@@ -104,14 +104,14 @@ public class MultiCommitter implements ICommitter, IXMLConfigurable {
      * @return committers
      */
     public List<ICommitter> getCommitters() {
-        return new ArrayList<ICommitter>(committers);
+        return new ArrayList<>(committers);
     }
     
     @Override
     public void add(
             String reference, InputStream content, Properties metadata) {
         
-        CachedInputStream cachedInputStream = null;
+        CachedInputStream cachedInputStream;
         if (content instanceof CachedInputStream) {
             cachedInputStream = (CachedInputStream) content;
         } else {
