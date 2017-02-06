@@ -1,4 +1,4 @@
-/* Copyright 2010-2016 Norconex Inc.
+/* Copyright 2010-2017 Norconex Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.io.Writer;
 import java.util.List;
 import java.util.Objects;
 
-import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
@@ -29,16 +28,16 @@ import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.CharEncoding;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-import com.norconex.commons.lang.config.ConfigurationUtil;
 import com.norconex.commons.lang.config.IXMLConfigurable;
+import com.norconex.commons.lang.config.XMLConfigurationUtil;
 import com.norconex.commons.lang.map.Properties;
+import com.norconex.commons.lang.xml.EnhancedXMLStreamWriter;
 
 /**
  * <p>A base class batching documents and offering mappings of source reference
@@ -290,59 +289,43 @@ public abstract class AbstractMappedCommitter
         }
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     public void saveToXML(Writer out) throws IOException {
-        XMLOutputFactory factory = XMLOutputFactory.newInstance();
         try {
-            XMLStreamWriter writer = factory.createXMLStreamWriter(out);
+            EnhancedXMLStreamWriter writer = new EnhancedXMLStreamWriter(out);
             writer.writeStartElement("committer");
             writer.writeAttribute("class", getClass().getCanonicalName());
 
             if (sourceReferenceField != null) {
                 writer.writeStartElement("sourceReferenceField");
-                writer.writeAttribute(
-                        "keep", Boolean.toString(keepSourceReferenceField));
+                writer.writeAttributeBoolean("keep", keepSourceReferenceField);
                 writer.writeCharacters(sourceReferenceField);
                 writer.writeEndElement();
             }
+            
             if (targetReferenceField != null) {
-                writer.writeStartElement("targetReferenceField");
-                writer.writeCharacters(targetReferenceField);
-                writer.writeEndElement();
+                writer.writeElementString(
+                        "targetReferenceField", targetReferenceField);
             }
             if (sourceContentField != null) {
                 writer.writeStartElement("sourceContentField");
-                writer.writeAttribute("keep",
-                        Boolean.toString(keepSourceContentField));
+                writer.writeAttributeBoolean("keep", keepSourceContentField);
                 writer.writeCharacters(sourceContentField);
                 writer.writeEndElement();
             }
             if (targetContentField != null) {
-                writer.writeStartElement("targetContentField");
-                writer.writeCharacters(targetContentField);
-                writer.writeEndElement();
+                writer.writeElementString(
+                        "targetContentField", targetContentField);
             }
             if (getQueueDir() != null) {
-                writer.writeStartElement("queueDir");
-                writer.writeCharacters(getQueueDir());
-                writer.writeEndElement();
+                writer.writeElementString("queueDir", getQueueDir());
             }
-            writer.writeStartElement("queueSize");
-            writer.writeCharacters(ObjectUtils.toString(getQueueSize()));
-            writer.writeEndElement();
-
-            writer.writeStartElement("commitBatchSize");
-            writer.writeCharacters(ObjectUtils.toString(getCommitBatchSize()));
-            writer.writeEndElement();
-
-            writer.writeStartElement("maxRetries");
-            writer.writeCharacters(ObjectUtils.toString(getMaxRetries()));
-            writer.writeEndElement();
-
-            writer.writeStartElement("maxRetryWait");
-            writer.writeCharacters(ObjectUtils.toString(getMaxRetryWait()));
-            writer.writeEndElement();
+            
+            writer.writeElementInteger("queueSize", getQueueSize());
+            writer.writeElementInteger(
+                    "commitBatchSize", getCommitBatchSize());
+            writer.writeElementInteger("maxRetries", getMaxRetries());
+            writer.writeElementLong("maxRetryWait", getMaxRetryWait());
 
             saveToXML(writer);
 
@@ -365,11 +348,13 @@ public abstract class AbstractMappedCommitter
 
     @Override
     public void loadFromXML(Reader in) {
-        XMLConfiguration xml = ConfigurationUtil.newXMLConfiguration(in);
-        setSourceReferenceField(xml.getString("sourceReferenceField", sourceReferenceField));
-        setKeepSourceReferenceField(xml.getBoolean("sourceReferenceField[@keep]", 
-                keepSourceReferenceField));
-        setTargetReferenceField(xml.getString("targetReferenceField", targetReferenceField));
+        XMLConfiguration xml = XMLConfigurationUtil.newXMLConfiguration(in);
+        setSourceReferenceField(
+                xml.getString("sourceReferenceField", sourceReferenceField));
+        setKeepSourceReferenceField(xml.getBoolean(
+                "sourceReferenceField[@keep]", keepSourceReferenceField));
+        setTargetReferenceField(xml.getString(
+                "targetReferenceField", targetReferenceField));
         setSourceContentField(
                 xml.getString("sourceContentField", sourceContentField));
         setKeepSourceContentField(xml.getBoolean("sourceContentField[@keep]", 

@@ -1,4 +1,4 @@
-/* Copyright 2010-2016 Norconex Inc.
+/* Copyright 2010-2017 Norconex Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,8 +37,8 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 import com.norconex.committer.core.ICommitter;
-import com.norconex.commons.lang.config.ConfigurationUtil;
 import com.norconex.commons.lang.config.IXMLConfigurable;
+import com.norconex.commons.lang.config.XMLConfigurationUtil;
 import com.norconex.commons.lang.io.CachedInputStream;
 import com.norconex.commons.lang.io.CachedStreamFactory;
 import com.norconex.commons.lang.map.Properties;
@@ -144,12 +144,12 @@ public class MultiCommitter implements ICommitter, IXMLConfigurable {
 
     @Override
     public void loadFromXML(Reader in) throws IOException {
-        XMLConfiguration xml = ConfigurationUtil.newXMLConfiguration(in);
+        XMLConfiguration xml = XMLConfigurationUtil.newXMLConfiguration(in);
         List<HierarchicalConfiguration> xmlCommitters = 
                 xml.configurationsAt("committer");
         for (HierarchicalConfiguration xmlCommitter : xmlCommitters) {
-            addCommitter(
-                    (ICommitter) ConfigurationUtil.newInstance(xmlCommitter));
+            addCommitter((ICommitter) 
+                    XMLConfigurationUtil.newInstance(xmlCommitter));
         }
     }
 

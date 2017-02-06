@@ -1,4 +1,4 @@
-/* Copyright 2010-2014 Norconex Inc.
+/* Copyright 2010-2017 Norconex Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,7 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.io.Writer;
 
-import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamWriter;
 
 import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.io.FileUtils;
@@ -38,9 +36,10 @@ import org.apache.commons.lang3.time.DateFormatUtils;
 import com.norconex.committer.core.CommitterException;
 import com.norconex.committer.core.ICommitter;
 import com.norconex.commons.lang.TimeIdGenerator;
-import com.norconex.commons.lang.config.ConfigurationUtil;
 import com.norconex.commons.lang.config.IXMLConfigurable;
+import com.norconex.commons.lang.config.XMLConfigurationUtil;
 import com.norconex.commons.lang.map.Properties;
+import com.norconex.commons.lang.xml.EnhancedXMLStreamWriter;
 
 
 /**
@@ -169,19 +168,16 @@ public class FileSystemCommitter implements ICommitter, IXMLConfigurable {
 
     @Override
     public void loadFromXML(Reader in) {
-        XMLConfiguration xml = ConfigurationUtil.newXMLConfiguration(in);
+        XMLConfiguration xml = XMLConfigurationUtil.newXMLConfiguration(in);
         setDirectory(xml.getString("directory", DEFAULT_DIRECTORY));
     }
     @Override
     public void saveToXML(Writer out) throws IOException {
-        XMLOutputFactory factory = XMLOutputFactory.newInstance();
         try {
-            XMLStreamWriter writer = factory.createXMLStreamWriter(out);
+            EnhancedXMLStreamWriter writer = new EnhancedXMLStreamWriter(out);
             writer.writeStartElement("committer");
             writer.writeAttribute("class", getClass().getCanonicalName());
-            writer.writeStartElement("directory");
-            writer.writeCharacters(directory);
-            writer.writeEndElement();
+            writer.writeElementString("directory", directory);
             writer.writeEndElement();
             writer.flush();
             writer.close();
