@@ -44,12 +44,12 @@ import com.norconex.commons.lang.io.CachedStreamFactory;
 import com.norconex.commons.lang.map.Properties;
 
 /**
+ * <p>
  * This committer allows you to define user many committers as one. 
  * Every committing requests will be dispatched and handled by all nested 
  * committers defined (in the order they were added).
- * <p>
- * XML configuration usage:
  * </p>
+ * <h3>XML configuration usage:</h3>
  * <pre>
  *  &lt;committer class="com.norconex.committer.core.impl.MultiCommitter"&gt;
  *      &lt;committer class="(committer class)"&gt;
