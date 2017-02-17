@@ -61,6 +61,21 @@ import com.norconex.commons.lang.map.Properties;
  *      ...
  *  &lt;/committer&gt;
  * </pre>
+ * 
+ * <h4>Usage example:</h4>
+ * <p>
+ * The following will commit files in two different locations on the filesystem.
+ * </p>
+ * <pre>
+ *  &lt;committer class="com.norconex.committer.core.impl.MultiCommitter"&gt;
+ *      &lt;committer class="com.norconex.committer.core.impl.FileSystemCommitter"&gt;
+ *          &lt;directory&gt;/export/path1/&lt;/directory&gt;
+ *      &lt;/committer&gt;
+ *      &lt;committer class="com.norconex.committer.core.impl.FileSystemCommitter"&gt;
+ *          &lt;directory&gt;/export/path2/&lt;/directory&gt;
+ *      &lt;/committer&gt;
+ *  &lt;/committer&gt;
+ * </pre>
  * @author Pascal Essiembre
  * @since 1.2.0
  */

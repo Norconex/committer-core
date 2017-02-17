@@ -8,6 +8,9 @@
   <body>
 
     <release version="2.0.6-SNAPSHOT" date="2017-??=??" description="Maintenance release">
+      <action dev="essiembre" type="add">
+        Added schema-based XML configuration validation.
+      </action>
       <action dev="essiembre" type="update">
         Maven dependency updates: Norconex Commons Lang 1.13.0.
       </action>

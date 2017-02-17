@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.norconex.committer;
+package com.norconex.committer.core;
 import java.io.File;
 import java.io.IOException;
 

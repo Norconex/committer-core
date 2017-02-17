@@ -43,13 +43,13 @@ import com.norconex.commons.lang.xml.EnhancedXMLStreamWriter;
 
 
 /**
+ * <p>
  * Commits a copy of files on the filesystem.  Files are directly saved
  * to the specified directory (no queuing or commit).  Useful for 
  * troubleshooting, or used as a file-based queue implementation by 
  * other committers.
- * <p>
- * XML configuration usage:
  * </p>
+ * <h3>XML configuration usage:</h3>
  * <pre>
  *  &lt;committer class="com.norconex.committer.core.impl.FileSystemCommitter"&gt;
  *      &lt;directory&gt;(path where to save files)&lt;/directory&gt;
