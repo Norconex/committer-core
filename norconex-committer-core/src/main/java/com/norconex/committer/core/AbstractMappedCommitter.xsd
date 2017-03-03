@@ -26,7 +26,7 @@
       <xs:element name="queueDir" type="nonEmpty" minOccurs="0" maxOccurs="1" />
       <xs:element name="queueSize" type="xs:int" minOccurs="0" maxOccurs="1" />
       <xs:element name="maxRetries" type="xs:int" minOccurs="0" maxOccurs="1" />
-      <xs:element name="maxRetryWait" type="xs:long" minOccurs="0" maxOccurs="1" />
+      <xs:element name="maxRetryWait" type="xs:string" minOccurs="0" maxOccurs="1" />
     </xs:all>
     <xs:attribute name="class" type="xs:string" use="required"></xs:attribute>
   </xs:complexType>

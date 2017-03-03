@@ -37,6 +37,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import com.norconex.commons.lang.config.IXMLConfigurable;
 import com.norconex.commons.lang.config.XMLConfigurationUtil;
 import com.norconex.commons.lang.map.Properties;
+import com.norconex.commons.lang.time.DurationParser;
 import com.norconex.commons.lang.xml.EnhancedXMLStreamWriter;
 
 /**
@@ -87,8 +88,14 @@ import com.norconex.commons.lang.xml.EnhancedXMLStreamWriter;
  * <code>keepSourceContentField</code> attribute is set to 
  * <code>true</code>.</p>
  * 
+ * <p>
+ * As of 2.0.6, XML configuration entries expecting millisecond durations
+ * can be provided in human-readable format (English only), as per 
+ * {@link DurationParser} (e.g., "5 minutes and 30 seconds" or "5m30s").
+ * </p>
+ * 
  * <a id="xml-config"></a>
- * <h4>XML Configuration</h4>
+ * <h3>XML Configuration</h3>
  * 
  * <p>Subclasses implementing {@link IXMLConfigurable} should allow this inner 
  * configuration:</p>
@@ -124,7 +131,7 @@ import com.norconex.commons.lang.xml.EnhancedXMLStreamWriter;
  *      &lt;queueDir&gt;(optional path where to queue files)&lt;/queueDir&gt;
  *      &lt;queueSize&gt;(max queue size before committing)&lt;/queueSize&gt;
  *      &lt;maxRetries&gt;(max retries upon commit failures)&lt;/maxRetries&gt;
- *      &lt;maxRetryWait&gt;(max delay between retries)&lt;/maxRetryWait&gt;
+ *      &lt;maxRetryWait&gt;(max delay in milliseconds between retries)&lt;/maxRetryWait&gt;
  * </pre>
  * 
  * @author Pascal Essiembre
@@ -367,7 +374,8 @@ public abstract class AbstractMappedCommitter
         setCommitBatchSize(xml.getInt("commitBatchSize", 
                 AbstractBatchCommitter.DEFAULT_COMMIT_BATCH_SIZE));
         setMaxRetries(xml.getInt("maxRetries", 0));
-        setMaxRetryWait(xml.getInt("maxRetryWait", 0));
+        setMaxRetryWait(XMLConfigurationUtil.getDuration(
+                xml, "maxRetryWait", 0));
 
         loadFromXml(xml);
     }
