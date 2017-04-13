@@ -7,6 +7,9 @@
 
 - Create a Spreadsheet Committer, with support for how to join multi-values.
 
+- Create a new committer that saves docs to a flat file.  XML and/or Json.
+  With option to break into numbered file after X bytes or X docs.
+
 - Add committer server
 
 - Add chainable committers??
