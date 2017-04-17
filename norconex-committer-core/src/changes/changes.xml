@@ -9,6 +9,12 @@
 
     <release version="2.0.6-SNAPSHOT" date="2017-??=??" description="Maintenance release">
       <action dev="essiembre" type="add">
+        New XMLFileCommitter to write documents to XML files.
+      </action>
+      <action dev="essiembre" type="add">
+        New JSONFileCommitter to write documents to JSON files.
+      </action>
+      <action dev="essiembre" type="add">
         Added schema-based XML configuration validation.
       </action>
       <action dev="essiembre" type="add">

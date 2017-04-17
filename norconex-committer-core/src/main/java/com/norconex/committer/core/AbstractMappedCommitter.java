@@ -89,7 +89,7 @@ import com.norconex.commons.lang.xml.EnhancedXMLStreamWriter;
  * <code>true</code>.</p>
  * 
  * <p>
- * As of 2.0.6, XML configuration entries expecting millisecond durations
+ * As of 2.1.0, XML configuration entries expecting millisecond durations
  * can be provided in human-readable format (English only), as per 
  * {@link DurationParser} (e.g., "5 minutes and 30 seconds" or "5m30s").
  * </p>

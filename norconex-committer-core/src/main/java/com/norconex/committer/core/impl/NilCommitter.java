@@ -91,7 +91,7 @@ public class NilCommitter implements ICommitter  {
 
     @Override
     public boolean equals(final Object other) {
-        if (!(other instanceof MultiCommitter)) {
+        if (!(other instanceof NilCommitter)) {
             return false;
         }
         return true;

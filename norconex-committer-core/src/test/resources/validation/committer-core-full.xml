@@ -35,4 +35,18 @@
     <maxRetries>3</maxRetries>
     <maxRetryWait>3000</maxRetryWait>
   </committer>
+  <committer class="com.norconex.committer.core.impl.JSONFileCommitter">
+    <directory>/tmp/somejsondir</directory>
+    <pretty>true</pretty>
+    <docsPerFile>10</docsPerFile>
+    <compress>true</compress>
+    <splitAddDelete>true</splitAddDelete>
+  </committer>
+  <committer class="com.norconex.committer.core.impl.XMLFileCommitter">
+    <directory>/tmp/somexmldir</directory>
+    <pretty>false</pretty>
+    <docsPerFile>1</docsPerFile>
+    <compress>false</compress>
+    <splitAddDelete>false</splitAddDelete>
+  </committer>
 </committer>
