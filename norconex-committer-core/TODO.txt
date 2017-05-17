@@ -1,3 +1,6 @@
+- Add init and close methods.
+- Have listeners for commit events
+
 - Maybe: have a way to "route" documents to the proper committer based on 
   metadata field values. Either by having a "restrictTo" equivalent to those 
   found in Importer handlers, or else.

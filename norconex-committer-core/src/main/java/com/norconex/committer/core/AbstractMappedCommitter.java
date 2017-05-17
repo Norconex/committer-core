@@ -302,7 +302,8 @@ public abstract class AbstractMappedCommitter
             EnhancedXMLStreamWriter writer = new EnhancedXMLStreamWriter(out);
             writer.writeStartElement("committer");
             writer.writeAttribute("class", getClass().getCanonicalName());
-
+            writer.writeAttributeString("xml:space", "preserve");
+            
             if (sourceReferenceField != null) {
                 writer.writeStartElement("sourceReferenceField");
                 writer.writeAttributeBoolean("keep", keepSourceReferenceField);

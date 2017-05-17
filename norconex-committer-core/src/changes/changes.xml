@@ -7,6 +7,16 @@
   </properties>
   <body>
 
+    <release version="2.1.1-SNAPSHOT" date="2017-??-??" description="Feature release">
+      <action dev="essiembre" type="update">
+        Subclasses of AbstractMappedCommitter will now have xml:space="preserve"
+        when written (IXMLConfigurable).
+      </action>
+      <action dev="essiembre" type="update">
+        Maven dependency updates: Norconex Commons Lang 1.13.1.
+      </action>
+    </release>
+
     <release version="2.1.0" date="2017-04-25" description="Feature release">
       <action dev="essiembre" type="add">
         New XMLFileCommitter to write documents to XML files.
