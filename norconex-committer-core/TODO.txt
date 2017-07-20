@@ -1,5 +1,11 @@
 - Add init and close methods.
-- Have listeners for commit events
+- Have listeners for commit events.  
+- Have a "clearQueue" method.
+- Have a "clearRepository" method.
+- Allow for multiple committers (and remove MultiCommitter?)
+- Committer server (and a committer "client" that can round-robin between 
+  committer servers?)
+
 
 - Maybe: have a way to "route" documents to the proper committer based on 
   metadata field values. Either by having a "restrictTo" equivalent to those 
