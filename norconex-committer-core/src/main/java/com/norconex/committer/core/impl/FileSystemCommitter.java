@@ -20,13 +20,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 
 import javax.xml.stream.XMLStreamException;
 
 import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.CharEncoding;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -106,7 +106,7 @@ public class FileSystemCommitter implements ICommitter, IXMLConfigurable {
             // Reference
             FileUtils.writeStringToFile(new File(
                     targetFile.getAbsolutePath() + EXTENSION_REFERENCE),
-                    reference, CharEncoding.UTF_8);
+                    reference, StandardCharsets.UTF_8);
             
         } catch (IOException e) {
             throw new CommitterException(
@@ -119,7 +119,7 @@ public class FileSystemCommitter implements ICommitter, IXMLConfigurable {
             File targetFile = createFile(FILE_SUFFIX_REMOVE);
             FileUtils.writeStringToFile(new File(
                     targetFile.getAbsolutePath() + EXTENSION_REFERENCE),
-                    reference, CharEncoding.UTF_8);
+                    reference, StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new CommitterException(
                     "Cannot queue document removal.  Ref: " + reference, e);

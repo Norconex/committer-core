@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Objects;
 
@@ -27,7 +28,6 @@ import javax.xml.stream.XMLStreamWriter;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.CharEncoding;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -138,7 +138,6 @@ import com.norconex.commons.lang.xml.EnhancedXMLStreamWriter;
  * @author Pascal Dimassimo
  * @since 1.1.0
  */
-@SuppressWarnings("nls")
 public abstract class AbstractMappedCommitter
         extends AbstractBatchCommitter implements IXMLConfigurable {
 
@@ -290,7 +289,7 @@ public abstract class AbstractMappedCommitter
             } else {
                 InputStream is = operation.getContentStream();
                 metadata.setString(targetContentField, 
-                        IOUtils.toString(is, CharEncoding.UTF_8));
+                        IOUtils.toString(is, StandardCharsets.UTF_8));
                 IOUtils.closeQuietly(is);
             }
         }
