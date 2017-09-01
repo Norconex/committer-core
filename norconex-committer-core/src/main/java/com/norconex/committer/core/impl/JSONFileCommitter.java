@@ -30,6 +30,7 @@ import javax.xml.stream.XMLStreamException;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -43,6 +44,7 @@ import com.norconex.committer.core.CommitterException;
 import com.norconex.committer.core.ICommitter;
 import com.norconex.commons.lang.config.IXMLConfigurable;
 import com.norconex.commons.lang.config.XMLConfigurationUtil;
+import com.norconex.commons.lang.file.FileUtil;
 import com.norconex.commons.lang.map.Properties;
 import com.norconex.commons.lang.xml.EnhancedXMLStreamWriter;
 
@@ -56,6 +58,10 @@ import com.norconex.commons.lang.xml.EnhancedXMLStreamWriter;
  * The timestamp matches the first time the 
  * {@link #add(String, InputStream, Properties)} or
  * {@link #remove(String, Properties)} methods is called.
+ * </p>
+ * <p>
+ * <b>Since 2.1.2</b>, you have to option to give a prefix or suffix to
+ * files that will be created (default does not add any).
  * </p>
  * <p>
  * If you request to split additions and deletions into separate files, 
@@ -94,6 +100,8 @@ import com.norconex.commons.lang.xml.EnhancedXMLStreamWriter;
  *      &lt;docsPerFile&gt;(max number of docs per JSON file)&lt;/docsPerFile&gt;
  *      &lt;compress&gt;[false|true]&lt;/compress&gt;
  *      &lt;splitAddDelete&gt;[false|true]&lt;/splitAddDelete&gt;
+ *      &lt;fileNamePrefix&gt;(optional prefix to created file names)&lt;/fileNamePrefix&gt;
+ *      &lt;fileNameSuffix&gt;(optional suffix to created file names)&lt;/fileNameSuffix&gt;
  *  &lt;/committer&gt;
  * </pre>
  * 
@@ -119,6 +127,8 @@ public class JSONFileCommitter implements ICommitter, IXMLConfigurable  {
     private JSONFile mainJSON; // either just for adds or both adds and dels
     private JSONFile delJSON;  // for when adds and dels are separated
     private String baseName;
+    private String fileNamePrefix;
+    private String fileNameSuffix;
     
     /**
      * Constructor.
@@ -170,6 +180,40 @@ public class JSONFileCommitter implements ICommitter, IXMLConfigurable  {
         this.splitAddDelete = separateAddDelete;
     }
 
+    /**
+     * Gets the file name prefix (default is <code>null</code>).
+     * @return file name prefix
+     * @since 2.1.2
+     */
+    public String getFileNamePrefix() {
+        return fileNamePrefix;
+    }
+    /**
+     * Sets an optional file name prefix.
+     * @param fileNamePrefix file name prefix
+     * @since 2.1.2
+     */
+    public void setFileNamePrefix(String fileNamePrefix) {
+        this.fileNamePrefix = fileNamePrefix;
+    }
+
+    /**
+     * Gets the file name suffix (default is <code>null</code>).
+     * @return file name suffix
+     * @since 2.1.2
+     */
+    public String getFileNameSuffix() {
+        return fileNameSuffix;
+    }
+    /**
+     * Sets an optional file name suffix.
+     * @param fileNameSuffix file name suffix
+     * @since 2.1.2
+     */
+    public void setFileNameSuffix(String fileNameSuffix) {
+        this.fileNameSuffix = fileNameSuffix;
+    }
+    
     private synchronized void init() {
         if (baseName == null) {
             File dir = new File(directory);
@@ -224,6 +268,7 @@ public class JSONFileCommitter implements ICommitter, IXMLConfigurable  {
             docAdd.put("doc-add", doc);
             docAdd.write(writer, indentFactor, indent);
         } catch (IOException e) {
+            mainJSON.close();
             throw new CommitterException("Cannot write to JSON file: " 
                     + mainJSON.file.getAbsolutePath(), e);
         }
@@ -276,6 +321,7 @@ public class JSONFileCommitter implements ICommitter, IXMLConfigurable  {
             docDel.put("doc-del", doc);
             docDel.write(writer, indentFactor, indent);
         } catch (IOException e) {
+            jsonFile.close();
             throw new CommitterException("Cannot write to JSON file: " 
                     + mainJSON.file.getAbsolutePath(), e);
         }
@@ -306,6 +352,8 @@ public class JSONFileCommitter implements ICommitter, IXMLConfigurable  {
         setDocsPerFile(xml.getInt("docsPerFile", docsPerFile));
         setCompress(xml.getBoolean("compress", compress));
         setSplitAddDelete(xml.getBoolean("splitAddDelete", splitAddDelete));
+        setFileNamePrefix(xml.getString("fileNamePrefix", fileNamePrefix));
+        setFileNameSuffix(xml.getString("fileNameSuffix", fileNameSuffix));
     }
     @Override
     public void saveToXML(Writer out) throws IOException {
@@ -318,6 +366,8 @@ public class JSONFileCommitter implements ICommitter, IXMLConfigurable  {
             writer.writeElementInteger("docsPerFile", docsPerFile);
             writer.writeElementBoolean("compress", compress);
             writer.writeElementBoolean("splitAddDelete", splitAddDelete);
+            writer.writeElementString("fileNamePrefix", fileNamePrefix);
+            writer.writeElementString("fileNameSuffix", fileNameSuffix);
             writer.writeEndElement();
             writer.flush();
             writer.close();
@@ -334,6 +384,8 @@ public class JSONFileCommitter implements ICommitter, IXMLConfigurable  {
                 .append(docsPerFile)
                 .append(compress)
                 .append(splitAddDelete)
+                .append(fileNamePrefix)
+                .append(fileNameSuffix)
                 .toHashCode();
     }
     
@@ -355,6 +407,8 @@ public class JSONFileCommitter implements ICommitter, IXMLConfigurable  {
                 .append(docsPerFile, other.docsPerFile)
                 .append(compress, other.compress)
                 .append(splitAddDelete, other.splitAddDelete)
+                .append(fileNamePrefix, other.fileNamePrefix)
+                .append(fileNameSuffix, other.fileNameSuffix)
                 .isEquals();
     }
 
@@ -366,6 +420,8 @@ public class JSONFileCommitter implements ICommitter, IXMLConfigurable  {
                 .append("docsPerFile", docsPerFile)
                 .append("compress", compress)
                 .append("splitAddDelete", splitAddDelete)
+                .append("fileNamePrefix", fileNamePrefix)
+                .append("fileNameSuffix", fileNameSuffix)
                 .toString();
     }
 
@@ -388,7 +444,13 @@ public class JSONFileCommitter implements ICommitter, IXMLConfigurable  {
             
             // initialize
             rollCount++;
-            String fileName = fileBaseName + "_" + rollCount + ".json";
+            String fileName = 
+                    StringUtils.stripToEmpty(
+                            FileUtil.toSafeFileName(fileNamePrefix))
+                  + fileBaseName
+                  + StringUtils.stripToEmpty(
+                          FileUtil.toSafeFileName(fileNameSuffix))
+                  + "_" + rollCount + ".json";
             if (compress) {
                 fileName += ".gz";
             }

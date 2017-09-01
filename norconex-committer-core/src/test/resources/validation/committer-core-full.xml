@@ -41,6 +41,8 @@
     <docsPerFile>10</docsPerFile>
     <compress>true</compress>
     <splitAddDelete>true</splitAddDelete>
+    <fileNamePrefix></fileNamePrefix>
+    <fileNameSuffix></fileNameSuffix>
   </committer>
   <committer class="com.norconex.committer.core.impl.XMLFileCommitter">
     <directory>/tmp/somexmldir</directory>
@@ -48,5 +50,7 @@
     <docsPerFile>1</docsPerFile>
     <compress>false</compress>
     <splitAddDelete>false</splitAddDelete>
+    <fileNamePrefix>my prefix</fileNamePrefix>
+    <fileNameSuffix>my suffix</fileNameSuffix>
   </committer>
 </committer>
