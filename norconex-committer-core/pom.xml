@@ -66,9 +66,9 @@
         <scope>provided</scope>
     </dependency>
     <dependency>
-        <groupId>org.json</groupId>
+        <groupId>com.tdunning</groupId>
         <artifactId>json</artifactId>
-        <version>20160810</version>
+        <version>1.8</version>    
     </dependency>
     <dependency>
     	<groupId>junit</groupId>

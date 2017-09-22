@@ -242,10 +242,8 @@ public class JSONFileCommitter implements ICommitter, IXMLConfigurable  {
             }
         }
         mainJSON.init();
-        int indentFactor = 0;
         int indent = 0;
         if (pretty) {
-            indentFactor = 2;
             indent = 2;
         }
         
@@ -266,7 +264,7 @@ public class JSONFileCommitter implements ICommitter, IXMLConfigurable  {
             
             JSONObject docAdd = new JSONObject();
             docAdd.put("doc-add", doc);
-            docAdd.write(writer, indentFactor, indent);
+            writer.write(docAdd.toString(indent));
         } catch (IOException e) {
             mainJSON.close();
             throw new CommitterException("Cannot write to JSON file: " 
@@ -299,10 +297,8 @@ public class JSONFileCommitter implements ICommitter, IXMLConfigurable  {
         jsonFile.init();
         
         
-        int indentFactor = 0;
         int indent = 0;
         if (pretty) {
-            indentFactor = 2;
             indent = 2;
         }
         
@@ -319,7 +315,8 @@ public class JSONFileCommitter implements ICommitter, IXMLConfigurable  {
 
             JSONObject docDel = new JSONObject();
             docDel.put("doc-del", doc);
-            docDel.write(writer, indentFactor, indent);
+            
+            writer.write(docDel.toString(indent));
         } catch (IOException e) {
             jsonFile.close();
             throw new CommitterException("Cannot write to JSON file: " 

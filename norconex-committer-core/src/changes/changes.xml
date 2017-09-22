@@ -15,6 +15,11 @@
       <action dev="essiembre" type="update">
         Maven dependency updates: Norconex Commons Lang 1.14.0.
       </action>
+      <action dev="essiembre" type="update">
+        Removed org.json/json dependency in favor of com.tdunning/json 
+        to avoid its ambiguous licencing and avoid conflicts with 
+        Tika dependencies. 
+      </action>
     </release>
 
     <release version="2.1.1" date="2017-05-23" description="Maintenance release">
