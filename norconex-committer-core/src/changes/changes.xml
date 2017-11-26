@@ -7,7 +7,7 @@
   </properties>
   <body>
 
-    <release version="2.1.2-SNAPSHOT" date="2017-11-26" description="Maintenance release">
+    <release version="2.1.2" date="2017-11-26" description="Maintenance release">
       <action dev="essiembre" type="add">
         It is now possible to specify a "fileNamePrefix" and "fileNameSuffix"
         for generated files from XMLFileCommitter and JSONFileCommitter.
