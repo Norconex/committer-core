@@ -1,4 +1,4 @@
-/* Copyright 2010-2017 Norconex Inc.
+/* Copyright 2010-2018 Norconex Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,107 +16,100 @@ package com.norconex.committer.core;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.Reader;
-import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Objects;
 
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamWriter;
-
-import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import com.norconex.commons.lang.config.IXMLConfigurable;
-import com.norconex.commons.lang.config.XMLConfigurationUtil;
 import com.norconex.commons.lang.map.Properties;
 import com.norconex.commons.lang.time.DurationParser;
-import com.norconex.commons.lang.xml.EnhancedXMLStreamWriter;
+import com.norconex.commons.lang.xml.XML;
 
 /**
  * <p>A base class batching documents and offering mappings of source reference
- * and source content fields to target reference and target content fields.  
+ * and source content fields to target reference and target content fields.
  * Batched documents are queued on the file system.</p>
- * 
+ *
  * <h3>Reference Mapping:</h3>
- * 
+ *
  * <h4>Source document reference</h4>
- * 
- * <p>By default the document reference from the source document comes from 
+ *
+ * <p>By default the document reference from the source document comes from
  * document reference value passed to the Committer (obtained internally
- * using {@link IAddOperation#getReference()} 
- * or {@link IDeleteOperation#getReference()}).  
+ * using {@link IAddOperation#getReference()}
+ * or {@link IDeleteOperation#getReference()}).
  * If you wish to ignore that original document
- * reference and use a metadata field instead, use the 
+ * reference and use a metadata field instead, use the
  * {@link #setSourceReferenceField(String)} method to do so.</p>
- * 
+ *
  * <h4>Target document reference</h4>
- * 
+ *
  * <p>The default (or constant) target reference
  * field is for subclasses to define.</p>
- * 
- * <p>When both a source and target reference 
- * fields are defined, the source reference field will be deleted unless the 
- * <code>keepSourceReferenceField</code> attribute is set to <code>true</code>. 
+ *
+ * <p>When both a source and target reference
+ * fields are defined, the source reference field will be deleted unless the
+ * <code>keepSourceReferenceField</code> attribute is set to <code>true</code>.
  * </p>
- * 
+ *
  * <h3>Content Mapping:</h3>
- * 
+ *
  * <p>Content typically only occurs when committing additions.</p>
- * 
+ *
  * <h4>Source document content</h4>
- * 
- * <p>The default source document content is the actual document content 
- * (obtained internally using {@link IAddOperation#getContentStream()}).  
+ *
+ * <p>The default source document content is the actual document content
+ * (obtained internally using {@link IAddOperation#getContentStream()}).
  * Defining a <code>sourceContentField</code>
  * will use the matching metadata property instead.</p>
- * 
+ *
  * <h4>Target document content</h4>
- * 
+ *
  * <p>The default (or constant) <b>target content</b> field is for subclasses
- * to define.</p> 
- * 
- * <p>When both a source and target content fields are defined, the 
- * source content field will be deleted unless the 
- * <code>keepSourceContentField</code> attribute is set to 
+ * to define.</p>
+ *
+ * <p>When both a source and target content fields are defined, the
+ * source content field will be deleted unless the
+ * <code>keepSourceContentField</code> attribute is set to
  * <code>true</code>.</p>
- * 
+ *
  * <p>
  * As of 2.1.0, XML configuration entries expecting millisecond durations
- * can be provided in human-readable format (English only), as per 
+ * can be provided in human-readable format (English only), as per
  * {@link DurationParser} (e.g., "5 minutes and 30 seconds" or "5m30s").
  * </p>
- * 
+ *
  * <a id="xml-config"></a>
  * <h3>XML Configuration</h3>
- * 
- * <p>Subclasses implementing {@link IXMLConfigurable} should allow this inner 
+ *
+ * <p>Subclasses implementing {@link IXMLConfigurable} should allow this inner
  * configuration:</p>
  * <pre>
  *      &lt;sourceReferenceField keep="[false|true]"&gt;
- *         (Optional name of field that contains the document reference, when 
+ *         (Optional name of field that contains the document reference, when
  *         the default document reference is not used.  The reference value
- *         will be mapped to the "targetReferenceField" 
+ *         will be mapped to the "targetReferenceField"
  *         specified or target repository default field if one is defined
  *         by the concrete implementation.
- *         Once re-mapped, this metadata source field is 
+ *         Once re-mapped, this metadata source field is
  *         deleted, unless "keep" is set to <code>true</code>.)
  *      &lt;/sourceReferenceField&gt;
  *      &lt;targetReferenceField&gt;
  *         (Name of target repository field where to store a document reference.
- *         If not specified, behavior is defined 
- *         by the concrete implementation.) 
+ *         If not specified, behavior is defined
+ *         by the concrete implementation.)
  *      &lt;/targetReferenceField&gt;
  *      &lt;sourceContentField keep="[false|true]"&gt;
- *         (If you wish to use a metadata field to act as the document 
- *         "content", you can specify that field here.  Default 
+ *         (If you wish to use a metadata field to act as the document
+ *         "content", you can specify that field here.  Default
  *         does not take a metadata field but rather the document content.
  *         Once re-mapped, the metadata source field is deleted,
  *         unless "keep" is set to <code>true</code>.)
@@ -133,7 +126,7 @@ import com.norconex.commons.lang.xml.EnhancedXMLStreamWriter;
  *      &lt;maxRetries&gt;(max retries upon commit failures)&lt;/maxRetries&gt;
  *      &lt;maxRetryWait&gt;(max delay in milliseconds between retries)&lt;/maxRetryWait&gt;
  * </pre>
- * 
+ *
  * @author Pascal Essiembre
  * @author Pascal Dimassimo
  * @since 1.1.0
@@ -151,7 +144,7 @@ public abstract class AbstractMappedCommitter
     private String targetReferenceField;
     private String targetContentField;
 
-    
+
     /**
      * Creates a new instance.
      */
@@ -176,7 +169,7 @@ public abstract class AbstractMappedCommitter
     /**
      * sets the source field name holding the unique identifier.
      * @param sourceReferenceField source field name
-     */    
+     */
     public void setSourceReferenceField(String sourceReferenceField) {
         this.sourceReferenceField = sourceReferenceField;
     }
@@ -231,7 +224,7 @@ public abstract class AbstractMappedCommitter
     }
     /**
      * Sets whether to keep the ID source field or not, once mapped.
-     * @param keepSourceReferenceField <code>true</code> when keeping 
+     * @param keepSourceReferenceField <code>true</code> when keeping
      * source reference field
      */
     public void setKeepSourceReferenceField(boolean keepSourceReferenceField) {
@@ -246,7 +239,7 @@ public abstract class AbstractMappedCommitter
     }
     /**
      * Sets whether to keep the content source field or not, once mapped.
-     * @param keepSourceContentField <code>true</code> when keeping content 
+     * @param keepSourceContentField <code>true</code> when keeping content
      * source field
      */
     public void setKeepSourceContentField(boolean keepSourceContentField) {
@@ -268,7 +261,7 @@ public abstract class AbstractMappedCommitter
         if (StringUtils.isNotBlank(targetReferenceField)) {
             metadata.setString(targetReferenceField, referenceValue);
         }
-        if (!keepSourceReferenceField 
+        if (!keepSourceReferenceField
                 && StringUtils.isNotBlank(sourceReferenceField)
                 && StringUtils.isNotBlank(targetReferenceField)
                 && !Objects.equals(
@@ -280,7 +273,7 @@ public abstract class AbstractMappedCommitter
         if (StringUtils.isNotBlank(targetContentField)) {
             if (StringUtils.isNotBlank(sourceContentField)) {
                 List<String >content = metadata.getStrings(sourceContentField);
-                metadata.setString(targetContentField, 
+                metadata.setString(targetContentField,
                         content.toArray(ArrayUtils.EMPTY_STRING_ARRAY));
                 if (!keepSourceContentField && !Objects.equals(
                         sourceContentField, targetContentField)) {
@@ -288,7 +281,7 @@ public abstract class AbstractMappedCommitter
                 }
             } else {
                 InputStream is = operation.getContentStream();
-                metadata.setString(targetContentField, 
+                metadata.setString(targetContentField,
                         IOUtils.toString(is, StandardCharsets.UTF_8));
                 IOUtils.closeQuietly(is);
             }
@@ -296,144 +289,83 @@ public abstract class AbstractMappedCommitter
     }
 
     @Override
-    public void saveToXML(Writer out) throws IOException {
-        try {
-            EnhancedXMLStreamWriter writer = new EnhancedXMLStreamWriter(out);
-            writer.writeStartElement("committer");
-            writer.writeAttribute("class", getClass().getCanonicalName());
-            writer.writeAttributeString("xml:space", "preserve");
-            
-            if (sourceReferenceField != null) {
-                writer.writeStartElement("sourceReferenceField");
-                writer.writeAttributeBoolean("keep", keepSourceReferenceField);
-                writer.writeCharacters(sourceReferenceField);
-                writer.writeEndElement();
-            }
-            
-            if (targetReferenceField != null) {
-                writer.writeElementString(
-                        "targetReferenceField", targetReferenceField);
-            }
-            if (sourceContentField != null) {
-                writer.writeStartElement("sourceContentField");
-                writer.writeAttributeBoolean("keep", keepSourceContentField);
-                writer.writeCharacters(sourceContentField);
-                writer.writeEndElement();
-            }
-            if (targetContentField != null) {
-                writer.writeElementString(
-                        "targetContentField", targetContentField);
-            }
-            if (getQueueDir() != null) {
-                writer.writeElementString("queueDir", getQueueDir());
-            }
-            
-            writer.writeElementInteger("queueSize", getQueueSize());
-            writer.writeElementInteger(
-                    "commitBatchSize", getCommitBatchSize());
-            writer.writeElementInteger("maxRetries", getMaxRetries());
-            writer.writeElementLong("maxRetryWait", getMaxRetryWait());
-
-            saveToXML(writer);
-
-            writer.writeEndElement();
-            writer.flush();
-            writer.close();
-        } catch (XMLStreamException e) {
-            throw new IOException("Cannot save as XML.", e);
+    public void saveToXML(XML xml) {
+        if (sourceReferenceField != null) {
+            xml.addElement("sourceReferenceField", sourceReferenceField)
+                    .setAttribute("keep", keepSourceReferenceField);
         }
+        if (targetReferenceField != null) {
+            xml.addElement("targetReferenceField", targetReferenceField);
+        }
+        if (sourceContentField != null) {
+            xml.addElement("sourceContentField", sourceContentField)
+                    .setAttribute("keep", keepSourceContentField);
+        }
+        if (targetContentField != null) {
+            xml.addElement("targetContentField", targetContentField);
+        }
+        if (getQueueDir() != null) {
+            xml.addElement("queueDir", getQueueDir());
+        }
+
+        xml.addElement("queueSize", getQueueSize());
+        xml.addElement("commitBatchSize", getCommitBatchSize());
+        xml.addElement("maxRetries", getMaxRetries());
+        xml.addElement("maxRetryWait", getMaxRetryWait());
+
+        saveMappedCommitterToXML(xml);
     }
 
     /**
      * Allows subclasses to write their config to xml
-     * 
-     * @param writer the xml being written
-     * @throws XMLStreamException problem saving to XML
+     * @param xml the xml being written
      */
-    protected abstract void saveToXML(XMLStreamWriter writer)
-            throws XMLStreamException;
+    protected abstract void saveMappedCommitterToXML(XML xml);
 
     @Override
-    public void loadFromXML(Reader in) {
-        XMLConfiguration xml = XMLConfigurationUtil.newXMLConfiguration(in);
+    public void loadFromXML(XML xml) {
         setSourceReferenceField(
                 xml.getString("sourceReferenceField", sourceReferenceField));
         setKeepSourceReferenceField(xml.getBoolean(
-                "sourceReferenceField[@keep]", keepSourceReferenceField));
+                "sourceReferenceField/@keep", keepSourceReferenceField));
         setTargetReferenceField(xml.getString(
                 "targetReferenceField", targetReferenceField));
         setSourceContentField(
                 xml.getString("sourceContentField", sourceContentField));
-        setKeepSourceContentField(xml.getBoolean("sourceContentField[@keep]", 
+        setKeepSourceContentField(xml.getBoolean("sourceContentField/@keep",
                 keepSourceContentField));
         setTargetContentField(
                 xml.getString("targetContentField", targetContentField));
         setQueueDir(xml.getString("queueDir", DEFAULT_QUEUE_DIR));
-        setQueueSize(xml.getInt("queueSize", 
+        setQueueSize(xml.getInteger("queueSize",
                 AbstractBatchCommitter.DEFAULT_QUEUE_SIZE));
-        setCommitBatchSize(xml.getInt("commitBatchSize", 
+        setCommitBatchSize(xml.getInteger("commitBatchSize",
                 AbstractBatchCommitter.DEFAULT_COMMIT_BATCH_SIZE));
-        setMaxRetries(xml.getInt("maxRetries", 0));
-        setMaxRetryWait(XMLConfigurationUtil.getDuration(
-                xml, "maxRetryWait", 0));
+        setMaxRetries(xml.getInteger("maxRetries", getMaxRetries()));
+        setMaxRetryWait(xml.getDurationMillis(
+                "maxRetryWait", getMaxRetryWait()));
 
-        loadFromXml(xml);
+        loadMappedCommitterFromXML(xml);
     }
 
     /**
      * Allows subclasses to load their config from xml
-     * 
+     *
      * @param xml XML configuration
      */
-    protected abstract void loadFromXml(XMLConfiguration xml);
+    protected abstract void loadMappedCommitterFromXML(XML xml);
 
+    @Override
+    public boolean equals(final Object other) {
+        return EqualsBuilder.reflectionEquals(this, other);
+    }
     @Override
     public int hashCode() {
-        return new HashCodeBuilder()
-                .appendSuper(super.hashCode())
-                .append(sourceContentField)
-                .append(keepSourceContentField)
-                .append(targetContentField)
-                .append(sourceReferenceField)
-                .append(keepSourceReferenceField)
-                .append(targetReferenceField)
-                .toHashCode();
+        return HashCodeBuilder.reflectionHashCode(this);
     }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (!(obj instanceof AbstractMappedCommitter)) {
-            return false;
-        }
-        AbstractMappedCommitter other = (AbstractMappedCommitter) obj;
-        return new EqualsBuilder()
-                .appendSuper(super.equals(obj))
-                .append(sourceContentField, other.sourceContentField)
-                .append(keepSourceContentField, other.keepSourceContentField)
-                .append(targetContentField, other.targetContentField)
-                .append(sourceReferenceField, other.sourceReferenceField)
-                .append(keepSourceReferenceField, other.keepSourceReferenceField)
-                .append(targetReferenceField, other.targetReferenceField)
-                .isEquals();
-    }
-
     @Override
     public String toString() {
-        ToStringBuilder builder = 
-                new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
-        builder.appendSuper(super.toString());
-        builder.append("targetReferenceField", targetReferenceField);
-        builder.append("sourceReferenceField", sourceReferenceField);
-        builder.append("keepSourceReferenceField", keepSourceReferenceField);
-        builder.append("targetContentField", targetContentField);
-        builder.append("sourceContentField", sourceContentField);
-        builder.append("keepSourceContentField", keepSourceContentField);
-        return builder.toString();
+        return new ReflectionToStringBuilder(
+                this, ToStringStyle.SHORT_PREFIX_STYLE).toString();
     }
 }

@@ -3,19 +3,16 @@ package com.norconex.committer.core;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamWriter;
-
-import org.apache.commons.configuration.XMLConfiguration;
+import com.norconex.commons.lang.xml.XML;
 
 public class MockAbstractMappedCommitter extends AbstractMappedCommitter {
 
     private List<ICommitOperation> commitBatch;
     private boolean committed = false;
-    
+
     @Override
     protected void commitBatch(List<ICommitOperation> batch) {
-        commitBatch = new ArrayList<ICommitOperation>(batch);
+        commitBatch = new ArrayList<>(batch);
     }
     public List<ICommitOperation> getCommitBatch() {
         return commitBatch;
@@ -29,14 +26,11 @@ public class MockAbstractMappedCommitter extends AbstractMappedCommitter {
         committed = true;
     }
     @Override
-    protected void saveToXML(XMLStreamWriter writer)
-            throws XMLStreamException {
-        // no saving
+    protected void loadMappedCommitterFromXML(XML xml) {
+        // NOOP
     }
     @Override
-    protected void loadFromXml(XMLConfiguration xml) {
-        // no loading
+    protected void saveMappedCommitterToXML(XML xml) {
+        // NOOP
     }
-
-    
 }

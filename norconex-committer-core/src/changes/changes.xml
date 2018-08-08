@@ -7,6 +7,22 @@
   </properties>
   <body>
 
+    <release version="3.0.0-SNAPSHOT" date="2018-??-??" description="Major release">
+      <action dev="essiembre" type="update">
+        Maven dependency updates: Norconex Commons Lang 2.0.0.
+      </action>
+      <action dev="essiembre" type="update">
+        Now using XML class from Norconex Commons lang for loading/saving
+        configuration.
+      </action>
+      <action dev="essiembre" type="update">
+        Now using SLF4J for logging.
+      </action>
+      <action dev="essiembre" type="remove">
+        Removed some of the deprecated code from 1.x. 
+      </action>
+    </release>
+
     <release version="2.1.2" date="2017-11-26" description="Maintenance release">
       <action dev="essiembre" type="add">
         It is now possible to specify a "fileNamePrefix" and "fileNameSuffix"

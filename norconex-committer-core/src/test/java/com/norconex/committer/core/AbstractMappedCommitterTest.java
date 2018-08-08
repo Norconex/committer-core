@@ -1,4 +1,4 @@
-/* Copyright 2010-2014 Norconex Inc.
+/* Copyright 2010-2018 Norconex Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,26 +23,18 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamWriter;
-
-import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.io.input.NullInputStream;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-import com.norconex.committer.core.AbstractMappedCommitter;
-import com.norconex.committer.core.IAddOperation;
-import com.norconex.committer.core.ICommitOperation;
 import com.norconex.commons.lang.map.Properties;
+import com.norconex.commons.lang.xml.XML;
 
 /**
- * @author Pascal Dimassimo
  * @author Pascal Essiembre
  */
-@SuppressWarnings({"nls"})
 public class AbstractMappedCommitterTest {
 
     @Rule
@@ -50,9 +42,9 @@ public class AbstractMappedCommitterTest {
     private StubCommitter committer;
     private boolean committed;
 
-    private Properties metadata = new Properties();
+    private final Properties metadata = new Properties();
 
-    private String defaultReference = "1";
+    private final String defaultReference = "1";
 
     /**
      * Sets up a committer for testing.
@@ -71,7 +63,7 @@ public class AbstractMappedCommitterTest {
 
     /**
      * Test no commit if not enough document
-     * @throws IOException could not create temporary file 
+     * @throws IOException could not create temporary file
      */
     @Test
     public void testNoCommit() throws IOException {
@@ -82,7 +74,7 @@ public class AbstractMappedCommitterTest {
 
     /**
      * Test commit if there is enough document.
-     * @throws IOException could not create temporary file 
+     * @throws IOException could not create temporary file
      */
     @Test
     public void testCommit() throws IOException {
@@ -115,18 +107,18 @@ public class AbstractMappedCommitterTest {
         assertEquals(1, committer.getCommitBatch().size());
         IAddOperation op = (IAddOperation) committer.getCommitBatch().get(0);
         Properties docMeta = op.getMetadata();
-        
+
         // Check that customTargetId was used
         assertEquals(defaultReference, docMeta.getString(customTargetId));
 
         // Check that customSourceId was removed (default behavior)
-        assertFalse("Source reference field was not removed.", 
+        assertFalse("Source reference field was not removed.",
                 docMeta.containsKey(customSourceId));
     }
 
     /**
      * Test keeping source id field.
-     * @throws IOException could not create temporary file 
+     * @throws IOException could not create temporary file
      */
     @Test
     public void testKeepSourceId() throws IOException {
@@ -145,14 +137,14 @@ public class AbstractMappedCommitterTest {
         // Check that the source id is still there
         assertTrue(op.getMetadata().containsKey("myreference"));
     }
-    
+
     class StubCommitter extends AbstractMappedCommitter {
 
         private List<ICommitOperation> commitBatch;
-                
+
         @Override
         protected void commitBatch(List<ICommitOperation> batch) {
-            commitBatch = new ArrayList<ICommitOperation>(batch);
+            commitBatch = new ArrayList<>(batch);
         }
         /**
          * @return the operationCount
@@ -166,13 +158,12 @@ public class AbstractMappedCommitterTest {
             committed = true;
         }
         @Override
-        protected void saveToXML(XMLStreamWriter writer)
-                throws XMLStreamException {
-            // no saving
+        protected void loadMappedCommitterFromXML(XML xml) {
+            // NOOP
         }
         @Override
-        protected void loadFromXml(XMLConfiguration xml) {
-            // no loading
+        protected void saveMappedCommitterToXML(XML xml) {
+            // NOOP
         }
     }
 }

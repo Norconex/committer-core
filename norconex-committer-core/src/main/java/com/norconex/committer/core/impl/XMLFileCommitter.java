@@ -1,4 +1,4 @@
-/* Copyright 2017 Norconex Inc.
+/* Copyright 2017-2018 Norconex Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,16 +20,12 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
-import java.io.Reader;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.zip.GZIPOutputStream;
 
-import javax.xml.stream.XMLStreamException;
-
-import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -38,25 +34,25 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.apache.commons.lang3.time.DateFormatUtils;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.norconex.committer.core.CommitterException;
 import com.norconex.committer.core.ICommitter;
 import com.norconex.commons.lang.config.IXMLConfigurable;
-import com.norconex.commons.lang.config.XMLConfigurationUtil;
 import com.norconex.commons.lang.file.FileUtil;
 import com.norconex.commons.lang.map.Properties;
 import com.norconex.commons.lang.xml.EnhancedXMLStreamWriter;
+import com.norconex.commons.lang.xml.XML;
 
 /**
  * <p>
  * Commits documents to XML files.  There are two kinds of generated files:
- * additions and deletions. 
+ * additions and deletions.
  * </p>
  * <p>
- * The generated XML file names are made of a timestamp and a sequence number. 
- * The timestamp matches the first time the 
+ * The generated XML file names are made of a timestamp and a sequence number.
+ * The timestamp matches the first time the
  * {@link #add(String, InputStream, Properties)} or
  * {@link #remove(String, Properties)} methods is called.
  * </p>
@@ -65,11 +61,11 @@ import com.norconex.commons.lang.xml.EnhancedXMLStreamWriter;
  * files that will be created (default does not add any).
  * </p>
  * <p>
- * If you request to split additions and deletions into separate files, 
- * the generated files will start with "add-" (for additions) and "del-" (for 
+ * If you request to split additions and deletions into separate files,
+ * the generated files will start with "add-" (for additions) and "del-" (for
  * deletions).
  * </p>
- * 
+ *
  * <h3>Generated XML format:</h3>
  * <pre>
  * &lt;docs&gt;
@@ -88,7 +84,7 @@ import com.norconex.commons.lang.xml.EnhancedXMLStreamWriter;
  *   &lt;doc-add&gt;
  *     &lt;!-- doc-add element is repeated for each additions --&gt;
  *   &lt;/doc-add&gt;
- *   
+ *
  *   &lt;!-- Document deletions: --&gt;
  *   &lt;doc-del&gt;
  *     &lt;reference&gt;(document reference, e.g., URL)&lt;/reference&gt;
@@ -97,8 +93,8 @@ import com.norconex.commons.lang.xml.EnhancedXMLStreamWriter;
  *     &lt;!-- doc-del element is repeated for each deletions --&gt;
  *   &lt;/doc-del&gt;
  * &lt;/docs&gt;
- * </pre> 
- * 
+ * </pre>
+ *
  * <h3>XML configuration usage:</h3>
  * <pre>
  *  &lt;committer class="com.norconex.committer.core.impl.XMLFileCommitter"&gt;
@@ -111,14 +107,14 @@ import com.norconex.commons.lang.xml.EnhancedXMLStreamWriter;
  *      &lt;fileNameSuffix&gt;(optional suffix to created file names)&lt;/fileNameSuffix&gt;
  *  &lt;/committer&gt;
  * </pre>
- * 
+ *
  * @author Pascal Essiembre
  * @since 2.1.0
  */
 public class XMLFileCommitter implements ICommitter, IXMLConfigurable  {
 
-    private static final Logger LOG = 
-            LogManager.getLogger(XMLFileCommitter.class);
+    private static final Logger LOG =
+            LoggerFactory.getLogger(XMLFileCommitter.class);
 
     /** Default committer directory */
     public static final String DEFAULT_DIRECTORY = "committer-xml";
@@ -136,14 +132,14 @@ public class XMLFileCommitter implements ICommitter, IXMLConfigurable  {
     private String baseName;
     private String fileNamePrefix;
     private String fileNameSuffix;
-    
+
     /**
      * Constructor.
      */
     public XMLFileCommitter() {
         super();
     }
-    
+
     /**
      * Gets the directory where files are committed.
      * @return directory
@@ -158,14 +154,14 @@ public class XMLFileCommitter implements ICommitter, IXMLConfigurable  {
     public void setDirectory(String directory) {
         this.directory = directory;
     }
-    
+
     public boolean isPretty() {
         return pretty;
     }
     public void setPretty(boolean indent) {
         this.pretty = indent;
     }
-    
+
     public int getDocsPerFile() {
         return docsPerFile;
     }
@@ -179,7 +175,7 @@ public class XMLFileCommitter implements ICommitter, IXMLConfigurable  {
     public void setCompress(boolean compress) {
         this.compress = compress;
     }
-    
+
     public boolean isSplitAddDelete() {
         return splitAddDelete;
     }
@@ -261,7 +257,7 @@ public class XMLFileCommitter implements ICommitter, IXMLConfigurable  {
                     IOUtils.toString(content, StandardCharsets.UTF_8).trim());
             xml.writeEndElement(); //content
             xml.writeEndElement(); //doc
-        } catch (XMLStreamException | IOException e) {
+        } catch (IOException e) {
             mainXML.close();
             throw new CommitterException(
                     "Cannot write to XML file: " + mainXML.file, e);
@@ -287,18 +283,12 @@ public class XMLFileCommitter implements ICommitter, IXMLConfigurable  {
             }
             xmlFile = mainXML;
         }
-        
+
         xmlFile.init();
-        try {
-            EnhancedXMLStreamWriter xml = xmlFile.xml;
-            xml.writeStartElement("doc-del");
-            xml.writeElementString("reference", reference);
-            xml.writeEndElement(); //doc
-        } catch (XMLStreamException e) {
-            xmlFile.close();
-            throw new CommitterException(
-                    "Cannot write to XML file: " + xmlFile.file, e);
-        }
+        EnhancedXMLStreamWriter xml = xmlFile.xml;
+        xml.writeStartElement("doc-del");
+        xml.writeElementString("reference", reference);
+        xml.writeEndElement(); //doc
         xmlFile.docCount++;
         if (docsPerFile > 0 && xmlFile.docCount == docsPerFile) {
             xmlFile.close();
@@ -319,37 +309,26 @@ public class XMLFileCommitter implements ICommitter, IXMLConfigurable  {
     }
 
     @Override
-    public void loadFromXML(Reader in) {
-        XMLConfiguration xml = XMLConfigurationUtil.newXMLConfiguration(in);
+    public void loadFromXML(XML xml) {
         setDirectory(xml.getString("directory", directory));
         setPretty(xml.getBoolean("pretty", pretty));
-        setDocsPerFile(xml.getInt("docsPerFile", docsPerFile));
+        setDocsPerFile(xml.getInteger("docsPerFile", docsPerFile));
         setCompress(xml.getBoolean("compress", compress));
         setSplitAddDelete(xml.getBoolean("splitAddDelete", splitAddDelete));
         setFileNamePrefix(xml.getString("fileNamePrefix", fileNamePrefix));
         setFileNameSuffix(xml.getString("fileNameSuffix", fileNameSuffix));
     }
     @Override
-    public void saveToXML(Writer out) throws IOException {
-        try {
-            EnhancedXMLStreamWriter writer = new EnhancedXMLStreamWriter(out);
-            writer.writeStartElement("committer");
-            writer.writeAttribute("class", getClass().getCanonicalName());
-            writer.writeElementString("directory", directory);
-            writer.writeElementBoolean("pretty", pretty);
-            writer.writeElementInteger("docsPerFile", docsPerFile);
-            writer.writeElementBoolean("compress", compress);
-            writer.writeElementBoolean("splitAddDelete", splitAddDelete);
-            writer.writeElementString("fileNamePrefix", fileNamePrefix);
-            writer.writeElementString("fileNameSuffix", fileNameSuffix);
-            writer.writeEndElement();
-            writer.flush();
-            writer.close();
-        } catch (XMLStreamException e) {
-            throw new IOException("Cannot save as XML.", e);
-        }
+    public void saveToXML(XML xml) {
+        xml.addElement("directory", directory);
+        xml.addElement("pretty", pretty);
+        xml.addElement("docsPerFile", docsPerFile);
+        xml.addElement("compress", compress);
+        xml.addElement("splitAddDelete", splitAddDelete);
+        xml.addElement("fileNamePrefix", fileNamePrefix);
+        xml.addElement("fileNameSuffix", fileNameSuffix);
     }
-    
+
     @Override
     public int hashCode() {
         return new HashCodeBuilder()
@@ -362,7 +341,7 @@ public class XMLFileCommitter implements ICommitter, IXMLConfigurable  {
                 .append(fileNameSuffix)
                 .toHashCode();
     }
-    
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -416,10 +395,10 @@ public class XMLFileCommitter implements ICommitter, IXMLConfigurable  {
             if (xml != null) {
                 return;
             }
-            
+
             // initialize
             rollCount++;
-            String fileName = 
+            String fileName =
                     StringUtils.stripToEmpty(
                             FileUtil.toSafeFileName(fileNamePrefix))
                   + fileBaseName
@@ -444,11 +423,11 @@ public class XMLFileCommitter implements ICommitter, IXMLConfigurable  {
                 } else {
                     writer = new FileWriter(file);
                 }
-                
+
                 xml = new EnhancedXMLStreamWriter(writer, false, indentSize);
                 xml.writeStartDocument();
                 xml.writeStartElement("docs");
-            } catch (XMLStreamException | IOException e) {
+            } catch (IOException e) {
                 throw new CommitterException(
                         "Cannot create XML file: " + file, e);
             }
@@ -462,7 +441,7 @@ public class XMLFileCommitter implements ICommitter, IXMLConfigurable  {
                     xml.close();
                     writer.flush();
                     writer.close();
-                } catch (XMLStreamException | IOException e) {
+                } catch (IOException e) {
                     throw new CommitterException(
                             "Cannot close XML file: " + file, e);
                 }

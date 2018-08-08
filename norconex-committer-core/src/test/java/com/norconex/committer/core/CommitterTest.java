@@ -1,4 +1,4 @@
-/* Copyright 2017 Norconex Inc.
+/* Copyright 2017-2018 Norconex Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 
-import org.apache.log4j.Level;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.norconex.committer.core.impl.MultiCommitter;
-import com.norconex.commons.lang.config.XMLConfigurationUtil;
-import com.norconex.commons.lang.log.CountingConsoleAppender;
+import com.norconex.commons.lang.xml.XML;
 
 
 /**
@@ -46,20 +43,15 @@ public class CommitterTest {
         c.setTargetContentField("targetContentField");
         c.setTargetReferenceField("targetReferenceField");
         System.out.println("Writing/Reading this: " + c);
-        XMLConfigurationUtil.assertWriteRead(c);
+        XML.assertWriteRead(c, "committer");
     }
-    
+
     @Test
     public void testValidation() throws IOException {
-        CountingConsoleAppender appender = new CountingConsoleAppender();
-        appender.startCountingFor(XMLConfigurationUtil.class, Level.WARN);
         try (Reader r = new InputStreamReader(getClass().getResourceAsStream(
                 "/validation/committer-core-full.xml"))) {
-            XMLConfigurationUtil.loadFromXML(new MultiCommitter(), r);
-        } finally {
-            appender.stopCountingFor(XMLConfigurationUtil.class);
+            Assert.assertEquals("Validation warnings/errors were found.",
+                    0, new XML(r).validate().size());
         }
-        Assert.assertEquals("Validation warnings/errors were found.", 
-                0, appender.getCount());
     }
 }

@@ -1,4 +1,4 @@
-/* Copyright 2010-2017 Norconex Inc.
+/* Copyright 2010-2018 Norconex Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,18 +18,14 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.Reader;
-import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 
-import javax.xml.stream.XMLStreamException;
-
-import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.apache.commons.lang3.time.DateFormatUtils;
 
@@ -37,16 +33,15 @@ import com.norconex.committer.core.CommitterException;
 import com.norconex.committer.core.ICommitter;
 import com.norconex.commons.lang.TimeIdGenerator;
 import com.norconex.commons.lang.config.IXMLConfigurable;
-import com.norconex.commons.lang.config.XMLConfigurationUtil;
 import com.norconex.commons.lang.map.Properties;
-import com.norconex.commons.lang.xml.EnhancedXMLStreamWriter;
+import com.norconex.commons.lang.xml.XML;
 
 
 /**
  * <p>
  * Commits a copy of files on the filesystem.  Files are directly saved
- * to the specified directory (no queuing or commit).  Useful for 
- * troubleshooting, or used as a file-based queue implementation by 
+ * to the specified directory (no queuing or commit).  Useful for
+ * troubleshooting, or used as a file-based queue implementation by
  * other committers.
  * </p>
  * <h3>XML configuration usage:</h3>
@@ -57,21 +52,20 @@ import com.norconex.commons.lang.xml.EnhancedXMLStreamWriter;
  * </pre>
  * @author Pascal Essiembre
  */
-@SuppressWarnings("nls")
 public class FileSystemCommitter implements ICommitter, IXMLConfigurable {
 
     /** Default committer directory */
     public static final String DEFAULT_DIRECTORY = "committer";
-    
+
     public static final String EXTENSION_CONTENT = ".cntnt";
     public static final String EXTENSION_METADATA = ".meta";
     public static final String EXTENSION_REFERENCE = ".ref";
-    
+
     public static final String FILE_SUFFIX_ADD = "-add";
     public static final String FILE_SUFFIX_REMOVE = "-del";
-    
+
     private String directory = DEFAULT_DIRECTORY;
-    
+
     /**
      * Gets the directory where files are committed.
      * @return directory
@@ -86,7 +80,7 @@ public class FileSystemCommitter implements ICommitter, IXMLConfigurable {
     public void setDirectory(String directory) {
         this.directory = directory;
     }
-    
+
     @Override
     public void add(
             String reference, InputStream content, Properties metadata) {
@@ -94,20 +88,20 @@ public class FileSystemCommitter implements ICommitter, IXMLConfigurable {
             File targetFile = createFile(FILE_SUFFIX_ADD);
 
             // Content
-            FileUtils.copyInputStreamToFile(content, 
+            FileUtils.copyInputStreamToFile(content,
                     new File(targetFile.getAbsolutePath() + EXTENSION_CONTENT));
 
             // Metadata
             FileOutputStream out = new FileOutputStream(new File(
                     targetFile.getAbsolutePath() + EXTENSION_METADATA));
-            metadata.store(out, "");
+            metadata.storeToProperties(out, "");
             IOUtils.closeQuietly(out);
-            
+
             // Reference
             FileUtils.writeStringToFile(new File(
                     targetFile.getAbsolutePath() + EXTENSION_REFERENCE),
                     reference, StandardCharsets.UTF_8);
-            
+
         } catch (IOException e) {
             throw new CommitterException(
                     "Cannot queue document addition.  Ref: " + reference, e);
@@ -131,35 +125,18 @@ public class FileSystemCommitter implements ICommitter, IXMLConfigurable {
         //DO NOTHING
     }
 
-    /**
-     * Gets the directory where documents to be added are stored.
-     * @return directory
-     * @deprecated since 2.0.1
-     */
-    @Deprecated
-    public File getAddDir() {
-        return new File(directory);
-    }
-    /**
-     * Gets the directory where documents to be removed are stored.
-     * @return directory
-     * @deprecated since 2.0.1
-     */
-    @Deprecated
-    public File getRemoveDir() {
-        return new File(directory); 
-    }
-    
     private synchronized File createFile(String suffix) throws IOException {
         // Create date directory
-        File dateDir = new File(directory, DateFormatUtils.format(
+        String safeDir =
+                ObjectUtils.defaultIfNull(directory, DEFAULT_DIRECTORY);
+        File dateDir = new File(safeDir, DateFormatUtils.format(
                 System.currentTimeMillis(), "yyyy/MM-dd/hh/mm/ss"));
         if (!dateDir.exists()) {
             try {
                 FileUtils.forceMkdir(dateDir);
             } catch (IOException e) {
                 throw new CommitterException(
-                        "Cannot create commit directory: " + dateDir, e); 
+                        "Cannot create commit directory: " + dateDir, e);
             }
         }
         // Create file
@@ -167,55 +144,26 @@ public class FileSystemCommitter implements ICommitter, IXMLConfigurable {
     }
 
     @Override
-    public void loadFromXML(Reader in) {
-        XMLConfiguration xml = XMLConfigurationUtil.newXMLConfiguration(in);
-        setDirectory(xml.getString("directory", DEFAULT_DIRECTORY));
+    public void loadFromXML(XML xml) {
+        setDirectory(xml.getString("directory", directory));
     }
     @Override
-    public void saveToXML(Writer out) throws IOException {
-        try {
-            EnhancedXMLStreamWriter writer = new EnhancedXMLStreamWriter(out);
-            writer.writeStartElement("committer");
-            writer.writeAttribute("class", getClass().getCanonicalName());
-            writer.writeElementString("directory", directory);
-            writer.writeEndElement();
-            writer.flush();
-            writer.close();
-        } catch (XMLStreamException e) {
-            throw new IOException("Cannot save as XML.", e);
-        }
+    public void saveToXML(XML xml) {
+        xml.addElement("directory", directory);
     }
 
+    @Override
+    public boolean equals(final Object other) {
+        return EqualsBuilder.reflectionEquals(this, other);
+    }
     @Override
     public int hashCode() {
-        HashCodeBuilder hashCodeBuilder = new HashCodeBuilder();
-        hashCodeBuilder.append(directory);
-        return hashCodeBuilder.toHashCode();
+        return HashCodeBuilder.reflectionHashCode(this);
     }
-    
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (!(obj instanceof FileSystemCommitter)) {
-            return false;
-        }
-        FileSystemCommitter other = (FileSystemCommitter) obj;
-        EqualsBuilder equalsBuilder = new EqualsBuilder();
-        equalsBuilder.append(directory, other.directory);
-        return equalsBuilder.isEquals();
-    }
-
     @Override
     public String toString() {
-        ToStringBuilder builder = 
-                new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
-        builder.append("directory", directory);
-        return builder.toString();
+        return new ReflectionToStringBuilder(
+                this, ToStringStyle.SHORT_PREFIX_STYLE).toString();
     }
 }
 

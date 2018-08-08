@@ -1,4 +1,4 @@
-/* Copyright 2010-2014 Norconex Inc.
+/* Copyright 2010-2018 Norconex Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,17 +20,17 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.apache.commons.lang3.time.StopWatch;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.norconex.committer.core.ICommitter;
 import com.norconex.commons.lang.map.Properties;
 
 /**
- * A dummy Committer that does nothing but logging to INFO (log4j) how many 
+ * A dummy Committer that does nothing but logging to INFO (log4j) how many
  * documents were queued (in batch of 100) so far, or committed (but fake).
  * Using log level DEBUG will print out all references being queued.
- * Can be useful for troubleshooting, or as a temporary replacement when 
+ * Can be useful for troubleshooting, or as a temporary replacement when
  * developing or testing a product that uses Committers, but you want something
  * faster or you are not yet ready to turn yours "on".
  * <p>
@@ -43,14 +43,14 @@ import com.norconex.commons.lang.map.Properties;
  */
 public class NilCommitter implements ICommitter  {
 
-    private static final Logger LOG = LogManager.getLogger(NilCommitter.class);
-    
+    private static final Logger LOG = LoggerFactory.getLogger(NilCommitter.class);
+
     private static final int LOG_TIME_BATCH_SIZE = 100;
-    
+
     private long addCount = 0;
     private long removeCount = 0;
-    private StopWatch watch = new StopWatch();
-    
+    private final StopWatch watch = new StopWatch();
+
     /**
      * Constructor.
      */
@@ -64,10 +64,10 @@ public class NilCommitter implements ICommitter  {
             String reference, InputStream content, Properties metadata) {
         addCount++;
         if (LOG.isDebugEnabled()) {
-            LOG.debug("Queing addition of " + reference);
+            LOG.debug("Queing addition of {}", reference);
         }
         if (addCount % LOG_TIME_BATCH_SIZE == 0) {
-            LOG.info(addCount + " additions queued in: " + watch.toString());
+            LOG.info("{} additions queued in: {}", addCount, watch.toString());
         }
     }
 
@@ -75,18 +75,18 @@ public class NilCommitter implements ICommitter  {
     public synchronized void remove(String reference, Properties metadata) {
         removeCount++;
         if (LOG.isDebugEnabled()) {
-            LOG.debug("Queing deletion of " + reference);
+            LOG.debug("Queing deletion of {}", reference);
         }
         if (removeCount % LOG_TIME_BATCH_SIZE == 0) {
-            LOG.info(removeCount + " deletions queued in " + watch.toString());
+            LOG.info("{} deletions queued in {}", removeCount, watch);
         }
     }
 
     @Override
     public void commit() {
-        LOG.info(addCount + " additions committed.");
-        LOG.info(removeCount + " deletions committed.");
-        LOG.info("Total elapsed time: " + watch.toString());
+        LOG.info("{} additions committed.", addCount);
+        LOG.info("{} deletions committed.", removeCount);
+        LOG.info("Total elapsed time: {}", watch);
     }
 
     @Override
@@ -106,5 +106,5 @@ public class NilCommitter implements ICommitter  {
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
                 .toString();
-    }  
+    }
 }

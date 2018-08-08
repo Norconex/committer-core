@@ -1,4 +1,4 @@
-/* Copyright 2010-2017 Norconex Inc.
+/* Copyright 2010-2018 Norconex Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,8 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.norconex.commons.lang.file.FileUtil;
 
@@ -35,12 +35,12 @@ import com.norconex.commons.lang.file.FileUtil;
 public class FileDeleteOperation implements IDeleteOperation {
 
     private static final long serialVersionUID = 1182738593255366952L;
-    private static final Logger LOG = 
-            LogManager.getLogger(FileDeleteOperation.class);
-    
+    private static final Logger LOG =
+            LoggerFactory.getLogger(FileDeleteOperation.class);
+
     private final String reference;
     private final File refFile;
-    
+
     /**
      * Constructor.
      * @param refFile the file to be deleted
@@ -49,14 +49,14 @@ public class FileDeleteOperation implements IDeleteOperation {
         super();
         this.refFile = refFile;
         try {
-            this.reference = 
+            this.reference =
                     FileUtils.readFileToString(refFile, StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new CommitterException(
                     "Cannot obtain reference from file " + refFile, e);
         }
     }
-    
+
     @Override
     public String getReference() {
         return reference;
@@ -75,7 +75,7 @@ public class FileDeleteOperation implements IDeleteOperation {
     public int hashCode() {
         return refFile.hashCode();
     }
-    
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -93,10 +93,10 @@ public class FileDeleteOperation implements IDeleteOperation {
         equalsBuilder.append(refFile, other.refFile);
         return equalsBuilder.isEquals();
     }
-    
+
     @Override
     public String toString() {
-        ToStringBuilder builder = 
+        ToStringBuilder builder =
                 new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
         builder.append("reference", reference);
         builder.append("refFile", refFile);

@@ -1,4 +1,4 @@
-/* Copyright 2017 Norconex Inc.
+/* Copyright 2017-2018 Norconex Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,14 +20,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
-import java.io.Reader;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.util.zip.GZIPOutputStream;
 
-import javax.xml.stream.XMLStreamException;
-
-import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -36,26 +32,25 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.apache.commons.lang3.time.DateFormatUtils;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.norconex.committer.core.CommitterException;
 import com.norconex.committer.core.ICommitter;
 import com.norconex.commons.lang.config.IXMLConfigurable;
-import com.norconex.commons.lang.config.XMLConfigurationUtil;
 import com.norconex.commons.lang.file.FileUtil;
 import com.norconex.commons.lang.map.Properties;
-import com.norconex.commons.lang.xml.EnhancedXMLStreamWriter;
+import com.norconex.commons.lang.xml.XML;
 
 /**
  * <p>
  * Commits documents to JSON files.  There are two kinds of generated files:
- * additions and deletions. 
+ * additions and deletions.
  * </p>
  * <p>
- * The generated JSON file names are made of a timestamp and a sequence number. 
- * The timestamp matches the first time the 
+ * The generated JSON file names are made of a timestamp and a sequence number.
+ * The timestamp matches the first time the
  * {@link #add(String, InputStream, Properties)} or
  * {@link #remove(String, Properties)} methods is called.
  * </p>
@@ -64,11 +59,11 @@ import com.norconex.commons.lang.xml.EnhancedXMLStreamWriter;
  * files that will be created (default does not add any).
  * </p>
  * <p>
- * If you request to split additions and deletions into separate files, 
- * the generated files will start with "add-" (for additions) and "del-" (for 
+ * If you request to split additions and deletions into separate files,
+ * the generated files will start with "add-" (for additions) and "del-" (for
  * deletions).
  * </p>
- * 
+ *
  * <h3>Generated JSON format:</h3>
  * <pre>
  * [
@@ -90,8 +85,8 @@ import com.norconex.commons.lang.xml.EnhancedXMLStreamWriter;
  *   {"doc-del": {"reference": "document reference, e.g., URL"}},
  *   {"doc-del": {"reference": "repeated as necessary"}}
  * ]
- * </pre> 
- * 
+ * </pre>
+ *
  * <h3>XML configuration usage:</h3>
  * <pre>
  *  &lt;committer class="com.norconex.committer.core.impl.JSONFileCommitter"&gt;
@@ -104,14 +99,14 @@ import com.norconex.commons.lang.xml.EnhancedXMLStreamWriter;
  *      &lt;fileNameSuffix&gt;(optional suffix to created file names)&lt;/fileNameSuffix&gt;
  *  &lt;/committer&gt;
  * </pre>
- * 
+ *
  * @author Pascal Essiembre
  * @since 2.1.0
  */
 public class JSONFileCommitter implements ICommitter, IXMLConfigurable  {
 
-    private static final Logger LOG = 
-            LogManager.getLogger(JSONFileCommitter.class);
+    private static final Logger LOG =
+            LoggerFactory.getLogger(JSONFileCommitter.class);
 
     /** Default committer directory */
     public static final String DEFAULT_DIRECTORY = "committer-json";
@@ -129,14 +124,14 @@ public class JSONFileCommitter implements ICommitter, IXMLConfigurable  {
     private String baseName;
     private String fileNamePrefix;
     private String fileNameSuffix;
-    
+
     /**
      * Constructor.
      */
     public JSONFileCommitter() {
         super();
     }
-    
+
     /**
      * Gets the directory where files are committed.
      * @return directory
@@ -151,14 +146,14 @@ public class JSONFileCommitter implements ICommitter, IXMLConfigurable  {
     public void setDirectory(String directory) {
         this.directory = directory;
     }
-    
+
     public boolean isPretty() {
         return pretty;
     }
     public void setPretty(boolean indent) {
         this.pretty = indent;
     }
-    
+
     public int getDocsPerFile() {
         return docsPerFile;
     }
@@ -172,7 +167,7 @@ public class JSONFileCommitter implements ICommitter, IXMLConfigurable  {
     public void setCompress(boolean compress) {
         this.compress = compress;
     }
-    
+
     public boolean isSplitAddDelete() {
         return splitAddDelete;
     }
@@ -213,7 +208,7 @@ public class JSONFileCommitter implements ICommitter, IXMLConfigurable  {
     public void setFileNameSuffix(String fileNameSuffix) {
         this.fileNameSuffix = fileNameSuffix;
     }
-    
+
     private synchronized void init() {
         if (baseName == null) {
             File dir = new File(directory);
@@ -246,7 +241,7 @@ public class JSONFileCommitter implements ICommitter, IXMLConfigurable  {
         if (pretty) {
             indent = 2;
         }
-        
+
         Writer writer = mainJSON.writer;
 
         try {
@@ -259,19 +254,19 @@ public class JSONFileCommitter implements ICommitter, IXMLConfigurable  {
             JSONObject doc = new JSONObject();
             doc.put("reference", reference);
             doc.put("metadata", metadata);
-            doc.put("content", 
+            doc.put("content",
                     IOUtils.toString(content, StandardCharsets.UTF_8).trim());
-            
+
             JSONObject docAdd = new JSONObject();
             docAdd.put("doc-add", doc);
             writer.write(docAdd.toString(indent));
         } catch (IOException e) {
             mainJSON.close();
-            throw new CommitterException("Cannot write to JSON file: " 
+            throw new CommitterException("Cannot write to JSON file: "
                     + mainJSON.file.getAbsolutePath(), e);
         }
 
-        
+
         mainJSON.docCount++;
         if (docsPerFile > 0 && mainJSON.docCount == docsPerFile) {
             mainJSON.close();
@@ -293,15 +288,15 @@ public class JSONFileCommitter implements ICommitter, IXMLConfigurable  {
             }
             jsonFile = mainJSON;
         }
-        
+
         jsonFile.init();
-        
-        
+
+
         int indent = 0;
         if (pretty) {
             indent = 2;
         }
-        
+
         Writer writer = jsonFile.writer;
         try {
             if (jsonFile.docCount > 0) {
@@ -315,11 +310,11 @@ public class JSONFileCommitter implements ICommitter, IXMLConfigurable  {
 
             JSONObject docDel = new JSONObject();
             docDel.put("doc-del", doc);
-            
+
             writer.write(docDel.toString(indent));
         } catch (IOException e) {
             jsonFile.close();
-            throw new CommitterException("Cannot write to JSON file: " 
+            throw new CommitterException("Cannot write to JSON file: "
                     + mainJSON.file.getAbsolutePath(), e);
         }
         jsonFile.docCount++;
@@ -342,37 +337,26 @@ public class JSONFileCommitter implements ICommitter, IXMLConfigurable  {
     }
 
     @Override
-    public void loadFromXML(Reader in) {
-        XMLConfiguration xml = XMLConfigurationUtil.newXMLConfiguration(in);
+    public void loadFromXML(XML xml) {
         setDirectory(xml.getString("directory", directory));
         setPretty(xml.getBoolean("pretty", pretty));
-        setDocsPerFile(xml.getInt("docsPerFile", docsPerFile));
+        setDocsPerFile(xml.getInteger("docsPerFile", docsPerFile));
         setCompress(xml.getBoolean("compress", compress));
         setSplitAddDelete(xml.getBoolean("splitAddDelete", splitAddDelete));
         setFileNamePrefix(xml.getString("fileNamePrefix", fileNamePrefix));
         setFileNameSuffix(xml.getString("fileNameSuffix", fileNameSuffix));
     }
     @Override
-    public void saveToXML(Writer out) throws IOException {
-        try {
-            EnhancedXMLStreamWriter writer = new EnhancedXMLStreamWriter(out);
-            writer.writeStartElement("committer");
-            writer.writeAttribute("class", getClass().getCanonicalName());
-            writer.writeElementString("directory", directory);
-            writer.writeElementBoolean("pretty", pretty);
-            writer.writeElementInteger("docsPerFile", docsPerFile);
-            writer.writeElementBoolean("compress", compress);
-            writer.writeElementBoolean("splitAddDelete", splitAddDelete);
-            writer.writeElementString("fileNamePrefix", fileNamePrefix);
-            writer.writeElementString("fileNameSuffix", fileNameSuffix);
-            writer.writeEndElement();
-            writer.flush();
-            writer.close();
-        } catch (XMLStreamException e) {
-            throw new IOException("Cannot save as XML.", e);
-        }
+    public void saveToXML(XML xml) {
+        xml.addElement("directory", directory);
+        xml.addElement("pretty", pretty);
+        xml.addElement("docsPerFile", docsPerFile);
+        xml.addElement("compress", compress);
+        xml.addElement("splitAddDelete", splitAddDelete);
+        xml.addElement("fileNamePrefix", fileNamePrefix);
+        xml.addElement("fileNameSuffix", fileNameSuffix);
     }
-    
+
     @Override
     public int hashCode() {
         return new HashCodeBuilder()
@@ -385,7 +369,7 @@ public class JSONFileCommitter implements ICommitter, IXMLConfigurable  {
                 .append(fileNameSuffix)
                 .toHashCode();
     }
-    
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -438,10 +422,10 @@ public class JSONFileCommitter implements ICommitter, IXMLConfigurable  {
             if (writer != null) {
                 return;
             }
-            
+
             // initialize
             rollCount++;
-            String fileName = 
+            String fileName =
                     StringUtils.stripToEmpty(
                             FileUtil.toSafeFileName(fileNamePrefix))
                   + fileBaseName

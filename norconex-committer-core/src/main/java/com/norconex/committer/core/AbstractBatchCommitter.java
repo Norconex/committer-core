@@ -1,4 +1,4 @@
-/* Copyright 2010-2015 Norconex Inc.
+/* Copyright 2010-2018 Norconex Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,10 +22,10 @@ import java.util.Set;
 import org.apache.commons.collections4.set.ListOrderedSet;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.norconex.commons.lang.Sleeper;
 import com.norconex.commons.lang.config.IXMLConfigurable;
@@ -38,13 +38,13 @@ import com.norconex.commons.lang.config.IXMLConfigurable;
  * operations are cached in memory until the commit batch size is reached, then
  * the operations cached so far are sent.
  * <br><br>
- * After being committed, the documents are automatically removed from the 
+ * After being committed, the documents are automatically removed from the
  * queue.
  * <br><br>
  * If you need to map original document fields with target repository fields,
  * consider using {@link AbstractMappedCommitter}.
- * 
- * <p>Subclasses implementing {@link IXMLConfigurable} should allow this inner 
+ *
+ * <p>Subclasses implementing {@link IXMLConfigurable} should allow this inner
  * configuration:</p>
  * <pre>
  *      &lt;commitBatchSize&gt;
@@ -55,16 +55,16 @@ import com.norconex.commons.lang.config.IXMLConfigurable;
  *      &lt;maxRetries&gt;(max retries upon commit failures)&lt;/maxRetries&gt;
  *      &lt;maxRetryWait&gt;(max delay in milliseconds between retries)&lt;/maxRetryWait&gt;
  * </pre>
- * 
+ *
  * @author Pascal Essiembre
  * @since 1.1.0
  */
-public abstract class AbstractBatchCommitter 
+public abstract class AbstractBatchCommitter
         extends AbstractFileQueueCommitter {
 
-    private static final Logger LOG = LogManager.getLogger(
+    private static final Logger LOG = LoggerFactory.getLogger(
             AbstractBatchCommitter.class);
-    
+
     /** Default commit batch size. */
     public static final int DEFAULT_COMMIT_BATCH_SIZE = 100;
 
@@ -72,7 +72,7 @@ public abstract class AbstractBatchCommitter
     private int maxRetries;
     private long maxRetryWait;
 
-    private final Set<ICommitOperation> operations = 
+    private final Set<ICommitOperation> operations =
             Collections.synchronizedSet(new ListOrderedSet<ICommitOperation>());
 
     /**
@@ -121,10 +121,10 @@ public abstract class AbstractBatchCommitter
     public void setMaxRetries(int maxRetries) {
         this.maxRetries = maxRetries;
     }
-    
+
     /**
      * Gets the maximum wait time before retrying a failed commit.
-     * @return maximum wait time 
+     * @return maximum wait time
      * @since 1.2.0
      */
     public long getMaxRetryWait() {
@@ -132,7 +132,7 @@ public abstract class AbstractBatchCommitter
     }
     /**
      * Sets the maximum wait time before retrying a failed commit.
-     * @param maxRetryWait maximum wait time 
+     * @param maxRetryWait maximum wait time
      * @since 1.2.0
      */
     public void setMaxRetryWait(long maxRetryWait) {
@@ -155,9 +155,7 @@ public abstract class AbstractBatchCommitter
             synchronized (operations) {
                 batch = getBatchToCommit();
             }
-            if (batch != null) {
-                commitAndCleanBatch(batch);
-            }
+            commitAndCleanBatch(batch);
         }
     }
 
@@ -166,7 +164,7 @@ public abstract class AbstractBatchCommitter
      * @param batch the group of operations
      */
     protected abstract void commitBatch(List<ICommitOperation> batch);
-   
+
     /**
      * Commits documents and delete them from queue when done.
      * @param batch the bath of operations to commit.
@@ -188,14 +186,14 @@ public abstract class AbstractBatchCommitter
                 }
             }
         }
-        
+
         // Delete queued documents after commit
         for (ICommitOperation op : batch) {
             op.delete();
         }
         batch.clear();
     }
-    
+
     private void cacheOperationAndCommitIfReady(ICommitOperation operation) {
         operations.add(operation);
         List<ICommitOperation> batch = null;
@@ -208,55 +206,24 @@ public abstract class AbstractBatchCommitter
             commitAndCleanBatch(batch);
         }
     }
-    
+
     private List<ICommitOperation> getBatchToCommit() {
-        List<ICommitOperation> batch = 
-                new ArrayList<ICommitOperation>(operations);
+        List<ICommitOperation> batch = new ArrayList<>(operations);
         operations.clear();
         return batch;
     }
 
     @Override
-    public int hashCode() {
-        HashCodeBuilder hashCodeBuilder = new HashCodeBuilder();
-        hashCodeBuilder.appendSuper(super.hashCode());
-        hashCodeBuilder.append(commitBatchSize);
-        hashCodeBuilder.append(maxRetries);
-        hashCodeBuilder.append(maxRetryWait);
-        hashCodeBuilder.append(operations);
-        return hashCodeBuilder.toHashCode();
+    public boolean equals(final Object other) {
+        return EqualsBuilder.reflectionEquals(this, other);
     }
-    
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (!(obj instanceof AbstractBatchCommitter)) {
-            return false;
-        }
-        AbstractBatchCommitter other = (AbstractBatchCommitter) obj;
-        EqualsBuilder equalsBuilder = new EqualsBuilder();
-        equalsBuilder.appendSuper(super.equals(other));
-        equalsBuilder.append(commitBatchSize, other.commitBatchSize);
-        equalsBuilder.append(maxRetries, other.maxRetries);
-        equalsBuilder.append(maxRetryWait, other.maxRetryWait);
-        equalsBuilder.append(operations, other.operations);
-        return equalsBuilder.isEquals();
+    public int hashCode() {
+        return HashCodeBuilder.reflectionHashCode(this);
     }
-    
     @Override
     public String toString() {
-        ToStringBuilder builder = 
-                new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
-        builder.appendSuper(super.toString());
-        builder.append("commitBatchSize", commitBatchSize);
-        builder.append("maxRetries", maxRetries);
-        builder.append("maxRetryWait", maxRetryWait);
-        builder.append("operations", operations);
-        return builder.toString();
+        return new ReflectionToStringBuilder(
+                this, ToStringStyle.SHORT_PREFIX_STYLE).toString();
     }
 }

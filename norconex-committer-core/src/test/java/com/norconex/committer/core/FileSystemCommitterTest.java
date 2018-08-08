@@ -1,4 +1,4 @@
-/* Copyright 2010-2017 Norconex Inc.
+/* Copyright 2010-2018 Norconex Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,18 +21,17 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.norconex.committer.core.impl.FileSystemCommitter;
-import com.norconex.commons.lang.config.XMLConfigurationUtil;
+import com.norconex.commons.lang.xml.XML;
 
 
 /**
  * Tests the {@link FileSystemCommitter}.
  * @author Pascal Essiembre
  */
-@SuppressWarnings({"nls"})
 public class FileSystemCommitterTest {
 
     private File tempFile;
-    
+
     @Before
     public void setUp() throws IOException {
         tempFile = File.createTempFile("FileSystemCommitterTest", ".xml");
@@ -48,7 +47,7 @@ public class FileSystemCommitterTest {
         FileSystemCommitter outCommitter = new FileSystemCommitter();
         outCommitter.setDirectory("C:\\FakeTestDirectory\\");
         System.out.println("Writing/Reading this: " + outCommitter);
-        XMLConfigurationUtil.assertWriteRead(outCommitter);
+        XML.assertWriteRead(outCommitter, "committer");
     }
 
 }

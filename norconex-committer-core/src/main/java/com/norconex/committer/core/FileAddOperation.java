@@ -1,4 +1,4 @@
-/* Copyright 2010-2017 Norconex Inc.
+/* Copyright 2010-2018 Norconex Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.norconex.committer.core.impl.FileSystemCommitter;
 import com.norconex.commons.lang.file.FileUtil;
@@ -42,8 +42,8 @@ import com.norconex.commons.lang.map.Properties;
 public class FileAddOperation implements IAddOperation {
 
     private static final long serialVersionUID = -7003290965448748871L;
-    private static final Logger LOG = 
-            LogManager.getLogger(FileAddOperation.class);
+    private static final Logger LOG =
+            LoggerFactory.getLogger(FileAddOperation.class);
 
     private final String reference;
     private final File contentFile;
@@ -62,11 +62,11 @@ public class FileAddOperation implements IAddOperation {
         this.refFile = refFile;
 
         String basePath = StringUtils.removeEnd(
-                refFile.getAbsolutePath(), 
+                refFile.getAbsolutePath(),
                 FileSystemCommitter.EXTENSION_REFERENCE);
         this.contentFile = new File(
                 basePath + FileSystemCommitter.EXTENSION_CONTENT);
-        this.metaFile = new File( 
+        this.metaFile = new File(
                 basePath + FileSystemCommitter.EXTENSION_METADATA);
         try {
             this.reference = FileUtils.readFileToString(
@@ -81,7 +81,7 @@ public class FileAddOperation implements IAddOperation {
                 FileInputStream is = null;
                 try {
                     is = new FileInputStream(metaFile);
-                    metadata.load(is);
+                    metadata.loadFromProperties(is);
                 } catch (IOException e) {
                     throw new CommitterException(
                             "Could not load metadata for " + metaFile, e);
@@ -97,7 +97,7 @@ public class FileAddOperation implements IAddOperation {
     public String getReference() {
         return reference;
     }
-    
+
     @Override
     public void delete() {
         File fileToDelete = null;
@@ -110,7 +110,7 @@ public class FileAddOperation implements IAddOperation {
 
             fileToDelete = contentFile;
             FileUtil.delete(fileToDelete);
-            
+
         } catch (IOException e) {
             LOG.error("Could not delete commit file: " + fileToDelete, e);
         }
@@ -130,7 +130,7 @@ public class FileAddOperation implements IAddOperation {
                     "Could not obtain content stream for " + contentFile, e);
         }
     }
-    
+
     @Override
     public int hashCode() {
         return hashCode;
@@ -153,10 +153,10 @@ public class FileAddOperation implements IAddOperation {
         equalsBuilder.append(metadata, other.metadata);
         return equalsBuilder.isEquals();
     }
-    
+
     @Override
     public String toString() {
-        ToStringBuilder builder = 
+        ToStringBuilder builder =
                 new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
         builder.append("file", contentFile);
         builder.append("metadata", metadata);
