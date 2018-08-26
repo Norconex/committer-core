@@ -259,7 +259,7 @@ public abstract class AbstractMappedCommitter
             referenceValue = metadata.getString(sourceReferenceField);
         }
         if (StringUtils.isNotBlank(targetReferenceField)) {
-            metadata.setString(targetReferenceField, referenceValue);
+            metadata.set(targetReferenceField, referenceValue);
         }
         if (!keepSourceReferenceField
                 && StringUtils.isNotBlank(sourceReferenceField)
@@ -273,7 +273,7 @@ public abstract class AbstractMappedCommitter
         if (StringUtils.isNotBlank(targetContentField)) {
             if (StringUtils.isNotBlank(sourceContentField)) {
                 List<String >content = metadata.getStrings(sourceContentField);
-                metadata.setString(targetContentField,
+                metadata.set(targetContentField,
                         content.toArray(ArrayUtils.EMPTY_STRING_ARRAY));
                 if (!keepSourceContentField && !Objects.equals(
                         sourceContentField, targetContentField)) {
@@ -281,7 +281,7 @@ public abstract class AbstractMappedCommitter
                 }
             } else {
                 InputStream is = operation.getContentStream();
-                metadata.setString(targetContentField,
+                metadata.set(targetContentField,
                         IOUtils.toString(is, StandardCharsets.UTF_8));
                 IOUtils.closeQuietly(is);
             }

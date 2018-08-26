@@ -58,7 +58,7 @@ public class AbstractMappedCommitterTest {
 
         committed = false;
         metadata.clear();
-        metadata.addString("myreference", defaultReference);
+        metadata.add("myreference", defaultReference);
     }
 
     /**
@@ -97,7 +97,7 @@ public class AbstractMappedCommitterTest {
         committer.setTargetReferenceField(customTargetId);
 
         // Store the source id value in metadata
-        metadata.addString(customSourceId, defaultReference);
+        metadata.add(customSourceId, defaultReference);
 
         // Add a doc (it should trigger a commit because batch size is 1)
         committer.setQueueSize(1);
