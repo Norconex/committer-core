@@ -36,10 +36,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.norconex.committer.core.impl.FileSystemCommitter;
-import com.norconex.commons.lang.config.IXMLConfigurable;
 import com.norconex.commons.lang.file.FileUtil;
 import com.norconex.commons.lang.file.IFileVisitor;
 import com.norconex.commons.lang.map.Properties;
+import com.norconex.commons.lang.xml.IXMLConfigurable;
 
 //TODO Maybe offer pluggable implementations for where to queue (FS, DB, etc)?
 
