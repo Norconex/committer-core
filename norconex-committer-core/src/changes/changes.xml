@@ -7,6 +7,15 @@
   </properties>
   <body>
 
+    <release version="2.1.3-SNAPSHOT" date="2019-??-??" description="Bugfix release">
+      <action dev="essiembre" type="update">
+        Maven dependency updates: Norconex Commons Lang 1.15.1.
+      </action>
+      <action dev="essiembre" type="fix" issue="18">
+        JSONFileCommitter now writes metadata properly.
+      </action>
+    </release>
+
     <release version="2.1.2" date="2017-11-26" description="Maintenance release">
       <action dev="essiembre" type="add">
         It is now possible to specify a "fileNamePrefix" and "fileNameSuffix"
