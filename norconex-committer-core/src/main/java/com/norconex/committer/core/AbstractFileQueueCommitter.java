@@ -1,4 +1,4 @@
-/* Copyright 2010-2018 Norconex Inc.
+/* Copyright 2010-2019 Norconex Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,6 @@ import org.slf4j.LoggerFactory;
 
 import com.norconex.committer.core.impl.FileSystemCommitter;
 import com.norconex.commons.lang.file.FileUtil;
-import com.norconex.commons.lang.file.IFileVisitor;
 import com.norconex.commons.lang.map.Properties;
 import com.norconex.commons.lang.xml.IXMLConfigurable;
 
@@ -64,7 +63,6 @@ import com.norconex.commons.lang.xml.IXMLConfigurable;
  * @author Pascal Essiembre
  * @since 1.1.0
  */
-@SuppressWarnings("nls")
 public abstract class AbstractFileQueueCommitter extends AbstractCommitter {
 
     private static final Logger LOG = LoggerFactory.getLogger(
@@ -75,13 +73,8 @@ public abstract class AbstractFileQueueCommitter extends AbstractCommitter {
 
     private static final int EMPTY_DIRS_SECONDS_LIMIT = 10;
 
-    private static final FileFilter REF_FILTER = new FileFilter() {
-        @Override
-        public boolean accept(File pathname) {
-            return pathname.getName().endsWith(
-                    FileSystemCommitter.EXTENSION_REFERENCE);
-        }
-    };
+    private static final FileFilter REF_FILTER = pathname -> pathname.getName().endsWith(
+            FileSystemCommitter.EXTENSION_REFERENCE);
 
     private final FileSystemCommitter queue = new FileSystemCommitter();
 
@@ -128,12 +121,7 @@ public abstract class AbstractFileQueueCommitter extends AbstractCommitter {
 
         // --- Additions and Deletions ---
         FileUtil.visitAllFiles(
-                new File(queue.getDirectory()), new IFileVisitor() {
-            @Override
-            public void visit(File file) {
-                fileCount.increment();
-            }
-        }, REF_FILTER);
+                new File(queue.getDirectory()), file -> fileCount.increment(), REF_FILTER);
         return fileCount.longValue();
     }
 
@@ -155,12 +143,7 @@ public abstract class AbstractFileQueueCommitter extends AbstractCommitter {
         // will be in file creation order.
         final Queue<File> filesPending = new ConcurrentLinkedQueue<>();
         FileUtil.visitAllFiles(
-                new File(queue.getDirectory()), new IFileVisitor() {
-            @Override
-            public void visit(File file) {
-                 filesPending.add(file);
-            }
-        }, REF_FILTER);
+                new File(queue.getDirectory()), file -> filesPending.add(file), REF_FILTER);
 
 
         // Nothing left to commit. This happens if multiple threads are

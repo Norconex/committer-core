@@ -1,4 +1,4 @@
-/* Copyright 2010-2018 Norconex Inc.
+/* Copyright 2010-2019 Norconex Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -92,10 +91,10 @@ public class FileSystemCommitter implements ICommitter, IXMLConfigurable {
                     new File(targetFile.getAbsolutePath() + EXTENSION_CONTENT));
 
             // Metadata
-            FileOutputStream out = new FileOutputStream(new File(
-                    targetFile.getAbsolutePath() + EXTENSION_METADATA));
-            metadata.storeToProperties(out, "");
-            IOUtils.closeQuietly(out);
+            try (FileOutputStream out = new FileOutputStream(new File(
+                    targetFile.getAbsolutePath() + EXTENSION_METADATA))) {
+                metadata.storeToProperties(out, "");
+            }
 
             // Reference
             FileUtils.writeStringToFile(new File(

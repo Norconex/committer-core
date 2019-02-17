@@ -1,4 +1,4 @@
-/* Copyright 2010-2018 Norconex Inc.
+/* Copyright 2010-2019 Norconex Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -280,10 +280,10 @@ public abstract class AbstractMappedCommitter
                     metadata.remove(sourceContentField);
                 }
             } else {
-                InputStream is = operation.getContentStream();
-                metadata.set(targetContentField,
-                        IOUtils.toString(is, StandardCharsets.UTF_8));
-                IOUtils.closeQuietly(is);
+                try (InputStream is = operation.getContentStream()) {
+                    metadata.set(targetContentField,
+                            IOUtils.toString(is, StandardCharsets.UTF_8));
+                }
             }
         }
     }

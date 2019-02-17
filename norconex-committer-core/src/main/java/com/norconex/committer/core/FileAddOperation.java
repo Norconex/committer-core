@@ -1,4 +1,4 @@
-/* Copyright 2010-2018 Norconex Inc.
+/* Copyright 2010-2019 Norconex Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -78,19 +77,14 @@ public class FileAddOperation implements IAddOperation {
         this.metadata = new Properties();
         synchronized (metadata) {
             if (metaFile.exists()) {
-                FileInputStream is = null;
-                try {
-                    is = new FileInputStream(metaFile);
+                try (FileInputStream is = new FileInputStream(metaFile)) {
                     metadata.loadFromProperties(is);
                 } catch (IOException e) {
                     throw new CommitterException(
                             "Could not load metadata for " + metaFile, e);
-                } finally {
-                    IOUtils.closeQuietly(is);
                 }
             }
         }
-
     }
 
     @Override

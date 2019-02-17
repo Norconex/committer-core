@@ -1,4 +1,4 @@
-/* Copyright 2010-2018 Norconex Inc.
+/* Copyright 2010-2019 Norconex Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -135,14 +135,10 @@ public abstract class AbstractCommitter implements ICommitter {
         }
     }
 
-    @SuppressWarnings("nls")
     private void commitIfReady() {
         long count = docCount.incrementAndGet();
         if (queueSize == 0 || count % queueSize == 0) {
-            if (LOG.isInfoEnabled()) {
-                LOG.info("Max queue size reached (" + queueSize
-                        + "). Committing");
-            }
+            LOG.info("Max queue size reached ({}). Committing", queueSize);
             commit();
         }
     }
