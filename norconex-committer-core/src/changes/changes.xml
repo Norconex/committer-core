@@ -8,6 +8,12 @@
   <body>
 
     <release version="3.0.0-SNAPSHOT" date="2018-??-??" description="Major release">
+      <action dev="essiembre" type="add">
+        New LogCommitter.
+      </action>
+      <action dev="essiembre" type="add">
+        New MemoryCommitter.
+      </action>
       <action dev="essiembre" type="update">
         Maven dependency updates: Norconex Commons Lang 2.0.0.
       </action>

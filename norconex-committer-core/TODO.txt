@@ -1,3 +1,6 @@
+
+- Have installer for other committer?
+
 - Rename maxRetryWait to retryDelay to avoid confusion.
 - Add init and close methods.
 - Have listeners for commit events.  
