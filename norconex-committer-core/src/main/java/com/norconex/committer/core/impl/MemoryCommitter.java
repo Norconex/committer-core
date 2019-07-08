@@ -88,13 +88,17 @@ public class MemoryCommitter implements ICommitter  {
     public List<ICommitOperation> getAllOperations() {
         return operations;
     }
-    public List<ICommitOperation> getAddOperations() {
-        return operations.stream().filter(
-                o -> o instanceof IAddOperation).collect(Collectors.toList());
+    public List<IAddOperation> getAddOperations() {
+        return operations.stream()
+                .filter(o -> o instanceof IAddOperation)
+                .map(o -> (IAddOperation) o)
+                .collect(Collectors.toList());
     }
-    public List<ICommitOperation> getDeleteOperations() {
-        return operations.stream().filter(
-               o -> o instanceof IDeleteOperation).collect(Collectors.toList());
+    public List<IDeleteOperation> getDeleteOperations() {
+        return operations.stream()
+                .filter(o -> o instanceof IDeleteOperation)
+                .map(o -> (IDeleteOperation) o)
+                .collect(Collectors.toList());
     }
 
     public long getAddCount() {
