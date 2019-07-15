@@ -253,7 +253,7 @@ public class JSONFileCommitter implements ICommitter, IXMLConfigurable  {
             }
             JSONObject doc = new JSONObject();
             doc.put("reference", reference);
-            doc.put("metadata", metadata);
+            doc.put("metadata", new JSONObject(metadata));
             doc.put("content",
                     IOUtils.toString(content, StandardCharsets.UTF_8).trim());
 
