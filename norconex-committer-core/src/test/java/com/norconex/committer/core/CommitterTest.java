@@ -51,7 +51,7 @@ public class CommitterTest {
         try (Reader r = new InputStreamReader(getClass().getResourceAsStream(
                 "/validation/committer-core-full.xml"))) {
             Assert.assertEquals("Validation warnings/errors were found.",
-                    0, new XML(r).validate().size());
+                    0, XML.of(r).create().validate().size());
         }
     }
 }

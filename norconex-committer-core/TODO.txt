@@ -1,6 +1,8 @@
 
 - Have installer for other committer?
 
+- Make sur logging is sufficient when batching so people know what is going on.
+
 - Rename maxRetryWait to retryDelay to avoid confusion.
 - Add init and close methods.
 - Have listeners for commit events.  

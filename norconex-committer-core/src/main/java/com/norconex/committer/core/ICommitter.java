@@ -22,12 +22,11 @@ import com.norconex.commons.lang.map.Properties;
  * Commits documents to their final destination (e.g. search engine).
  * @author Pascal Essiembre
  */
-@SuppressWarnings("nls")
 public interface ICommitter {
 
     /**
-     * Adds a new or modified document to the target destination.  
-     * Implementations may decide to queue the addition request instead until 
+     * Adds a new or modified document to the target destination.
+     * Implementations may decide to queue the addition request instead until
      * commit is called, or a certain threshold is reached.
      * @param reference document reference (e.g. URL)
      * @param content document content
@@ -37,17 +36,17 @@ public interface ICommitter {
     void add(String reference, InputStream content, Properties metadata);
 
     /**
-     * Removes a document from the target destination.  
-     * Implementations may decide to queue the removal request instead until 
+     * Removes a document from the target destination.
+     * Implementations may decide to queue the removal request instead until
      * commit is called, or a certain threshold is reached.
      * @param reference document reference (e.g. URL)
      * @param metadata document metadata
      * @since 2.0.0
      */
     void remove(String reference, Properties metadata);
-        
+
     /**
-     * Commits documents.  Effectively apply the additions and removals.  
+     * Commits documents.  Effectively apply the additions and removals.
      * May not be necessary for some implementations.
      */
     void commit();
