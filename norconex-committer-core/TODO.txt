@@ -1,3 +1,7 @@
+
+- Store failing docs in a separate folder so they are not re-attempted over
+  and over.
+
 - Rename maxRetryWait to retryDelay to avoid confusion.
 - Add init and close methods.
 - Have listeners for commit events.  
