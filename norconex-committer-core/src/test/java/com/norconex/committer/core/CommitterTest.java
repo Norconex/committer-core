@@ -1,4 +1,4 @@
-/* Copyright 2017-2018 Norconex Inc.
+/* Copyright 2017-2020 Norconex Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import com.norconex.commons.lang.xml.XML;
 public class CommitterTest {
 
     @Test
-    public void testWriteRead() throws IOException {
+    public void testWriteRead() {
         MockAbstractMappedCommitter c = new MockAbstractMappedCommitter();
         c.setCommitBatchSize(10);
         c.setKeepSourceContentField(true);

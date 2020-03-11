@@ -43,7 +43,7 @@ public class FileSystemCommitterTest {
     }
 
     @Test
-    public void testWriteRead() throws IOException {
+    public void testWriteRead() {
         FileSystemCommitter outCommitter = new FileSystemCommitter();
         outCommitter.setDirectory("C:\\FakeTestDirectory\\");
         System.out.println("Writing/Reading this: " + outCommitter);

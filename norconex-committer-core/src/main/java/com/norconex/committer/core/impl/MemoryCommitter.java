@@ -1,4 +1,4 @@
-/* Copyright 2019 Norconex Inc.
+/* Copyright 2019-2020 Norconex Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringExclude;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.apache.commons.lang3.builder.ToStringSummary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,12 +58,15 @@ public class MemoryCommitter implements ICommitter  {
     private static final Logger LOG =
             LoggerFactory.getLogger(MemoryCommitter.class);
 
+    @ToStringSummary
     private final List<ICommitOperation> operations = new ArrayList<>();
 
     private long addCount = 0;
     private long removeCount = 0;
 
+    @ToStringExclude
     private boolean ignoreContent;
+    @ToStringExclude
     private String fieldsRegex;
 
     /**
