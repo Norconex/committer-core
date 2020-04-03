@@ -47,13 +47,24 @@
         <groupId>com.tdunning</groupId>
         <artifactId>json</artifactId>
     </dependency>
-    <!-- TODO: replace with Junit 5. -->
+     
+    <!-- Tests and provided. -->
     <dependency>
-    	<groupId>junit</groupId>
-    	<artifactId>junit</artifactId>
-    	<version>4.12</version>
-    	<scope>test</scope>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-slf4j-impl</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-core</artifactId>
+      <scope>test</scope>
+    </dependency>     
+     
   </dependencies>
  
   <build>
@@ -119,6 +130,7 @@
     </site>
   </distributionManagement>
   
+  <!-- 
   <reporting>
     <plugins>
       <plugin>
@@ -187,7 +199,8 @@
         </reportSets>
       </plugin>
     </plugins>
-  </reporting>  
+  </reporting> 
+  -->
 
   <url>http://norconex.com/collectors/committer-core</url>
   <description>Norconex Committer is a java library and command line application used to route content to local or remote target repositories, such as a search engine index.   </description>

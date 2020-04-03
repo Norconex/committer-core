@@ -1,4 +1,13 @@
 
+
+- Do a memory committer queue and test swapping one for the other behaving
+  just fine.
+
+- Have option to retry batches by breaking them down into smaller chunks
+  up to 1 at a time.
+
+- Ensure no workDir collision (either in this project or caller).
+
 - Have installer for other committer?
 
 - Make sur logging is sufficient when batching so people know what is going on.

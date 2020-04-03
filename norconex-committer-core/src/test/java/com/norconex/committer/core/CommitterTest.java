@@ -18,8 +18,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.norconex.commons.lang.xml.XML;
 
@@ -42,7 +42,6 @@ public class CommitterTest {
         c.setSourceReferenceField("sourceReferenceField");
         c.setTargetContentField("targetContentField");
         c.setTargetReferenceField("targetReferenceField");
-        System.out.println("Writing/Reading this: " + c);
         XML.assertWriteRead(c, "committer");
     }
 
@@ -50,8 +49,8 @@ public class CommitterTest {
     public void testValidation() throws IOException {
         try (Reader r = new InputStreamReader(getClass().getResourceAsStream(
                 "/validation/committer-core-full.xml"))) {
-            Assert.assertEquals("Validation warnings/errors were found.",
-                    0, XML.of(r).create().validate().size());
+            Assertions.assertEquals(0, XML.of(r).create().validate().size(),
+                    "Validation warnings/errors were found.");
         }
     }
 }

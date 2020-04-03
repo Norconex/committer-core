@@ -7,7 +7,7 @@
   </properties>
   <body>
 
-    <release version="3.0.0-SNAPSHOT" date="2018-??-??" description="Major release">
+    <release version="3.0.0-SNAPSHOT" date="2020-??-??" description="Major release">
       <action dev="essiembre" type="add">
         New LogCommitter.
       </action>
@@ -15,7 +15,38 @@
         New MemoryCommitter.
       </action>
       <action dev="essiembre" type="update">
-        Maven dependency updates: Norconex Commons Lang 2.0.0.
+        Batch and queuing now separate to favor reuse.
+      </action>
+      <action dev="essiembre" type="add">
+        New "init" and "close" methods for committers.
+      </action>
+      <action dev="essiembre" type="add">
+        Now fire Committer events for interested consuming classes.
+      </action>
+      <action dev="essiembre" type="update">
+        No more "commit" methods.  Batching has the concept of batch "consumer"
+        and a new "close" method replace it. 
+      </action>
+      <action dev="essiembre" type="update">
+        The "add" operation is now "upsert" (update or insert). 
+        Now fire Committer events for interested consuming classes.
+        The "remove" operation is now "delete".
+      </action>
+      <action dev="essiembre" type="update">
+        Documents are now committed via UsertRequest and DeleteRequest 
+        objects.
+      </action>
+      <action dev="essiembre" type="update">
+        On Committers supporting batches, "queueSize" and "commitBatchSize" 
+        configuration options are now merged into "batchSize".
+        Now when a batch queue is full, the whole batch is sent.
+      </action>
+      <action dev="essiembre" type="update">
+        Maven dependency updates: Norconex Commons Lang 2.0.0, 
+        Junit 5.
+      </action>
+      <action dev="essiembre" type="update">
+        Version 3 classes package structure has *.core3.* in it.
       </action>
       <action dev="essiembre" type="update">
         Now using XML class from Norconex Commons lang for loading/saving

@@ -34,7 +34,7 @@ import com.norconex.commons.lang.xml.XML;
 
 /**
  * <p>
- * This committer allows you to define user many committers as one.
+ * This committer allows you to define and use many committers as one.
  * Every committing requests will be dispatched and handled by all nested
  * committers defined (in the order they were added).
  * </p>

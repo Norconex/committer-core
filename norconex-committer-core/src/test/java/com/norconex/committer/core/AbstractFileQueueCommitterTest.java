@@ -1,4 +1,4 @@
-/* Copyright 2010-2017 Norconex Inc.
+/* Copyright 2010-2020 Norconex Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,10 @@
  */
 package com.norconex.committer.core;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -28,23 +26,23 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import com.norconex.commons.lang.map.Properties;
 
 public class AbstractFileQueueCommitterTest {
 
-    @Rule
-    public TemporaryFolder temp = new TemporaryFolder();
-    
+    @TempDir
+    public Path temp;
+
     @Test
     public void testMultipleCommitThread() throws Exception {
-        
+
         final AtomicInteger counter = new AtomicInteger();
 
-        final AbstractFileQueueCommitter committer = 
+        final AbstractFileQueueCommitter committer =
                 new AbstractFileQueueCommitter() {
 
             @Override
@@ -65,10 +63,10 @@ public class AbstractFileQueueCommitterTest {
             protected void commitComplete() {
             }
         };
-        
-        File queue = temp.newFolder();
+
+        File queue = temp.toFile();
         committer.setQueueDir(queue.getPath());
-        // Use a bigger number to make sure the files are not 
+        // Use a bigger number to make sure the files are not
         // committed while they are added.
         committer.setQueueSize(1000);
 
@@ -83,30 +81,27 @@ public class AbstractFileQueueCommitterTest {
             Properties metadata = new Properties();
             committer.remove(Integer.toString(i), metadata);
         }
-        
+
         ExecutorService pool = Executors.newFixedThreadPool(10);
         for (int i = 0; i < 10; i++) {
-            pool.submit(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        committer.commit();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+            pool.submit(() -> {
+                try {
+                    committer.commit();
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             });
         }
 
         pool.shutdown();
         pool.awaitTermination(10, TimeUnit.SECONDS);
-        
+
         // Each file should have been processed exactly once
-        assertEquals(100, counter.intValue());
-        
+        Assertions.assertEquals(100, counter.intValue());
+
         // All files should have been processed
         Collection<File> files = FileUtils.listFiles(queue, null, true);
-        assertTrue(files.isEmpty());
+        Assertions.assertTrue(files.isEmpty());
     }
 
 }

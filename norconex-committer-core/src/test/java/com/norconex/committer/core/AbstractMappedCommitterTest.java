@@ -1,4 +1,4 @@
-/* Copyright 2010-2018 Norconex Inc.
+/* Copyright 2010-2020 Norconex Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,16 @@
  */
 package com.norconex.committer.core;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.input.NullInputStream;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import com.norconex.commons.lang.map.Properties;
 import com.norconex.commons.lang.xml.XML;
@@ -37,8 +33,8 @@ import com.norconex.commons.lang.xml.XML;
  */
 public class AbstractMappedCommitterTest {
 
-    @Rule
-    public TemporaryFolder tempFolder = new TemporaryFolder();
+    @TempDir
+    public Path tempFolder;
     private StubCommitter committer;
     private boolean committed;
 
@@ -50,11 +46,10 @@ public class AbstractMappedCommitterTest {
      * Sets up a committer for testing.
      * @throws IOException problem setting up committer
      */
-    @Before
+    @BeforeEach
     public void setup() throws IOException {
         committer = new StubCommitter();
-        File queue = tempFolder.newFolder("queue");
-        committer.setQueueDir(queue.toString());
+        committer.setQueueDir(tempFolder.toString());
 
         committed = false;
         metadata.clear();
@@ -69,7 +64,7 @@ public class AbstractMappedCommitterTest {
     public void testNoCommit() throws IOException {
         // Default batch size is 1000, so no commit should occur
         committer.add(defaultReference, new NullInputStream(0), metadata);
-        assertFalse(committed);
+        Assertions.assertFalse(committed);
     }
 
     /**
@@ -80,7 +75,7 @@ public class AbstractMappedCommitterTest {
     public void testCommit() throws IOException {
         committer.setQueueSize(1);
         committer.add(defaultReference, new NullInputStream(0), metadata);
-        assertTrue(committed);
+        Assertions.assertTrue(committed);
     }
 
     /**
@@ -104,16 +99,18 @@ public class AbstractMappedCommitterTest {
         committer.add(defaultReference, new NullInputStream(0), metadata);
 
         // Get the map generated
-        assertEquals(1, committer.getCommitBatch().size());
+        Assertions.assertEquals(1, committer.getCommitBatch().size());
         IAddOperation op = (IAddOperation) committer.getCommitBatch().get(0);
         Properties docMeta = op.getMetadata();
 
         // Check that customTargetId was used
-        assertEquals(defaultReference, docMeta.getString(customTargetId));
+        Assertions.assertEquals(
+                defaultReference, docMeta.getString(customTargetId));
 
         // Check that customSourceId was removed (default behavior)
-        assertFalse("Source reference field was not removed.",
-                docMeta.containsKey(customSourceId));
+        Assertions.assertFalse(
+                docMeta.containsKey(customSourceId),
+                "Source reference field was not removed.");
     }
 
     /**
@@ -131,11 +128,11 @@ public class AbstractMappedCommitterTest {
         committer.commit();
 
         // Get the map generated
-        assertEquals(1, committer.getCommitBatch().size());
+        Assertions.assertEquals(1, committer.getCommitBatch().size());
         IAddOperation op = (IAddOperation) committer.getCommitBatch().get(0);
 
         // Check that the source id is still there
-        assertTrue(op.getMetadata().containsKey("myreference"));
+        Assertions.assertTrue(op.getMetadata().containsKey("myreference"));
     }
 
     class StubCommitter extends AbstractMappedCommitter {
