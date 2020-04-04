@@ -37,10 +37,9 @@ import org.apache.commons.lang3.time.DateFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.norconex.committer.core3.CommitterContext;
+import com.norconex.committer.core3.AbstractCommitter;
 import com.norconex.committer.core3.CommitterException;
 import com.norconex.committer.core3.DeleteRequest;
-import com.norconex.committer.core3.ICommitter;
 import com.norconex.committer.core3.UpsertRequest;
 import com.norconex.commons.lang.xml.IXMLConfigurable;
 import com.norconex.commons.lang.xml.XML;
@@ -67,8 +66,8 @@ import com.norconex.commons.lang.xml.XML;
  * @author Pascal Essiembre
  * @since 3.0.0
  */
-public abstract class AbstractFSCommitter<T>
-        implements ICommitter, IXMLConfigurable  {
+public abstract class AbstractFSCommitter<T> extends AbstractCommitter
+        implements IXMLConfigurable  {
 
     private static final Logger LOG =
             LoggerFactory.getLogger(AbstractFSCommitter.class);
@@ -148,12 +147,10 @@ public abstract class AbstractFSCommitter<T>
     }
 
     @Override
-    public void init(CommitterContext committerContext)
-            throws CommitterException {
-
+    protected void doInit() throws CommitterException {
         if (directory == null) {
-            if (committerContext.getWorkDir() != null) {
-                this.directory = committerContext.getWorkDir().resolve(
+            if (getCommitterContext().getWorkDir() != null) {
+                this.directory = getCommitterContext().getWorkDir().resolve(
                         "committer-" + getFileExtension());
             } else {
                 this.directory = Paths.get("./committer-" + getFileExtension());
@@ -178,10 +175,9 @@ public abstract class AbstractFSCommitter<T>
             this.deleteHandler = upsertHandler;
         }
     }
-
     @Override
-    public void upsert(
-            UpsertRequest upsertRequest) throws CommitterException {
+    protected void doUpsert(UpsertRequest upsertRequest)
+            throws CommitterException {
         try {
             writeUpsert(upsertHandler.getDocWriter(), upsertRequest);
         } catch (IOException e) {
@@ -189,9 +185,9 @@ public abstract class AbstractFSCommitter<T>
                     + upsertRequest.getReference());
         }
     }
-
     @Override
-    public void delete(DeleteRequest deleteRequest) throws CommitterException {
+    protected void doDelete(DeleteRequest deleteRequest)
+            throws CommitterException {
         try {
             writeDelete(deleteHandler.getDocWriter(), deleteRequest);
         } catch (IOException e) {
@@ -199,9 +195,8 @@ public abstract class AbstractFSCommitter<T>
                     + deleteRequest.getReference());
         }
     }
-
     @Override
-    public void close() throws CommitterException {
+    protected void doClose() throws CommitterException {
         try {
             if (upsertHandler != null) {
                 upsertHandler.close();

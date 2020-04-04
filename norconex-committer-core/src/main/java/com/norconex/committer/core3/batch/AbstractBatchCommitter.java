@@ -15,19 +15,16 @@
 package com.norconex.committer.core3.batch;
 
 import java.util.Iterator;
-import java.util.Objects;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.slf4j.event.Level;
 
-import com.norconex.committer.core3.CommitterContext;
+import com.norconex.committer.core3.AbstractCommitter;
 import com.norconex.committer.core3.CommitterEvent;
 import com.norconex.committer.core3.CommitterException;
 import com.norconex.committer.core3.DeleteRequest;
-import com.norconex.committer.core3.ICommitter;
 import com.norconex.committer.core3.ICommitterRequest;
 import com.norconex.committer.core3.UpsertRequest;
 import com.norconex.committer.core3.batch.queue.ICommitterQueue;
@@ -40,9 +37,16 @@ import com.norconex.commons.lang.xml.XML;
  * A base implementation for doing batch commits. Uses an internal queue
  * for storing update/addition requests and deletion requests.
  * It sends the queued data to the remote target every time a given
- * queue size threshold has been reached.  Both additions and deletions count
- * towards the same queue size.
+ * queue threshold has been reached.  Unless otherwise stated,
+ * both additions and deletions count towards that threshold.
  * </p>
+ * <p>
+ * This class also provides batch-related events:
+ * <code>COMMITTER_BATCH_BEGIN</code>,
+ * <code>COMMITTER_BATCH_END</code>, and
+ * <code>COMMITTER_BATCH_ERROR</code>.
+ * </p>
+ *
  * <p>
  * The default queue is {@link FSQueue} (file-system queue).
  * </p>
@@ -58,96 +62,56 @@ import com.norconex.commons.lang.xml.XML;
  * @author Pascal Essiembre
  * @since 3.0.0
  */
-public abstract class AbstractBatchCommitter
-        implements ICommitter, IXMLConfigurable, BatchConsumer {
+public abstract class AbstractBatchCommitter extends AbstractCommitter
+        implements IXMLConfigurable, BatchConsumer {
 
-    private CommitterContext committerContext;
     private ICommitterQueue queue;
 
     @Override
-    public final void init(
-            CommitterContext committerContext) throws CommitterException {
-        this.committerContext = Objects.requireNonNull(
-                committerContext, "'committerContext' must not be null.");
-        fireInfo(CommitterEvent.COMMITTER_INIT_BEGIN, null);
-
-        try {
-            if (this.queue == null) {
-                this.queue = new FSQueue();
-            }
-            this.queue.init(committerContext, this);
-
-            initCommitter(committerContext);
-        } catch (CommitterException | RuntimeException e) {
-            fireError(CommitterEvent.COMMITTER_INIT_ERROR, null, e);
-            throw e;
+    protected final void doInit() throws CommitterException {
+        if (this.queue == null) {
+            this.queue = new FSQueue();
         }
-        fireInfo(CommitterEvent.COMMITTER_INIT_END, null);
-    }
-
-    public ICommitterQueue getQueue() {
-        return queue;
-    }
-    public void setQueue(ICommitterQueue queue) {
-        this.queue = queue;
-    }
-
-    @Override
-    public final void upsert(
-            UpsertRequest upsertRequest) throws CommitterException {
-        fireInfo(CommitterEvent.COMMITTER_UPSERT_BEGIN, upsertRequest);
-        try {
-            queue.queue(upsertRequest);
-        } catch (CommitterException | RuntimeException e) {
-            fireError(CommitterEvent.COMMITTER_UPSERT_ERROR, upsertRequest, e);
-            throw e;
-        }
-        fireInfo(CommitterEvent.COMMITTER_UPSERT_END, upsertRequest);
+        this.queue.init(getCommitterContext(), this);
+        initBatchCommitter();
     }
     @Override
-    public final void delete(
-            DeleteRequest deleteRequest) throws CommitterException {
-        fireInfo(CommitterEvent.COMMITTER_DELETE_BEGIN, deleteRequest);
+    protected void doUpsert(UpsertRequest upsertRequest)
+            throws CommitterException {
+        queue.queue(upsertRequest);
+    }
+    @Override
+    protected void doDelete(DeleteRequest deleteRequest)
+            throws CommitterException {
+        queue.queue(deleteRequest);
+    }
+    @Override
+    protected void doClose() throws CommitterException {
         try {
-            queue.queue(deleteRequest);
-        } catch (CommitterException | RuntimeException e) {
-            fireError(CommitterEvent.COMMITTER_DELETE_ERROR, deleteRequest, e);
-            throw e;
+            closeBatchCommitter();
+        } finally {
+            this.queue.close();
         }
-        fireInfo(CommitterEvent.COMMITTER_DELETE_END, deleteRequest);
     }
 
     @Override
     public void consume(Iterator<ICommitterRequest> it)
             throws CommitterException {
-        fireInfo(CommitterEvent.COMMITTER_BATCH_BEGIN, null);
+        fireInfo(CommitterEvent.COMMITTER_BATCH_BEGIN);
         try {
             commitBatch(it);
         } catch (CommitterException | RuntimeException e) {
-            fireError(CommitterEvent.COMMITTER_BATCH_ERROR, null, e);
+            fireError(CommitterEvent.COMMITTER_BATCH_ERROR, e);
             throw  e;
         }
-        fireInfo(CommitterEvent.COMMITTER_BATCH_END, null);
+        fireInfo(CommitterEvent.COMMITTER_BATCH_END);
     }
-
-    @Override
-    public final void close() throws CommitterException {
-        fireInfo(CommitterEvent.COMMITTER_CLOSE_BEGIN, null);
-        try {
-            this.queue.close();
-            closeCommitter();
-        } catch (CommitterException | RuntimeException e) {
-            fireError(CommitterEvent.COMMITTER_CLOSE_ERROR, null, e);
-            throw e;
-        }
-        fireInfo(CommitterEvent.COMMITTER_CLOSE_END, null);
-    }
-
 
     @Override
     public final void loadFromXML(XML xml) {
         loadBatchCommitterFromXML(xml);
-        setQueue(xml.getObjectImpl(ICommitterQueue.class, "queue", queue));
+        setCommitterQueue(
+                xml.getObjectImpl(ICommitterQueue.class, "queue", queue));
     }
     @Override
     public final void saveToXML(XML xml) {
@@ -155,23 +119,22 @@ public abstract class AbstractBatchCommitter
         xml.addElement("queue", queue);
     }
 
-    protected abstract void loadBatchCommitterFromXML(XML xml);
-    protected abstract void saveBatchCommitterToXML(XML xml);
-
-    protected CommitterContext getCommitterContext() {
-        return this.committerContext;
-    }
-    protected ICommitterQueue getCommitterQueue() {
+    public ICommitterQueue getCommitterQueue() {
         return this.queue;
+    }
+    public void setCommitterQueue(ICommitterQueue queue) {
+        this.queue = queue;
     }
 
     /**
      * Subclasses can perform additional initialization by overriding this
-     * method. Default implementation does nothing.
-     * @param committerContext contextual data helping with initialization
+     * method. Default implementation does nothing. The committer context
+     * and committer queue will be already initialized when invoking
+     * {@link #getCommitterContext()} and {@link #getCommitterQueue()},
+     * respectively.
      * @throws CommitterException error initializing
      */
-    protected void initCommitter(CommitterContext committerContext)
+    protected void initBatchCommitter()
             throws CommitterException {
         //NOOP
     }
@@ -183,18 +146,12 @@ public abstract class AbstractBatchCommitter
      * method. Default implementation does nothing.
      * @throws CommitterException error closing committer
      */
-    protected void closeCommitter() throws CommitterException {
+    protected void closeBatchCommitter() throws CommitterException {
         //NOOP
     }
 
-    private void fireInfo(String name, ICommitterRequest req) {
-        committerContext.getEventManager().fire(
-                CommitterEvent.create(name, this, req));
-    }
-    private void fireError(String name, ICommitterRequest req, Exception e) {
-        committerContext.getEventManager().fire(
-                CommitterEvent.create(name, this, req, e), Level.ERROR);
-    }
+    protected abstract void loadBatchCommitterFromXML(XML xml);
+    protected abstract void saveBatchCommitterToXML(XML xml);
 
     @Override
     public boolean equals(final Object other) {
@@ -209,6 +166,4 @@ public abstract class AbstractBatchCommitter
         return new ReflectionToStringBuilder(
                 this, ToStringStyle.SHORT_PREFIX_STYLE).toString();
     }
-
-
 }

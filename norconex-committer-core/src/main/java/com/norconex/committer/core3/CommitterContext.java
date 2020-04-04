@@ -27,7 +27,7 @@ import com.norconex.commons.lang.TimeIdGenerator;
 import com.norconex.commons.lang.event.EventManager;
 
 /**
- * Holds data defined outisde a committer but useful or required for the
+ * Holds data defined outside a committer but useful or required for the
  * committer execution.
  * @author Pascal Essiembre
  * @since 3.0.0
@@ -66,6 +66,9 @@ public final class CommitterContext {
             if (ctx.workDir == null) {
                 ctx.workDir = new File(FileUtils.getTempDirectory(),
                         "committer-workdir-" + TimeIdGenerator.next()).toPath();
+            }
+            if (ctx.eventManager == null) {
+                ctx.eventManager = new EventManager();
             }
             return ctx;
         }
