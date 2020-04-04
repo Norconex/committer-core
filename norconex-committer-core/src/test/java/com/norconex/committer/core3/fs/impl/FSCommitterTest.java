@@ -16,36 +16,58 @@ package com.norconex.committer.core3.fs.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.stream.Stream;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import com.norconex.committer.core3.CommitterException;
 import com.norconex.committer.core3.TestUtil;
+import com.norconex.committer.core3.fs.AbstractFSCommitter;
+import com.norconex.commons.lang.bean.BeanUtil;
 import com.norconex.commons.lang.xml.XML;
 
 /**
- * <p>XML File Committer tests.</p>
+ * <p>JSON File Committer tests.</p>
  *
  * @author Pascal Essiembre
  * @since 3.0.0
  */
-public class XMLFileCommitterTest  {
+public class FSCommitterTest  {
+
+    @Target(ElementType.METHOD)
+    @Retention(RetentionPolicy.RUNTIME)
+    @ParameterizedTest(name = "{index} {1}")
+    @MethodSource(value= {
+            "committerProvider"
+    })
+    @interface CommitterTest {}
+
+    static Stream<Arguments> committerProvider() {
+        return Stream.of(
+                TestUtil.args(new XMLFileCommitter()),
+                TestUtil.args(new JSONFileCommitter())
+        );
+    }
 
     @TempDir
     public Path folder;
 
-    //TODO if all tests are same, create parameterized tests for FS committers.
-
-    @Test
-    public void testMergedXMLFileCommitter() throws CommitterException {
+    @CommitterTest
+    public void testMergedJSONFileCommitter(
+            AbstractFSCommitter<?> c, String name) throws CommitterException {
         // write 5 upserts and 2 deletes.
         // max docs per file being 2, so should generate 4 files.
-        XMLFileCommitter c = new XMLFileCommitter();
         c.setDocsPerFile(2);
-        c.setIndent(2);
+        setIndentIfPresent(c, 3);
         c.setSplitUpsertDelete(false);
 
 
@@ -58,14 +80,14 @@ public class XMLFileCommitterTest  {
         assertEquals(0,  TestUtil.listFSDeleteFiles(c.getDirectory()).size());
     }
 
-    @Test
-    public void testSplitXMLFileCommitter() throws CommitterException {
+    @CommitterTest
+    public void testSplitXMLFileCommitter(
+            AbstractFSCommitter<?> c, String name) throws CommitterException {
         // write 5 upserts and 2 deletes.
         // max docs per file being 2, so should generate 3 upsert files
         // and 1 delete file
-        XMLFileCommitter c = new XMLFileCommitter();
         c.setDocsPerFile(2);
-        c.setIndent(2);
+        setIndentIfPresent(c, 3);
         c.setSplitUpsertDelete(true);
 
         c.init(TestUtil.committerContext(folder));
@@ -77,16 +99,22 @@ public class XMLFileCommitterTest  {
         assertEquals(1,  TestUtil.listFSDeleteFiles(c.getDirectory()).size());
     }
 
-    @Test
-    public void testWriteRead() {
-        XMLFileCommitter c = new XMLFileCommitter();
+    @CommitterTest
+    public void testWriteRead(AbstractFSCommitter<?> c, String name) {
         c.setCompress(true);
         c.setDirectory(Paths.get("c:\\temp"));
         c.setDocsPerFile(5);
         c.setFileNamePrefix("prefix");
         c.setFileNamePrefix("suffix");
-        c.setIndent(4);
+        setIndentIfPresent(c, 3);
         c.setSplitUpsertDelete(true);
         XML.assertWriteRead(c, "committer");
+    }
+
+    private void setIndentIfPresent(AbstractFSCommitter<?> c, int indent) {
+        if (BeanUtil.isSettable(c, "indent")) {
+            BeanUtil.setValue(c, "indent", indent);
+        }
+
     }
 }

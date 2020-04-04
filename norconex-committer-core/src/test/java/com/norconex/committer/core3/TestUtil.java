@@ -19,11 +19,13 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Supplier;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.io.filefilter.TrueFileFilter;
+import org.junit.jupiter.params.provider.Arguments;
 
 import com.norconex.commons.lang.map.Properties;
 
@@ -36,6 +38,16 @@ public final class TestUtil {
 
     private TestUtil() {
         super();
+    }
+
+    // create test a arguments instance with the object as the first agrument
+    // and the simple class name of the object as the second.  For nicer
+    // display in test reports.
+    public static Arguments args(Object obj) {
+        return Arguments.of(obj, obj.getClass().getSimpleName());
+    }
+    public static Arguments args(Supplier<Object> supplier) {
+        return args(supplier.get());
     }
 
     public static Collection<File> listFSFiles(Path path) {
