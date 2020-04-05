@@ -57,11 +57,11 @@ import com.norconex.commons.lang.map.Properties;
  *
  * {@nx.xml.usage
  * <committer class="com.norconex.committer.core.impl.LogCommitter">
- *   <logLevel>[TRACE|DEBUG|INFO|WARN|ERROR|STDOUT|STDERR]<logLevel/>
+ *   <logLevel>[TRACE|DEBUG|INFO|WARN|ERROR|STDOUT|STDERR]</logLevel>
  *   <fieldsRegex>
  *     (Regular expressions matching fields to log. Default logs all.)
- *   <fieldsRegex/>
- *   <ignoreContent>[false|true]<ignoreContent/>
+ *   </fieldsRegex>
+ *   <ignoreContent>[false|true]</ignoreContent>
  * </committer>
  * }
  *
