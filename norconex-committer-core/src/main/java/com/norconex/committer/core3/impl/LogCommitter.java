@@ -1,4 +1,4 @@
-/* Copyright 2019 Norconex Inc.
+/* Copyright 2019-2020 Norconex Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,26 +12,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.norconex.committer.core.impl;
+package com.norconex.committer.core3.impl;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Optional;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.norconex.committer.core.ICommitter;
+import com.norconex.committer.core3.AbstractCommitter;
+import com.norconex.committer.core3.CommitterException;
+import com.norconex.committer.core3.DeleteRequest;
+import com.norconex.committer.core3.UpsertRequest;
 import com.norconex.commons.lang.SLF4JUtil;
 import com.norconex.commons.lang.map.Properties;
 
@@ -50,22 +54,21 @@ import com.norconex.commons.lang.map.Properties;
  * you do not use in a production environment. At a minimum, if you are
  * logging to file, make sure to rotate/clean the logs regularly.
  * </p>
- * <p>
- * XML configuration usage:
- * </p>
- * <pre>
- *  &lt;committer class="com.norconex.committer.core.impl.LogCommitter"&gt;
- *      &lt;logLevel&gt;[TRACE|DEBUG|INFO|WARN|ERROR|STDOUT|STDERR]&lt;logLevel/&gt;
- *      &lt;fieldsRegex&gt;
- *          (Regular expressions matching fields to log. Default logs all.)
- *      &lt;fieldsRegex/&gt;
- *      &lt;ignoreContent&gt;[false|true]&lt;ignoreContent/&gt;
- *  &lt;/committer&gt;
- * </pre>
+ *
+ * {@nx.xml.usage
+ * <committer class="com.norconex.committer.core.impl.LogCommitter">
+ *   <logLevel>[TRACE|DEBUG|INFO|WARN|ERROR|STDOUT|STDERR]<logLevel/>
+ *   <fieldsRegex>
+ *     (Regular expressions matching fields to log. Default logs all.)
+ *   <fieldsRegex/>
+ *   <ignoreContent>[false|true]<ignoreContent/>
+ * </committer>
+ * }
+ *
  * @author Pascal Essiembre
  * @since 3.0.0
  */
-public class LogCommitter implements ICommitter  {
+public class LogCommitter extends AbstractCommitter  {
 
     private static final Logger LOG =
             LoggerFactory.getLogger(LogCommitter.class);
@@ -101,28 +104,24 @@ public class LogCommitter implements ICommitter  {
         this.logLevel = logLevel;
     }
 
-    /**
-     * Constructor.
-     */
-    public LogCommitter() {
-        super();
+    @Override
+    protected void doInit() throws CommitterException {
         watch.start();
     }
-
     @Override
-    public synchronized void add(
-            String reference, InputStream content, Properties metadata) {
-
+    protected void doUpsert(UpsertRequest upsertRequest)
+            throws CommitterException {
         StringBuilder b = new StringBuilder();
-        b.append("=== DOCUMENT ADDED ==================================\n");
+        b.append("=== DOCUMENT UPSERTED ==================================\n");
 
-        stringifyRefAndMeta(b, reference, metadata);
+        stringifyRefAndMeta(
+                b, upsertRequest.getReference(), upsertRequest.getMetadata());
 
         if (!ignoreContent) {
             b.append("--- Content -----------------------------------------\n");
             try {
                 b.append(IOUtils.toString(
-                        content, StandardCharsets.UTF_8)).append('\n');
+                        upsertRequest.getContent(), UTF_8)).append('\n');
             } catch (IOException e) {
                 b.append(ExceptionUtils.getStackTrace(e));
             }
@@ -134,19 +133,25 @@ public class LogCommitter implements ICommitter  {
             LOG.info("{} additions queued in: {}", addCount, watch.toString());
         }
     }
-
     @Override
-    public synchronized void remove(String reference, Properties metadata) {
-
+    protected void doDelete(DeleteRequest deleteRequest)
+            throws CommitterException {
         StringBuilder b = new StringBuilder();
-        b.append("=== DOCUMENT REMOVED ================================\n");
-        stringifyRefAndMeta(b, reference, metadata);
+        b.append("=== DOCUMENT DELETED ===================================\n");
+        stringifyRefAndMeta(
+                b, deleteRequest.getReference(), deleteRequest.getMetadata());
         log(b.toString());
 
         removeCount++;
         if (removeCount % LOG_TIME_BATCH_SIZE == 0) {
             LOG.info("{} deletions queued in {}", removeCount, watch);
         }
+    }
+    @Override
+    protected void doClose() throws CommitterException {
+        LOG.info("{} additions committed.", addCount);
+        LOG.info("{} deletions committed.", removeCount);
+        LOG.info("Total elapsed time: {}", watch);
     }
 
     private void stringifyRefAndMeta(
@@ -179,28 +184,16 @@ public class LogCommitter implements ICommitter  {
     }
 
     @Override
-    public void commit() {
-        LOG.info("{} additions committed.", addCount);
-        LOG.info("{} deletions committed.", removeCount);
-        LOG.info("Total elapsed time: {}", watch);
-    }
-
-    @Override
     public boolean equals(final Object other) {
-        if (!(other instanceof LogCommitter)) {
-            return false;
-        }
-        return true;
+        return EqualsBuilder.reflectionEquals(this, other);
     }
-
     @Override
     public int hashCode() {
-        return new HashCodeBuilder().toHashCode();
+        return HashCodeBuilder.reflectionHashCode(this);
     }
-
     @Override
     public String toString() {
-        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-                .toString();
+        return new ReflectionToStringBuilder(
+                this, ToStringStyle.SHORT_PREFIX_STYLE).toString();
     }
 }
