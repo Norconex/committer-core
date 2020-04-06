@@ -50,7 +50,9 @@ import com.norconex.commons.lang.xml.XML;
  *  &lt;/committer&gt;
  * </pre>
  * @author Pascal Essiembre
+ * @deprecated Since 3.0.0.
  */
+@Deprecated
 public class FileSystemCommitter implements ICommitter, IXMLConfigurable {
 
     /** Default committer directory */

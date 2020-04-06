@@ -1,4 +1,4 @@
-/* Copyright 2010-2014 Norconex Inc.
+/* Copyright 2010-2020 Norconex Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,9 @@ import com.norconex.commons.lang.map.Properties;
 /**
  * Commits documents to their final destination (e.g. search engine).
  * @author Pascal Essiembre
+ * @deprecated Since 3.0.0, use {@link com.norconex.committer.core3.ICommitter}
  */
+@Deprecated
 public interface ICommitter {
 
     /**

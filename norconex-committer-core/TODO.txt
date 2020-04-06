@@ -29,7 +29,7 @@
   could break the routing.  Maybe sending the deletion to all defined committers
   for deletions could do it.  
 
-- Create a Spreadsheet Committer, with support for how to join multi-values.
+- Create a CSV/Spreadsheet Committer, with support for how to join multi-values.
 
 - Add committer server
 

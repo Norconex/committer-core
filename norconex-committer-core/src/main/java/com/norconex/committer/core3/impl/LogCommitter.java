@@ -22,10 +22,12 @@ import java.util.Map.Entry;
 import java.util.Optional;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.EqualsExclude;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.HashCodeExclude;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringExclude;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.time.StopWatch;
@@ -38,6 +40,9 @@ import com.norconex.committer.core3.DeleteRequest;
 import com.norconex.committer.core3.UpsertRequest;
 import com.norconex.commons.lang.SLF4JUtil;
 import com.norconex.commons.lang.map.Properties;
+import com.norconex.commons.lang.text.TextMatcher;
+import com.norconex.commons.lang.xml.IXMLConfigurable;
+import com.norconex.commons.lang.xml.XML;
 
 /**
  * <p>
@@ -56,11 +61,11 @@ import com.norconex.commons.lang.map.Properties;
  * </p>
  *
  * {@nx.xml.usage
- * <committer class="com.norconex.committer.core.impl.LogCommitter">
+ * <committer class="com.norconex.committer.core3.impl.LogCommitter">
  *   <logLevel>[TRACE|DEBUG|INFO|WARN|ERROR|STDOUT|STDERR]</logLevel>
- *   <fieldsRegex>
- *     (Regular expressions matching fields to log. Default logs all.)
- *   </fieldsRegex>
+ *   <fieldMatcher {@nx.include com.norconex.commons.lang.text.TextMatcher#matchAttributes}>
+ *     (Expression matching fields to log. Default logs all.)
+ *   </fieldMatcher>
  *   <ignoreContent>[false|true]</ignoreContent>
  * </committer>
  * }
@@ -68,7 +73,9 @@ import com.norconex.commons.lang.map.Properties;
  * @author Pascal Essiembre
  * @since 3.0.0
  */
-public class LogCommitter extends AbstractCommitter  {
+@SuppressWarnings("javadoc")
+public class LogCommitter extends AbstractCommitter
+        implements IXMLConfigurable  {
 
     private static final Logger LOG =
             LoggerFactory.getLogger(LogCommitter.class);
@@ -77,10 +84,14 @@ public class LogCommitter extends AbstractCommitter  {
 
     private long addCount = 0;
     private long removeCount = 0;
+
+    @ToStringExclude
+    @HashCodeExclude
+    @EqualsExclude
     private final StopWatch watch = new StopWatch();
 
     private boolean ignoreContent;
-    private String fieldsRegex;
+    private final TextMatcher fieldMatcher = new TextMatcher();
     private String logLevel;
 
     public boolean isIgnoreContent() {
@@ -90,11 +101,11 @@ public class LogCommitter extends AbstractCommitter  {
         this.ignoreContent = ignoreContent;
     }
 
-    public String getFieldsRegex() {
-        return fieldsRegex;
+    public TextMatcher getFieldMatcher() {
+        return fieldMatcher;
     }
-    public void setFieldsRegex(String fieldsRegex) {
-        this.fieldsRegex = fieldsRegex;
+    public void setFieldMatcher(TextMatcher fieldMatcher) {
+        this.fieldMatcher.copyFrom(fieldMatcher);
     }
 
     public String getLogLevel() {
@@ -112,13 +123,13 @@ public class LogCommitter extends AbstractCommitter  {
     protected void doUpsert(UpsertRequest upsertRequest)
             throws CommitterException {
         StringBuilder b = new StringBuilder();
-        b.append("=== DOCUMENT UPSERTED ==================================\n");
+        b.append("\n=== DOCUMENT UPSERTED ================================\n");
 
         stringifyRefAndMeta(
                 b, upsertRequest.getReference(), upsertRequest.getMetadata());
 
         if (!ignoreContent) {
-            b.append("--- Content -----------------------------------------\n");
+            b.append("\n--- Content ---------------------------------------\n");
             try {
                 b.append(IOUtils.toString(
                         upsertRequest.getContent(), UTF_8)).append('\n');
@@ -130,25 +141,26 @@ public class LogCommitter extends AbstractCommitter  {
 
         addCount++;
         if (addCount % LOG_TIME_BATCH_SIZE == 0) {
-            LOG.info("{} additions queued in: {}", addCount, watch.toString());
+            LOG.info("{} upsert logged in: {}", addCount, watch);
         }
     }
     @Override
     protected void doDelete(DeleteRequest deleteRequest)
             throws CommitterException {
         StringBuilder b = new StringBuilder();
-        b.append("=== DOCUMENT DELETED ===================================\n");
+        b.append("\n=== DOCUMENT DELETED =================================\n");
         stringifyRefAndMeta(
                 b, deleteRequest.getReference(), deleteRequest.getMetadata());
         log(b.toString());
 
         removeCount++;
         if (removeCount % LOG_TIME_BATCH_SIZE == 0) {
-            LOG.info("{} deletions queued in {}", removeCount, watch);
+            LOG.info("{} delete logged in {}", removeCount, watch);
         }
     }
     @Override
     protected void doClose() throws CommitterException {
+        watch.stop();
         LOG.info("{} additions committed.", addCount);
         LOG.info("{} deletions committed.", removeCount);
         LOG.info("Total elapsed time: {}", watch);
@@ -158,10 +170,10 @@ public class LogCommitter extends AbstractCommitter  {
             StringBuilder b, String reference, Properties metadata) {
         b.append("REFERENCE = ").append(reference).append('\n');
         if (metadata != null) {
-            b.append("--- Metadata: ---------------------------------------\n");
+            b.append("\n--- Metadata: -------------------------------------\n");
             for (Entry<String, List<String>> en : metadata.entrySet()) {
-                if (StringUtils.isBlank(fieldsRegex)
-                        || en.getKey().matches(fieldsRegex)) {
+                if (fieldMatcher.getPattern() == null
+                        || fieldMatcher.matches(en.getKey())) {
                     for (String val : en.getValue()) {
                         b.append(en.getKey()).append(" = ")
                                 .append(val).append('\n');
@@ -181,6 +193,19 @@ public class LogCommitter extends AbstractCommitter  {
         } else {
             SLF4JUtil.log(LOG, lvl, txt);
         }
+    }
+
+    @Override
+    public void loadFromXML(XML xml) {
+        setLogLevel(xml.getString("logLevel", logLevel));
+        setIgnoreContent(xml.getBoolean("ignoreContent", ignoreContent));
+        fieldMatcher.loadFromXML(xml.getXML("fieldMatcher"));
+    }
+    @Override
+    public void saveToXML(XML xml) {
+        xml.addElement("logLevel", logLevel);
+        xml.addElement("ignoreContent", ignoreContent);
+        fieldMatcher.saveToXML(xml.addElement("fieldMatcher"));
     }
 
     @Override

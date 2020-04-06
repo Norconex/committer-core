@@ -1,4 +1,4 @@
-/* Copyright 2010-2014 Norconex Inc.
+/* Copyright 2010-2020 Norconex Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,14 @@ import java.io.Serializable;
  * can take place on a remote repository, and hold all necessary information
  * for a successful commit.
  * <br><br>
- * {@link IAddOperation} and {@link IDeleteOperation} are the two types of 
+ * {@link IAddOperation} and {@link IDeleteOperation} are the two types of
  * operations typically used by most repositories.
- * 
+ *
  * @author Pascal Essiembre
  * @since 1.1.0
+ * @deprecated Since 3.0.0.
  */
+@Deprecated
 public interface ICommitOperation extends Serializable {
 
     /**

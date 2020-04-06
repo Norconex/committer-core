@@ -110,7 +110,10 @@ import com.norconex.commons.lang.xml.XML;
  *
  * @author Pascal Essiembre
  * @since 2.1.0
+ * @deprecated Since 3.0.0, use
+ *      {@link com.norconex.committer.core3.fs.impl.XMLFileCommitter}
  */
+@Deprecated
 public class XMLFileCommitter implements ICommitter, IXMLConfigurable  {
 
     private static final Logger LOG =

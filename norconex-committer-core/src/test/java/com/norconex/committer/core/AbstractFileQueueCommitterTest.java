@@ -32,6 +32,7 @@ import org.junit.jupiter.api.io.TempDir;
 
 import com.norconex.commons.lang.map.Properties;
 
+@Deprecated
 public class AbstractFileQueueCommitterTest {
 
     @TempDir

@@ -1,4 +1,4 @@
-/* Copyright 2010-2019 Norconex Inc.
+/* Copyright 2010-2020 Norconex Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,9 @@ import com.norconex.commons.lang.map.Properties;
  * A file-based addition operation.
  * @author Pascal Essiembre
  * @since 1.1.0
+ * @deprecated Since 3.0.0.
  */
+@Deprecated
 public class FileAddOperation implements IAddOperation {
 
     private static final long serialVersionUID = -7003290965448748871L;

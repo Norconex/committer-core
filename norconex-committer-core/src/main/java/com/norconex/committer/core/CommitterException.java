@@ -1,4 +1,4 @@
-/* Copyright 2010-2014 Norconex Inc.
+/* Copyright 2010-2020 Norconex Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,9 @@ package com.norconex.committer.core;
 /**
  * Triggered when something went wrong with committing.
  * @author Pascal Essiembre
+ * @deprecated Since 3.0.0.
  */
+@Deprecated
 public class CommitterException extends RuntimeException {
 
     private static final long serialVersionUID = -805913995358009121L;

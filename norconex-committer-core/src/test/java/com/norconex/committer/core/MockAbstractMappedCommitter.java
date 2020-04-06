@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.norconex.commons.lang.xml.XML;
 
+@Deprecated
 public class MockAbstractMappedCommitter extends AbstractMappedCommitter {
 
     private List<ICommitOperation> commitBatch;

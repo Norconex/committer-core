@@ -25,7 +25,9 @@ import com.norconex.committer.core3.UpsertRequest;
  * version 3.x, allowing for a smooth migration.
  * @author Pascal Essiembre
  * @since 3.0.0
+ * @deprecated This adaptor only exists to facilitate migration towards 3.x.
  */
+@Deprecated
 public final class V3CommitterAdapter implements ICommitter {
 
     private final com.norconex.committer.core.ICommitter v2;

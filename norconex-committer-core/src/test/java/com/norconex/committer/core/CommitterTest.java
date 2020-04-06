@@ -26,7 +26,9 @@ import com.norconex.commons.lang.xml.XML;
 
 /**
  * @author Pascal Essiembre
+ * @deprecated
  */
+@Deprecated
 public class CommitterTest {
 
     @Test

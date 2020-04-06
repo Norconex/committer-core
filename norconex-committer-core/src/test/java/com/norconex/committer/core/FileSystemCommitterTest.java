@@ -26,7 +26,9 @@ import com.norconex.commons.lang.xml.XML;
 /**
  * Tests the {@link FileSystemCommitter}.
  * @author Pascal Essiembre
+ * @deprecated
  */
+@Deprecated
 public class FileSystemCommitterTest {
 
     private File tempFile;
