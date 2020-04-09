@@ -6,7 +6,8 @@
 - Have option to retry batches by breaking them down into smaller chunks
   up to 1 at a time.
 
-- Ensure no workDir collision (either in this project or caller).
+- Ensure no workDir collision (either in this project or caller).  Append
+  committer index in case of multiple committers (or always)?
 
 - Have installer for other committer?
 

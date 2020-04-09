@@ -43,6 +43,7 @@ public class AbstractFileQueueCommitterTest {
 
         final AtomicInteger counter = new AtomicInteger();
 
+        @SuppressWarnings("resource")
         final AbstractFileQueueCommitter committer =
                 new AbstractFileQueueCommitter() {
 

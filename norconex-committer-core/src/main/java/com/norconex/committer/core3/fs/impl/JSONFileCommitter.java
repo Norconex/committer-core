@@ -20,8 +20,11 @@ import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.EqualsExclude;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.HashCodeExclude;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringExclude;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.json.JSONObject;
 
@@ -104,6 +107,9 @@ public class JSONFileCommitter extends AbstractFSCommitter<Writer> {
 
     private int indent = -1;
 
+    @ToStringExclude
+    @HashCodeExclude
+    @EqualsExclude
     private boolean first = true;
 
     public int getIndent() {

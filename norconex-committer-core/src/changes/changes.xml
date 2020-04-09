@@ -21,10 +21,6 @@
         Batch and queuing now separate to favor reuse.
       </action>
       <action dev="essiembre" type="add">
-        New V3CommitterAdapter to ensure backward compatibility with V2
-        committers.
-      </action>
-      <action dev="essiembre" type="add">
         New "init" and "close" methods for committers.
       </action>
       <action dev="essiembre" type="add">

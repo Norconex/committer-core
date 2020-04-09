@@ -16,6 +16,10 @@ package com.norconex.committer.core;
 
 import java.io.InputStream;
 
+import com.norconex.committer.core3.CommitterContext;
+import com.norconex.committer.core3.CommitterException;
+import com.norconex.committer.core3.DeleteRequest;
+import com.norconex.committer.core3.UpsertRequest;
 import com.norconex.commons.lang.map.Properties;
 
 /**
@@ -24,7 +28,7 @@ import com.norconex.commons.lang.map.Properties;
  * @deprecated Since 3.0.0, use {@link com.norconex.committer.core3.ICommitter}
  */
 @Deprecated
-public interface ICommitter {
+public interface ICommitter extends com.norconex.committer.core3.ICommitter {
 
     /**
      * Adds a new or modified document to the target destination.
@@ -52,4 +56,23 @@ public interface ICommitter {
      * May not be necessary for some implementations.
      */
     void commit();
+
+    @Override
+    default void init(CommitterContext committerContext)
+            throws CommitterException {
+        //NOOP
+    }
+    @Override
+    default void upsert(UpsertRequest upsertRequest) throws CommitterException {
+        add(upsertRequest.getReference(),
+                upsertRequest.getContent(), upsertRequest.getMetadata());
+    }
+    @Override
+    default void delete(DeleteRequest deleteRequest) throws CommitterException {
+        remove(deleteRequest.getReference(), deleteRequest.getMetadata());
+    }
+    @Override
+    default void close() throws CommitterException {
+        commit();
+    }
 }

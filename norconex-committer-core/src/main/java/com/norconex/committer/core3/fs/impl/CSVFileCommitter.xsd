@@ -40,6 +40,18 @@
                 <xs:enumeration value="POSTGRESSQL_TEXT1.5"/>
                 <xs:enumeration value="RFC-4180"/>
                 <xs:enumeration value="TDF"/>
+                <xs:enumeration value="default"/>
+                <xs:enumeration value="excel"/>
+                <xs:enumeration value="informix_unload1.3"/>
+                <xs:enumeration value="informix_unload_csv1.3"/>
+                <xs:enumeration value="mongo_csv1.7"/>
+                <xs:enumeration value="mongo_tsv1.7"/>
+                <xs:enumeration value="mysql"/>
+                <xs:enumeration value="oracle1.6"/>
+                <xs:enumeration value="postgressql_csv1.5"/>
+                <xs:enumeration value="postgressql_text1.5"/>
+                <xs:enumeration value="rfc-4180"/>
+                <xs:enumeration value="tdf"/>
               </xs:restriction>
             </xs:simpleType>
           </xs:attribute>
