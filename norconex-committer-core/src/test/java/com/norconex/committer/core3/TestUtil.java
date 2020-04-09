@@ -27,6 +27,7 @@ import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.junit.jupiter.params.provider.Arguments;
 
+import com.norconex.commons.lang.map.MapUtil;
 import com.norconex.commons.lang.map.Properties;
 
 
@@ -115,6 +116,14 @@ public final class TestUtil {
                         StandardCharsets.UTF_8));
         return req;
     }
+    public static UpsertRequest upsertRequest(
+            String reference, String content, Object... metadataPairs) {
+        Properties meta = new Properties();
+        meta.loadFromMap(MapUtil.toMap(metadataPairs));
+        UpsertRequest req = new UpsertRequest(reference, meta,
+                IOUtils.toInputStream(content, StandardCharsets.UTF_8));
+        return req;
+    }
 
     public static List<DeleteRequest> deleteRequests(int qty) {
         List<DeleteRequest> reqs = new ArrayList<>();
@@ -128,6 +137,13 @@ public final class TestUtil {
         meta.add("title", "Sample document " + index);
         DeleteRequest req = new DeleteRequest(
                 "http://example.com/page" + index + ".html", meta);
+        return req;
+    }
+    public static DeleteRequest deleteRequest(
+            String reference, Object... metadataPairs) {
+        Properties meta = new Properties();
+        meta.loadFromMap(MapUtil.toMap(metadataPairs));
+        DeleteRequest req = new DeleteRequest(reference, meta);
         return req;
     }
 }

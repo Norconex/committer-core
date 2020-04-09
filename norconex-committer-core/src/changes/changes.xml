@@ -9,6 +9,9 @@
 
     <release version="3.0.0-SNAPSHOT" date="2020-??-??" description="Major release">
       <action dev="essiembre" type="add">
+        New CSVFileCommitter (comma-separated values).
+      </action>
+      <action dev="essiembre" type="add">
         New LogCommitter.
       </action>
       <action dev="essiembre" type="add">

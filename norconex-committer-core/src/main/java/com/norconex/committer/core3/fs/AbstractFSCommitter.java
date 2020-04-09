@@ -54,8 +54,8 @@ import com.norconex.commons.lang.xml.XML;
  * The following are configuration options inherited by subclasses:
  * </p>
  * {@nx.xml #options
- *   <directory>(path where to save XML files)</directory>
- *   <docsPerFile>(max number of docs per XML file)</docsPerFile>
+ *   <directory>(path where to save the files)</directory>
+ *   <docsPerFile>(max number of docs per file)</docsPerFile>
  *   <compress>[false|true]</compress>
  *   <splitAddDelete>[false|true]</splitAddDelete>
  *   <fileNamePrefix>(optional prefix to created file names)</fileNamePrefix>

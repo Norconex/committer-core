@@ -47,7 +47,13 @@
         <groupId>com.tdunning</groupId>
         <artifactId>json</artifactId>
     </dependency>
-     
+
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-csv</artifactId>
+      <version>1.8</version>
+    </dependency>
+
     <!-- Tests and provided. -->
     <dependency>
       <groupId>org.junit.jupiter</groupId>

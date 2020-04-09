@@ -36,7 +36,7 @@ import com.norconex.commons.lang.bean.BeanUtil;
 import com.norconex.commons.lang.xml.XML;
 
 /**
- * <p>JSON File Committer tests.</p>
+ * <p>Common File Committer tests.</p>
  *
  * @author Pascal Essiembre
  * @since 3.0.0
@@ -53,8 +53,9 @@ public class FSCommitterTest  {
 
     static Stream<Arguments> committerProvider() {
         return Stream.of(
-                TestUtil.args(new XMLFileCommitter()),
-                TestUtil.args(new JSONFileCommitter())
+            TestUtil.args(new XMLFileCommitter()),
+            TestUtil.args(new JSONFileCommitter()),
+            TestUtil.args(new CSVFileCommitter())
         );
     }
 
@@ -62,7 +63,7 @@ public class FSCommitterTest  {
     public Path folder;
 
     @CommitterTest
-    public void testMergedJSONFileCommitter(
+    public void testMergedFileCommitter(
             AbstractFSCommitter<?> c, String name) throws CommitterException {
         // write 5 upserts and 2 deletes.
         // max docs per file being 2, so should generate 4 files.
@@ -81,7 +82,7 @@ public class FSCommitterTest  {
     }
 
     @CommitterTest
-    public void testSplitXMLFileCommitter(
+    public void testSplitFileCommitter(
             AbstractFSCommitter<?> c, String name) throws CommitterException {
         // write 5 upserts and 2 deletes.
         // max docs per file being 2, so should generate 3 upsert files
@@ -115,6 +116,5 @@ public class FSCommitterTest  {
         if (BeanUtil.isSettable(c, "indent")) {
             BeanUtil.setValue(c, "indent", indent);
         }
-
     }
 }

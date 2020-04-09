@@ -90,7 +90,7 @@ import com.norconex.commons.lang.xml.XML;
  * }
  *
  * {@nx.xml.usage
- * <committer class="com.norconex.committer.core.impl.JSONFileCommitter">
+ * <committer class="com.norconex.committer.core3.fs.impl.JSONFileCommitter">
  *   {@nx.include com.norconex.committer.core3.fs.AbstractFSCommitter#options}
  *   <indent>(number of indentation spaces, default does not indent)</indent>
  * </committer>
