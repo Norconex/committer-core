@@ -35,6 +35,7 @@ import com.norconex.committer.core3.DeleteRequest;
 import com.norconex.committer.core3.UpsertRequest;
 import com.norconex.committer.core3.fs.AbstractFSCommitter;
 import com.norconex.commons.lang.collection.CollectionUtil;
+import com.norconex.commons.lang.convert.EnumConverter;
 import com.norconex.commons.lang.xml.XML;
 
 /**
@@ -222,7 +223,8 @@ public class CSVFileCommitter extends AbstractFSCommitter<CSVPrinter> {
         if (StringUtils.isBlank(format)) {
             fmt = CSVFormat.newFormat(',');
         } else {
-            fmt = CSVFormat.valueOf(format.toUpperCase());
+            fmt = new EnumConverter().toType(
+                    format, CSVFormat.Predefined.class).getFormat();
         }
 
         if (delimiter != null) {
@@ -349,9 +351,9 @@ public class CSVFileCommitter extends AbstractFSCommitter<CSVPrinter> {
         List<Column> cols = new ArrayList<>();
         for (XML colXml : xml.getXMLList("col")) {
             cols.add(new Column(
-                    colXml.getString("@field"),
-                    colXml.getString("@header"),
-                    colXml.getInteger("@truncateAt")));
+                    colXml.getString("@field", null),
+                    colXml.getString("@header", null),
+                    colXml.getInteger("@truncateAt", 0)));
         }
         setColumns(cols);
     }

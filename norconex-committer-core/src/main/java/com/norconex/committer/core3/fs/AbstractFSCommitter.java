@@ -57,7 +57,7 @@ import com.norconex.commons.lang.xml.XML;
  *   <directory>(path where to save the files)</directory>
  *   <docsPerFile>(max number of docs per file)</docsPerFile>
  *   <compress>[false|true]</compress>
- *   <splitAddDelete>[false|true]</splitAddDelete>
+ *   <splitUpsertDelete>[false|true]</splitUpsertDelete>
  *   <fileNamePrefix>(optional prefix to created file names)</fileNamePrefix>
  *   <fileNameSuffix>(optional suffix to created file names)</fileNameSuffix>
  * }
