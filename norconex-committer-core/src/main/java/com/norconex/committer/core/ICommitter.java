@@ -75,4 +75,8 @@ public interface ICommitter extends com.norconex.committer.core3.ICommitter {
     default void close() throws CommitterException {
         commit();
     }
+    @Override
+    default void clean() throws CommitterException {
+        // NOOP
+    }
 }

@@ -211,6 +211,12 @@ public abstract class AbstractFSCommitter<T> extends AbstractCommitter
     }
 
     @Override
+    protected void doClean() throws CommitterException {
+        // NOOP, no internal state is kept.
+        // We do not clean previously committed files.
+    }
+
+    @Override
     public final void loadFromXML(XML xml) {
         loadCommitterFromXML(xml);
         setDirectory(xml.getPath("directory", directory));

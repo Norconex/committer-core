@@ -166,6 +166,11 @@ public class LogCommitter extends AbstractCommitter
         LOG.info("Total elapsed time: {}", watch);
     }
 
+    @Override
+    protected void doClean() throws CommitterException {
+        // NOOP
+    }
+
     private void stringifyRefAndMeta(
             StringBuilder b, String reference, Properties metadata) {
         b.append("REFERENCE = ").append(reference).append('\n');

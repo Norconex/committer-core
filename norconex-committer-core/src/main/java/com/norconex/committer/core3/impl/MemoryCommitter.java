@@ -183,6 +183,11 @@ public class MemoryCommitter extends AbstractCommitter {
     }
 
     @Override
+    protected void doClean() throws CommitterException {
+        // NOOP
+    }
+
+    @Override
     public boolean equals(final Object other) {
         return EqualsBuilder.reflectionEquals(this, other);
     }

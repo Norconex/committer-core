@@ -33,4 +33,14 @@ public interface ICommitter extends AutoCloseable {
 
     @Override
     void close() throws CommitterException;
+
+    /**
+     * Cleans any persisted information (e.g. queue) to ensure next run will
+     * start fresh.
+     * Calling this method on Committers not persisting anything between
+     * each execution will have no effect. This method does NOT delete anything
+     * previously committed on the target repository.
+     * @throws CommitterException something went wrong cleaning the committer.
+     */
+    void clean() throws CommitterException;
 }

@@ -250,6 +250,23 @@ public class FSQueue implements ICommitterQueue, IXMLConfigurable {
         consumeBatch(queueDir);
     }
 
+    @Override
+    public void clean() throws CommitterException {
+        if (queueDir == null) {
+            LOG.error("Queue directory not initialized. Could not clean.");
+            return;
+        }
+
+        // move one level higher before deleting to get queue/active/errors
+        try {
+            FileUtil.delete(queueDir.getParent().toFile());
+        } catch (IOException e) {
+            throw new CommitterException("Could not clean queue "
+                    + "directory located at "
+                    + queueDir.getParent().toAbsolutePath(), e);
+        }
+    }
+
     private Path createActiveDir() {
         return queueDir.resolve("batch-" + TimeIdGenerator.next());
     }

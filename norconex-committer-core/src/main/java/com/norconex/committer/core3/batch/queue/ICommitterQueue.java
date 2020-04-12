@@ -34,6 +34,12 @@ public interface ICommitterQueue extends AutoCloseable {
     //TODO Return new queue size after this queue request?
     void queue(ICommitterRequest request) throws CommitterException;
 
+    /**
+     * Cleans any persisted information specific to this queue.
+     * @throws CommitterException could not clean queue
+     */
+    void clean() throws CommitterException;
+
     @Override
     void close() throws CommitterException;
 }

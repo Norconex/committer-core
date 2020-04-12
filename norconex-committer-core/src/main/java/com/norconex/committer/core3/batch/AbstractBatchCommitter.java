@@ -93,6 +93,10 @@ public abstract class AbstractBatchCommitter extends AbstractCommitter
             this.queue.close();
         }
     }
+    @Override
+    protected void doClean() throws CommitterException {
+        this.queue.clean();
+    }
 
     @Override
     public void consume(Iterator<ICommitterRequest> it)

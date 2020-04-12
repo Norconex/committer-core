@@ -88,6 +88,19 @@ public abstract class AbstractCommitter implements ICommitter {
         fireInfo(CommitterEvent.COMMITTER_CLOSE_END);
     }
 
+    @Override
+    public final void clean() throws CommitterException {
+        fireInfo(CommitterEvent.COMMITTER_CLEAN_BEGIN);
+        try {
+            doClean();
+        } catch (CommitterException | RuntimeException e) {
+            fireError(CommitterEvent.COMMITTER_CLEAN_ERROR, e);
+            throw e;
+        }
+        fireInfo(CommitterEvent.COMMITTER_CLEAN_END);
+    }
+
+
     protected CommitterContext getCommitterContext() {
         return this.committerContext;
     }
@@ -111,6 +124,8 @@ public abstract class AbstractCommitter implements ICommitter {
      * @throws CommitterException error closing committer
      */
     protected abstract void doClose() throws CommitterException;
+
+    protected abstract void doClean() throws CommitterException;
 
     protected final void fireDebug(String name) {
         fireInfo(name, null);

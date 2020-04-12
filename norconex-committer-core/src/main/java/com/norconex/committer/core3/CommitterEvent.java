@@ -79,6 +79,14 @@ public class CommitterEvent<T extends ICommitter> extends Event<T> {
     /** The Committer encountered an error when closing. */
     public static final String COMMITTER_CLOSE_ERROR = "COMMITTER_CLOSE_ERROR";
 
+    /** The Committer is being cleaned. */
+    public static final String COMMITTER_CLEAN_BEGIN = "COMMITTER_CLEAN_BEGIN";
+    /** The Committer has been cleaned. */
+    public static final String COMMITTER_CLEAN_END = "COMMITTER_CLEAN_END";
+    /** The Committer encountered an error when cleaning. */
+    public static final String COMMITTER_CLEAN_ERROR = "COMMITTER_CLEAN_ERROR";
+
+
     //TODO add a constant for "commit_error" and maybe "commit_warning"?
 
 
