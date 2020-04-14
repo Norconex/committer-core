@@ -16,11 +16,14 @@
 -->
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
-  <!-- Elements/types reusable across Committer Core. -->
+  <xs:include schemaLocation="Committer.xsd"></xs:include>
 
-  <xs:include schemaLocation="/com/norconex/commons/lang/Lang.xsd"></xs:include>
-  <xs:include schemaLocation="/com/norconex/commons/lang/text/TextMatcher.xsd"></xs:include>
-  <xs:include schemaLocation="/com/norconex/commons/lang/map/PropertyMatcher.xsd"></xs:include>
-  
+  <xs:complexType name="AbstractCommitter" abstract="true">
+    <xs:all>
+      <xs:element name="restrictTo" type="PropertyMatcherType" minOccurs="0" maxOccurs="unbounded" />              
+    </xs:all>
+    <xs:attribute name="class" type="xs:string" use="required"></xs:attribute>
+  </xs:complexType>
+
 </xs:schema>
 

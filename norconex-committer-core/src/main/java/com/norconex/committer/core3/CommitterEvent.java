@@ -38,6 +38,14 @@ public class CommitterEvent<T extends ICommitter> extends Event<T> {
     /** The Committer encountered an error when initializing. */
     public static final String COMMITTER_INIT_ERROR = "COMMITTER_INIT_ERROR";
 
+    /** The Committer has accepted a request and it will commit it. */
+    public static final String COMMITTER_ACCEPT_YES = "COMMITTER_ACCEPT_YES";
+    /** The Committer has rejected a request and it will not commit it. */
+    public static final String COMMITTER_ACCEPT_NO = "COMMITTER_ACCEPT_NO";
+    /** The Committer acceptance check produced an error. */
+    public static final String COMMITTER_ACCEPT_ERROR =
+            "COMMITTER_ACCEPT_ERROR";
+
     /** The Committer is receiving a document to be updated or inserted. */
     public static final String COMMITTER_UPSERT_BEGIN =
             "COMMITTER_UPSERT_BEGIN";

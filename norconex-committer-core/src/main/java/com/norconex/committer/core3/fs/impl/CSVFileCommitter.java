@@ -337,7 +337,7 @@ public class CSVFileCommitter extends AbstractFSCommitter<CSVPrinter> {
     }
 
     @Override
-    public void loadCommitterFromXML(XML xml) {
+    public void loadFSCommitterFromXML(XML xml) {
         setFormat(xml.getString("@format", getFormat()));
         setDelimiter(xml.get("@delimiter", Character.class, getDelimiter()));
         setQuote(xml.get("@quote", Character.class, getQuote()));
@@ -358,7 +358,7 @@ public class CSVFileCommitter extends AbstractFSCommitter<CSVPrinter> {
         setColumns(cols);
     }
     @Override
-    public void saveCommitterToXML(XML xml) {
+    public void saveFSCommitterToXML(XML xml) {
         xml.setAttribute("format", getFormat());
         xml.setAttribute("delimiter", getDelimiter());
         xml.setAttribute("quote", getQuote());

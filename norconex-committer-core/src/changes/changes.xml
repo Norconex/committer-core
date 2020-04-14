@@ -17,11 +17,15 @@
       <action dev="essiembre" type="add">
         New MemoryCommitter.
       </action>
+      <action dev="essiembre" type="add">
+        New ability to restrict committing to only matching documents
+        (to facilitate "routing").
+      </action>
       <action dev="essiembre" type="update">
         Batch and queuing now separate to favor reuse.
       </action>
       <action dev="essiembre" type="add">
-        New "init", "close", and "clean" methods for committers.
+        New "init", "close", "accept", and "clean" methods for committers.
       </action>
       <action dev="essiembre" type="add">
         Now fire Committer events for interested consuming classes.

@@ -57,11 +57,13 @@ import com.norconex.commons.lang.xml.XML;
  *   <queue class="(optional custom queue implementation class)">
  *     (custom queue configuration options, if applicable)
  *   </queue>
+ *   {@nx.include com.norconex.committer.core3.AbstractCommitter#options}
  * }
  *
  * @author Pascal Essiembre
  * @since 3.0.0
  */
+@SuppressWarnings("javadoc")
 public abstract class AbstractBatchCommitter extends AbstractCommitter
         implements IXMLConfigurable, BatchConsumer {
 
@@ -112,16 +114,19 @@ public abstract class AbstractBatchCommitter extends AbstractCommitter
     }
 
     @Override
-    public final void loadFromXML(XML xml) {
+    public final void loadCommitterFromXML(XML xml) {
         loadBatchCommitterFromXML(xml);
         setCommitterQueue(
                 xml.getObjectImpl(ICommitterQueue.class, "queue", queue));
     }
     @Override
-    public final void saveToXML(XML xml) {
+    public final void saveCommitterToXML(XML xml) {
         saveBatchCommitterToXML(xml);
         xml.addElement("queue", queue);
     }
+
+    protected abstract void loadBatchCommitterFromXML(XML xml);
+    protected abstract void saveBatchCommitterToXML(XML xml);
 
     public ICommitterQueue getCommitterQueue() {
         return this.queue;
@@ -153,9 +158,6 @@ public abstract class AbstractBatchCommitter extends AbstractCommitter
     protected void closeBatchCommitter() throws CommitterException {
         //NOOP
     }
-
-    protected abstract void loadBatchCommitterFromXML(XML xml);
-    protected abstract void saveBatchCommitterToXML(XML xml);
 
     @Override
     public boolean equals(final Object other) {

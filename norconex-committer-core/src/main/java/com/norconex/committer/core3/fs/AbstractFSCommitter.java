@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Objects;
 import java.util.zip.GZIPOutputStream;
 
@@ -60,12 +59,14 @@ import com.norconex.commons.lang.xml.XML;
  *   <splitUpsertDelete>[false|true]</splitUpsertDelete>
  *   <fileNamePrefix>(optional prefix to created file names)</fileNamePrefix>
  *   <fileNameSuffix>(optional suffix to created file names)</fileNameSuffix>
+ *   {@nx.include com.norconex.committer.core3.AbstractCommitter#options}
  * }
  *
  * @param <T> type of file serializer
  * @author Pascal Essiembre
  * @since 3.0.0
  */
+@SuppressWarnings("javadoc")
 public abstract class AbstractFSCommitter<T> extends AbstractCommitter
         implements IXMLConfigurable  {
 
@@ -149,12 +150,10 @@ public abstract class AbstractFSCommitter<T> extends AbstractCommitter
     @Override
     protected void doInit() throws CommitterException {
         if (directory == null) {
-            if (getCommitterContext().getWorkDir() != null) {
-                this.directory = getCommitterContext().getWorkDir().resolve(
-                        "committer-" + getFileExtension());
-            } else {
-                this.directory = Paths.get("./committer-" + getFileExtension());
-            }
+            this.directory = getCommitterContext().getWorkDir();
+//                    .resolveSibling(
+//                    getCommitterContext().getWorkDir().getFileName()
+//                    + "-" + getFileExtension());
         }
 
         try {
@@ -217,8 +216,8 @@ public abstract class AbstractFSCommitter<T> extends AbstractCommitter
     }
 
     @Override
-    public final void loadFromXML(XML xml) {
-        loadCommitterFromXML(xml);
+    public final void loadCommitterFromXML(XML xml) {
+        loadFSCommitterFromXML(xml);
         setDirectory(xml.getPath("directory", directory));
         setDocsPerFile(xml.getInteger("docsPerFile", docsPerFile));
         setCompress(xml.getBoolean("compress", compress));
@@ -228,8 +227,8 @@ public abstract class AbstractFSCommitter<T> extends AbstractCommitter
         setFileNameSuffix(xml.getString("fileNameSuffix", fileNameSuffix));
     }
     @Override
-    public final void saveToXML(XML xml) {
-        saveCommitterToXML(xml);
+    public final void saveCommitterToXML(XML xml) {
+        saveFSCommitterToXML(xml);
         xml.addElement("directory", directory);
         xml.addElement("docsPerFile", docsPerFile);
         xml.addElement("compress", compress);
@@ -237,6 +236,14 @@ public abstract class AbstractFSCommitter<T> extends AbstractCommitter
         xml.addElement("fileNamePrefix", fileNamePrefix);
         xml.addElement("fileNameSuffix", fileNameSuffix);
     }
+
+    public void loadFSCommitterFromXML(XML xml) {
+        //NOOP
+    }
+    public void saveFSCommitterToXML(XML xml) {
+        //NOOP
+    }
+
 
     protected abstract String getFileExtension();
     protected abstract T createDocWriter(Writer writer) throws IOException;
@@ -246,13 +253,6 @@ public abstract class AbstractFSCommitter<T> extends AbstractCommitter
             T docWriter, DeleteRequest deleteRequest) throws IOException;
     protected abstract void closeDocWriter(T docWriter)
             throws IOException;
-
-    public void loadCommitterFromXML(XML xml) {
-        //NOOP
-    }
-    public void saveCommitterToXML(XML xml) {
-        //NOOP
-    }
 
     @Override
     public boolean equals(final Object other) {

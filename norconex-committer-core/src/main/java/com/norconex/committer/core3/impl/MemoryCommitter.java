@@ -39,6 +39,7 @@ import com.norconex.committer.core3.ICommitterRequest;
 import com.norconex.committer.core3.UpsertRequest;
 import com.norconex.commons.lang.map.Properties;
 import com.norconex.commons.lang.text.TextMatcher;
+import com.norconex.commons.lang.xml.XML;
 
 /**
  * <p>
@@ -52,9 +53,16 @@ import com.norconex.commons.lang.text.TextMatcher;
  * discouraged for regular production use.
  * </p>
  *
+ * {@nx.xml.usage
+ * <committer class="com.norconex.committer.core3.impl.MemoryCommitter">
+ *   {@nx.include com.norconex.committer.core3.AbstractCommitter#options}
+ * </committer>
+ * }
+ *
  * @author Pascal Essiembre
  * @since 3.0.0
  */
+@SuppressWarnings("javadoc")
 public class MemoryCommitter extends AbstractCommitter {
 
     private static final Logger LOG =
@@ -199,5 +207,15 @@ public class MemoryCommitter extends AbstractCommitter {
     public String toString() {
         return new ReflectionToStringBuilder(
                 this, ToStringStyle.SHORT_PREFIX_STYLE).toString();
+    }
+
+    @Override
+    public void loadCommitterFromXML(XML xml) {
+        //NOOP
+    }
+
+    @Override
+    public void saveCommitterToXML(XML xml) {
+        //NOOP
     }
 }

@@ -19,6 +19,7 @@ import java.io.InputStream;
 import com.norconex.committer.core3.CommitterContext;
 import com.norconex.committer.core3.CommitterException;
 import com.norconex.committer.core3.DeleteRequest;
+import com.norconex.committer.core3.ICommitterRequest;
 import com.norconex.committer.core3.UpsertRequest;
 import com.norconex.commons.lang.map.Properties;
 
@@ -78,5 +79,10 @@ public interface ICommitter extends com.norconex.committer.core3.ICommitter {
     @Override
     default void clean() throws CommitterException {
         // NOOP
+    }
+    @Override
+    default boolean accept(ICommitterRequest request)
+            throws CommitterException {
+        return true;
     }
 }

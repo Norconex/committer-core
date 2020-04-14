@@ -25,6 +25,8 @@ public interface ICommitter extends AutoCloseable {
 
     void init(CommitterContext committerContext) throws CommitterException;
 
+    boolean accept(ICommitterRequest request) throws CommitterException;
+
     //TODO do we support specifying multiple entities like this? Wise for
     //batching in case we have a client-server setup?
     void upsert(UpsertRequest upsertRequest) throws CommitterException;

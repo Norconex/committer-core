@@ -67,6 +67,7 @@ import com.norconex.commons.lang.xml.XML;
  *     (Expression matching fields to log. Default logs all.)
  *   </fieldMatcher>
  *   <ignoreContent>[false|true]</ignoreContent>
+ *   {@nx.include com.norconex.committer.core3.AbstractCommitter#options}
  * </committer>
  * }
  *
@@ -201,19 +202,6 @@ public class LogCommitter extends AbstractCommitter
     }
 
     @Override
-    public void loadFromXML(XML xml) {
-        setLogLevel(xml.getString("logLevel", logLevel));
-        setIgnoreContent(xml.getBoolean("ignoreContent", ignoreContent));
-        fieldMatcher.loadFromXML(xml.getXML("fieldMatcher"));
-    }
-    @Override
-    public void saveToXML(XML xml) {
-        xml.addElement("logLevel", logLevel);
-        xml.addElement("ignoreContent", ignoreContent);
-        fieldMatcher.saveToXML(xml.addElement("fieldMatcher"));
-    }
-
-    @Override
     public boolean equals(final Object other) {
         return EqualsBuilder.reflectionEquals(this, other);
     }
@@ -225,5 +213,17 @@ public class LogCommitter extends AbstractCommitter
     public String toString() {
         return new ReflectionToStringBuilder(
                 this, ToStringStyle.SHORT_PREFIX_STYLE).toString();
+    }
+    @Override
+    public void loadCommitterFromXML(XML xml) {
+        setLogLevel(xml.getString("logLevel", logLevel));
+        setIgnoreContent(xml.getBoolean("ignoreContent", ignoreContent));
+        fieldMatcher.loadFromXML(xml.getXML("fieldMatcher"));
+    }
+    @Override
+    public void saveCommitterToXML(XML xml) {
+        xml.addElement("logLevel", logLevel);
+        xml.addElement("ignoreContent", ignoreContent);
+        fieldMatcher.saveToXML(xml.addElement("fieldMatcher"));
     }
 }

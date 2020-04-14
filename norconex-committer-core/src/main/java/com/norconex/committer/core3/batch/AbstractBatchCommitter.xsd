@@ -16,13 +16,16 @@
 -->
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
+  <xs:include schemaLocation="../AbstractCommitter.xsd"></xs:include>
+
   <xs:complexType name="AbstractBatchCommitter" abstract="true">  
-    <xs:complexType>
-      <xs:all>
-        <xs:element name="queue" type="anyComplexRequiredClassType" minOccurs="0" maxOccurs="1"/>
-      </xs:all>
-      <xs:attribute name="class" type="xs:string" required="true"></xs:attribute>
-    </xs:complexType>
-  </xs:element>
+    <xs:complexContent> 
+      <xs:extension base="AbstractCommitter"> 
+        <xs:all>
+          <xs:element name="queue" type="anyComplexRequiredClassType" minOccurs="0" maxOccurs="1"/>
+        </xs:all>
+      </xs:extension> 
+    </xs:complexContent>   
+  </xs:complexType>
 
 </xs:schema>

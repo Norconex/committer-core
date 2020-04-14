@@ -44,8 +44,22 @@ public final class CommitterContext {
     public EventManager getEventManager() {
         return eventManager;
     }
+    /**
+     * Gets a unique working directory for a committer (if one is needed).
+     * @return working directory (never <code>null</code>)
+     */
     public Path getWorkDir() {
         return workDir;
+    }
+    public CommitterContext withEventManager(EventManager eventManager) {
+        return CommitterContext.build()
+                .setEventManager(eventManager)
+                .setWorkDir(workDir).create();
+    }
+    public CommitterContext withWorkdir(Path workDir) {
+        return CommitterContext.build()
+                .setEventManager(eventManager)
+                .setWorkDir(workDir).create();
     }
 
     public static Builder build() {
@@ -65,7 +79,7 @@ public final class CommitterContext {
         public CommitterContext create() {
             if (ctx.workDir == null) {
                 ctx.workDir = new File(FileUtils.getTempDirectory(),
-                        "committer-workdir-" + TimeIdGenerator.next()).toPath();
+                        "committer-" + TimeIdGenerator.next()).toPath();
             }
             if (ctx.eventManager == null) {
                 ctx.eventManager = new EventManager();

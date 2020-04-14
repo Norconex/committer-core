@@ -198,11 +198,11 @@ public class JSONFileCommitter extends AbstractFSCommitter<Writer> {
     }
 
     @Override
-    public void loadCommitterFromXML(XML xml) {
+    public void loadFSCommitterFromXML(XML xml) {
         setIndent(xml.getInteger("indent", indent));
     }
     @Override
-    public void saveCommitterToXML(XML xml) {
+    public void saveFSCommitterToXML(XML xml) {
         xml.addElement("indent", indent);
     }
 
