@@ -26,7 +26,7 @@ import com.norconex.committer.core3.ICommitterRequest;
  * @since 3.0.0
  */
 @FunctionalInterface
-public interface BatchConsumer {
+public interface IBatchConsumer {
 
     void consume(Iterator<ICommitterRequest> it) throws CommitterException;
 }

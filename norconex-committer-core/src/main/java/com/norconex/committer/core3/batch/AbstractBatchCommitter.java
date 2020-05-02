@@ -54,9 +54,9 @@ import com.norconex.commons.lang.xml.XML;
  * <p>Subclasses inherits this {@link IXMLConfigurable} configuration:</p>
  *
  * {@nx.xml #options
- *   <queue class="(optional custom queue implementation class)">
- *     (custom queue configuration options, if applicable)
- *   </queue>
+ *   <!-- Default queue settings ("class" is optional): -->
+ *   {@nx.include com.norconex.committer.core3.batch.queue.impl.FSQueue@@nx.xml.usage}
+ *
  *   {@nx.include com.norconex.committer.core3.AbstractCommitter#options}
  * }
  *
@@ -65,17 +65,26 @@ import com.norconex.commons.lang.xml.XML;
  */
 @SuppressWarnings("javadoc")
 public abstract class AbstractBatchCommitter extends AbstractCommitter
-        implements IXMLConfigurable, BatchConsumer {
+        implements IXMLConfigurable, IBatchConsumer {
+
+//    private static final Logger LOG =
+//            LoggerFactory.getLogger(AbstractBatchCommitter.class);
 
     private ICommitterQueue queue;
+
+    //TODO add support for these?
+//    private int maxRetries;
+//    private long maxRetryWait;
+
+
 
     @Override
     protected final void doInit() throws CommitterException {
         if (this.queue == null) {
             this.queue = new FSQueue();
         }
-        this.queue.init(getCommitterContext(), this);
         initBatchCommitter();
+        this.queue.init(getCommitterContext(), this);
     }
     @Override
     protected void doUpsert(UpsertRequest upsertRequest)

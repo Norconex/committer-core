@@ -132,10 +132,6 @@ import com.norconex.commons.lang.xml.XML;
  * </committer>
  * }
  *
- * {@nx.xml.example
- *
- * }
- *
  * @author Pascal Essiembre
  * @since 3.0.0
  */

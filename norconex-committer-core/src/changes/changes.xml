@@ -30,6 +30,9 @@
       <action dev="essiembre" type="add">
         Now fire Committer events for interested consuming classes.
       </action>
+      <action dev="essiembre" type="add">
+        New support for field mappings.
+      </action>
       <action dev="essiembre" type="update">
         No more "commit" method.  Batching has the concept of batch "consumer"
         and a new "close" method replaces it. 

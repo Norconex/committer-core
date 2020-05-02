@@ -47,7 +47,7 @@ import com.norconex.committer.core3.CommitterContext;
 import com.norconex.committer.core3.CommitterException;
 import com.norconex.committer.core3.DeleteRequest;
 import com.norconex.committer.core3.ICommitterRequest;
-import com.norconex.committer.core3.batch.BatchConsumer;
+import com.norconex.committer.core3.batch.IBatchConsumer;
 import com.norconex.committer.core3.batch.queue.ICommitterQueue;
 import com.norconex.commons.lang.TimeIdGenerator;
 import com.norconex.commons.lang.collection.CountingIterator;
@@ -119,11 +119,11 @@ public class FSQueue implements ICommitterQueue, IXMLConfigurable {
     @ToStringExclude
     @EqualsExclude
     @HashCodeExclude
-    private BatchConsumer batchConsumer;
+    private IBatchConsumer batchConsumer;
 
     @Override
     public void init(CommitterContext committerContext,
-            BatchConsumer batchConsumer) throws CommitterException {
+            IBatchConsumer batchConsumer) throws CommitterException {
 
         this.batchConsumer = Objects.requireNonNull(batchConsumer,
                 "'batchConsumer' must not be null.");
@@ -138,9 +138,9 @@ public class FSQueue implements ICommitterQueue, IXMLConfigurable {
         this.queueDir = workDir.resolve("queue");
         this.errorDir = workDir.resolve("error");
         try {
-            Files.createDirectories(workDir);
-            Files.createDirectories(queueDir);
-            Files.createDirectories(errorDir);
+            FileUtils.forceMkdir(workDir.toFile());
+            FileUtils.forceMkdir(queueDir.toFile());
+            FileUtils.forceMkdir(errorDir.toFile());
         } catch (IOException e) {
             throw new CommitterException(
                     "Could not create committer queue directory: "
@@ -163,7 +163,7 @@ public class FSQueue implements ICommitterQueue, IXMLConfigurable {
         LOG.info("File system Committer queue initialized.");
     }
 
-    public BatchConsumer getBatchConsumer() {
+    public IBatchConsumer getBatchConsumer() {
         return batchConsumer;
     }
     public int getBatchSize() {
@@ -247,13 +247,15 @@ public class FSQueue implements ICommitterQueue, IXMLConfigurable {
     @Override
     public void close() throws CommitterException {
         // specifying parent dir will process all that's left there.
-        consumeBatch(queueDir);
+        if (queueDir != null && Files.exists(queueDir)) {
+            consumeBatch(queueDir);
+        }
     }
 
     @Override
     public void clean() throws CommitterException {
         if (queueDir == null) {
-            LOG.error("Queue directory not initialized. Could not clean.");
+            LOG.error("Queue directory not found. Nothing not clean.");
             return;
         }
 
