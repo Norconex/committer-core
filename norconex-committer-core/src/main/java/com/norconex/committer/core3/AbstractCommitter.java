@@ -16,11 +16,13 @@ package com.norconex.committer.core3;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
-import java.util.Optional;
 
+import org.apache.commons.collections4.map.ListOrderedMap;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -45,11 +47,10 @@ import com.norconex.commons.lang.xml.XML;
  *
  * <h3>Field mapping</h3>
  * <p>
- * By default, this abstract class applies field mappings using default
- * names for the target reference and content fields when unspecified.
- * Implementors are strongly encouraged
- * to override {@link #applyFieldMappings()} if they want to enforce
- * certain names are not changed or other specific behavior.
+ * By default, this abstract class applies field mappings for metadata fields,
+ * but leaves the document reference and content (input stream) for concrete
+ * implementations to handle. In other words, they only apply to
+ * {@link ICommitterRequest#getMetadata()}.
  * Field mappings are performed on committer requests before calls
  * to {@link #doUpsert(UpsertRequest)}
  * and {@link #doDelete(DeleteRequest)} are made.
@@ -67,7 +68,10 @@ import com.norconex.commons.lang.xml.XML;
  *       (value-matching expression)
  *   </valueMatcher>
  * </restrictTo>
- * {@nx.include com.norconex.committer.core.FieldMappings@nx.xml.usage}>
+ * <fieldMappings>
+ *   <!-- Add as many field mappings as needed -->
+ *   <field source="(source field name" target="(target field name)"/>
+ * </fieldMappings>
  * }
  * <p>
  * Implementing classes inherit the above XML configuration.
@@ -82,18 +86,7 @@ public abstract class AbstractCommitter
 
     private CommitterContext committerContext;
     private final PropertyMatchers restrictions = new PropertyMatchers();
-    private final FieldMappings fieldMappings;
-    private FieldMapping effectiveReferenceMapping;
-    private FieldMapping effectiveContentMapping;
-
-    public AbstractCommitter() {
-        this(null);
-    }
-    public AbstractCommitter(FieldMappings fieldMappings) {
-        super();
-        this.fieldMappings = Optional.ofNullable(fieldMappings)
-                .orElse(new FieldMappings());
-    }
+    private final Map<String, String> fieldMappings = new ListOrderedMap<>();
 
     /**
      * Adds one or more restrictions this committer should be restricted to.
@@ -143,8 +136,34 @@ public abstract class AbstractCommitter
         return restrictions;
     }
 
-    public FieldMappings getFieldMappings() {
-        return fieldMappings;
+    /**
+     * Gets an unmodifiable copy of the metadata mappings.
+     * @return metadata mappings
+     */
+    public Map<String, String> getFieldMappings() {
+        return Collections.unmodifiableMap(fieldMappings);
+    }
+    /**
+     * Sets a metadata field mapping.
+     * @param sourceField source field
+     * @param targetField target field
+     */
+    public void setMetadataMapping(String sourceField, String targetField) {
+        fieldMappings.put(sourceField, targetField);
+    }
+    /**
+     * Sets a metadata field mappings, where the key is the source field and
+     * the value is the target field.
+     * @param mappings metadata field mappings
+     */
+    public void setFieldMappings(Map<String, String> mappings) {
+        fieldMappings.putAll(mappings);
+    }
+    public String removeMetadataMapping(String sourceField) {
+        return fieldMappings.remove(sourceField);
+    }
+    public void clearMetadataMappings() {
+        fieldMappings.clear();
     }
 
     @Override
@@ -154,13 +173,6 @@ public abstract class AbstractCommitter
                 committerContext, "'committerContext' must not be null.");
         fireInfo(CommitterEvent.COMMITTER_INIT_BEGIN);
         try {
-            FieldMappings fms = getFieldMappings();
-            this.effectiveReferenceMapping = Optional.ofNullable(
-                    fms.getReferenceMapping()).orElseGet(() ->
-                    new FieldMapping(null, fms.getDefaultReferenceTarget()));
-            this.effectiveContentMapping = Optional.ofNullable(
-                    fms.getContentMapping()).orElseGet(() ->
-                    new FieldMapping(null, fms.getDefaultContentTarget()));
             doInit();
         } catch (CommitterException | RuntimeException e) {
             fireError(CommitterEvent.COMMITTER_INIT_ERROR, e);
@@ -212,56 +224,12 @@ public abstract class AbstractCommitter
         fireInfo(CommitterEvent.COMMITTER_DELETE_END, deleteRequest);
     }
 
-    //TODO describe default implementation
-    protected void applyFieldMappings(ICommitterRequest req)
-            throws CommitterException {
+    protected void applyFieldMappings(ICommitterRequest req) {
         Properties props = new Properties();
-        String sourceReferenceField = null;
-        String sourceContentField = null;
-
-        // Map reference. If target is undefined, do not set.
-        FieldMapping referenceMapping = getEffectiveReferenceMapping();
-        if (StringUtils.isNotBlank(referenceMapping.getTarget())) {
-            if (StringUtils.isNotBlank(referenceMapping.getSource())) {
-                sourceReferenceField = referenceMapping.getSource();
-                props.add(referenceMapping.getTarget(),
-                        req.getMetadata().get(sourceReferenceField));
-            } else {
-                props.add(referenceMapping.getTarget(), req.getReference());
-            }
-        }
-
-        // Map content. If target is undefined, do not set.
-        if (req instanceof UpsertRequest) {
-            FieldMapping contentMapping = getEffectiveContentMapping();
-            if (StringUtils.isNotBlank(contentMapping.getTarget())) {
-                if (StringUtils.isNotBlank(contentMapping.getSource())) {
-                    sourceContentField = contentMapping.getSource();
-                    props.add(contentMapping.getTarget(),
-                            req.getMetadata().get(sourceContentField));
-                } else {
-                    try {
-                        props.add(contentMapping.getTarget(),
-                                IOUtils.toString(((UpsertRequest) req).getContent(),
-                                        StandardCharsets.UTF_8));
-                    } catch (IOException e) {
-                        throw new CommitterException(
-                                "Could not load document content for : "
-                                        + req.getReference());
-                    }
-                }
-            }
-        }
-
-        // Other fields
         for (Entry<String, List<String>> en : req.getMetadata().entrySet()) {
             String sourceField = en.getKey();
-            if (Objects.equals(sourceField, sourceReferenceField)
-                    || Objects.equals(sourceField, sourceContentField)) {
-                continue;
-            }
-            if (fieldMappings.isSourceMapped(sourceField)) {
-                String targetField = fieldMappings.getMappedTarget(sourceField);
+            if (fieldMappings.containsKey(sourceField)) {
+                String targetField = fieldMappings.get(sourceField);
                 // if target undefined, do not set
                 if (StringUtils.isNotBlank(targetField)) {
                     props.addList(targetField, en.getValue());
@@ -270,16 +238,24 @@ public abstract class AbstractCommitter
                 props.addList(sourceField, en.getValue());
             }
         }
-
         req.getMetadata().clear();
         req.getMetadata().putAll(props);
     }
 
-    protected final FieldMapping getEffectiveReferenceMapping() {
-        return effectiveReferenceMapping;
-    }
-    protected final FieldMapping getEffectiveContentMapping() {
-        return effectiveContentMapping;
+    protected final String getContentAsString(ICommitterRequest req)
+            throws CommitterException {
+        if (req instanceof UpsertRequest) {
+            try {
+                return IOUtils.toString(
+                        ((UpsertRequest) req).getContent(),
+                                StandardCharsets.UTF_8);
+            } catch (IOException e) {
+                throw new CommitterException(
+                        "Could not load document content for : "
+                                + req.getReference(), e);
+            }
+        }
+        return null;
     }
 
     @Override
@@ -372,7 +348,13 @@ public abstract class AbstractCommitter
                 restrictions.add(PropertyMatcher.loadFromXML(node));
             }
         }
-        fieldMappings.loadFromXML(xml.getXML("fieldMappings"));
+
+        List<XML> xmlMappings = xml.getXMLList("fieldMappings/field");
+        for (XML xmlMapping : xmlMappings) {
+            setMetadataMapping(
+                    xmlMapping.getString("@source", null),
+                    xmlMapping.getString("@target", null));
+        }
     }
     @Override
     public final void saveToXML(XML xml) {
@@ -380,7 +362,13 @@ public abstract class AbstractCommitter
         restrictions.forEach(pm -> {
             PropertyMatcher.saveToXML(xml.addElement("restrictTo"), pm);
         });
-        fieldMappings.saveToXML(xml.addElement("fieldMappings"));
+
+        XML fieldsXml = xml.addElement("fieldMappings");
+        for (Entry<String, String> en : fieldMappings.entrySet()) {
+            fieldsXml.addElement("field")
+                    .setAttribute("source", en.getKey())
+                    .setAttribute("target", en.getValue());
+        }
     }
 
     public abstract void loadCommitterFromXML(XML xml);

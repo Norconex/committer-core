@@ -52,6 +52,7 @@ import com.norconex.committer.core3.batch.queue.ICommitterQueue;
 import com.norconex.commons.lang.TimeIdGenerator;
 import com.norconex.commons.lang.collection.CountingIterator;
 import com.norconex.commons.lang.file.FileUtil;
+import com.norconex.commons.lang.io.CachedStreamFactory;
 import com.norconex.commons.lang.xml.IXMLConfigurable;
 import com.norconex.commons.lang.xml.XML;
 
@@ -89,6 +90,9 @@ public class FSQueue implements ICommitterQueue, IXMLConfigurable {
     private static final Logger LOG = LoggerFactory.getLogger(
             FSQueue.class);
 
+    public static final int DEFAULT_BATCH_SIZE = 20;
+    public static final int DEFAULT_MAX_PER_FOLDER = 500;
+
     static final String EXT = ".zip";
     static final FileFilter FILTER = f -> f.getName().endsWith(EXT);
 
@@ -113,13 +117,18 @@ public class FSQueue implements ICommitterQueue, IXMLConfigurable {
     private Path activeDir;
 
     // configurables;
-    private int batchSize = 20;
-    private int maxPerFolder = 500;
+    private int batchSize = DEFAULT_BATCH_SIZE;
+    private int maxPerFolder = DEFAULT_MAX_PER_FOLDER;
 
     @ToStringExclude
     @EqualsExclude
     @HashCodeExclude
     private IBatchConsumer batchConsumer;
+
+    @ToStringExclude
+    @EqualsExclude
+    @HashCodeExclude
+    private CachedStreamFactory streamFactory;
 
     @Override
     public void init(CommitterContext committerContext,
@@ -133,6 +142,8 @@ public class FSQueue implements ICommitterQueue, IXMLConfigurable {
         // Workdir:
         Path workDir = Optional.ofNullable(committerContext.getWorkDir())
                 .orElseGet(() -> Paths.get(FileUtils.getTempDirectoryPath()));
+        this.streamFactory = committerContext.getStreamFactory();
+
         LOG.info("Committer working directory: {}",
                 workDir.toAbsolutePath());
         this.queueDir = workDir.resolve("queue");
@@ -217,7 +228,7 @@ public class FSQueue implements ICommitterQueue, IXMLConfigurable {
         try (Stream<Path> s = Files.find(dir,  Integer.MAX_VALUE,
                 (f, a) -> f.toFile().getName().endsWith(EXT))) {
             it = new CountingIterator<>(new TransformIterator<>(
-                    s.iterator(), FSQueueUtil::fromZipFile));
+                    s.iterator(), this::loadCommitterRequest));
             if (it.hasNext()) {
                 batchConsumer.consume(it);
             }
@@ -243,6 +254,15 @@ public class FSQueue implements ICommitterQueue, IXMLConfigurable {
         }
         return it.getCount();
     }
+
+    private ICommitterRequest loadCommitterRequest(Path file) {
+        try {
+            return FSQueueUtil.fromZipFile(file, streamFactory);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
 
     @Override
     public void close() throws CommitterException {

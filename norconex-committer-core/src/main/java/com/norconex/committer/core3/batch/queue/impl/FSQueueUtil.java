@@ -18,12 +18,14 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.io.FileFilter;
 import java.io.IOException;
-import java.io.UncheckedIOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Enumeration;
+import java.util.Optional;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
+import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
 import org.apache.commons.io.IOUtils;
@@ -32,6 +34,7 @@ import com.norconex.committer.core3.DeleteRequest;
 import com.norconex.committer.core3.ICommitterRequest;
 import com.norconex.committer.core3.UpsertRequest;
 import com.norconex.commons.lang.io.CachedInputStream;
+import com.norconex.commons.lang.io.CachedStreamFactory;
 import com.norconex.commons.lang.map.Properties;
 
 /**
@@ -77,31 +80,37 @@ public final class FSQueueUtil {
         }
     }
 
-    public static ICommitterRequest fromZipFile(Path sourceFile) {
+    public static ICommitterRequest fromZipFile(Path sourceFile)
+            throws IOException {
+        return fromZipFile(sourceFile, null);
+    }
+    public static ICommitterRequest fromZipFile(
+            Path sourceFile, CachedStreamFactory streamFactory)
+                    throws IOException {
         String ref = null;
         Properties meta = new Properties();
         CachedInputStream content = null;
 
-        try (ZipInputStream zipIn = new ZipInputStream(
-                IOUtils.buffer(Files.newInputStream(sourceFile)))) {
-            ZipEntry zipEntry = zipIn.getNextEntry();
-            while (zipEntry != null) {
-                String name = zipEntry.getName();
-                if ("reference".equals(name)) {
-                    ref = IOUtils.toString(zipIn, StandardCharsets.UTF_8);
-                } else if ("metadata".equals(name)) {
-                    meta.loadFromProperties(zipIn);
-                } else if ("content".equals(name)) {
-                    content = CachedInputStream.cache(zipIn);
-                    content.enforceFullCaching();
+        try (ZipFile zipFile = new ZipFile(sourceFile.toFile())) {
+            Enumeration<? extends ZipEntry> entries = zipFile.entries();
+            while(entries.hasMoreElements()){
+                ZipEntry entry = entries.nextElement();
+                String name = entry.getName();
+                try (InputStream is = zipFile.getInputStream(entry)) {
+                    if ("reference".equals(name)) {
+                        ref = IOUtils.toString(is, StandardCharsets.UTF_8);
+                    } else if ("metadata".equals(name)) {
+                        meta.loadFromProperties(is);
+                    } else if ("content".equals(name)) {
+                        CachedStreamFactory csf = Optional.ofNullable(
+                                streamFactory).orElseGet(
+                                        CachedStreamFactory::new);
+                        content = csf.newInputStream(is);
+                        content.enforceFullCaching();
+                        content.rewind();
+                    }
                 }
-                zipIn.closeEntry();
-                zipEntry = zipIn.getNextEntry();
             }
-            zipIn.closeEntry();
-        } catch (IOException e) {
-            throw new UncheckedIOException(
-                    "Could not convert committer request file to object.", e);
         }
         if (content == null) {
             return new DeleteRequest(ref, meta);

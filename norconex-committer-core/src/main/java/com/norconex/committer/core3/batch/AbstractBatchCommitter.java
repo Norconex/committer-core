@@ -54,7 +54,7 @@ import com.norconex.commons.lang.xml.XML;
  * <p>Subclasses inherits this {@link IXMLConfigurable} configuration:</p>
  *
  * {@nx.xml #options
- *   <!-- Default queue settings ("class" is optional): -->
+ *   <!-- Settings for default queue implementation ("class" is optional): -->
  *   {@nx.include com.norconex.committer.core3.batch.queue.impl.FSQueue@@nx.xml.usage}
  *
  *   {@nx.include com.norconex.committer.core3.AbstractCommitter#options}
@@ -75,7 +75,8 @@ public abstract class AbstractBatchCommitter extends AbstractCommitter
     //TODO add support for these?
 //    private int maxRetries;
 //    private long maxRetryWait;
-
+//    *   <maxRetries>(max retries upon commit failures)</maxRetries>
+//    *   <maxRetryWait>(max delay in milliseconds between retries)</maxRetryWait>
 
 
     @Override

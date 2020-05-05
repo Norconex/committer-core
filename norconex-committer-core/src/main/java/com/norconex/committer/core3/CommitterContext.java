@@ -25,6 +25,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 
 import com.norconex.commons.lang.TimeIdGenerator;
 import com.norconex.commons.lang.event.EventManager;
+import com.norconex.commons.lang.io.CachedStreamFactory;
 
 /**
  * Holds data defined outside a committer but useful or required for the
@@ -36,6 +37,7 @@ public final class CommitterContext {
 
     private EventManager eventManager;
     private Path workDir;
+    private CachedStreamFactory streamFactory;
 
     private CommitterContext() {
         super();
@@ -51,15 +53,31 @@ public final class CommitterContext {
     public Path getWorkDir() {
         return workDir;
     }
+    public CachedStreamFactory getStreamFactory() {
+        return streamFactory;
+    }
+
     public CommitterContext withEventManager(EventManager eventManager) {
         return CommitterContext.build()
                 .setEventManager(eventManager)
-                .setWorkDir(workDir).create();
+                .setWorkDir(workDir)
+                .setStreamFactory(streamFactory)
+                .create();
     }
     public CommitterContext withWorkdir(Path workDir) {
         return CommitterContext.build()
                 .setEventManager(eventManager)
-                .setWorkDir(workDir).create();
+                .setWorkDir(workDir)
+                .setStreamFactory(streamFactory)
+                .create();
+    }
+    public CommitterContext withStreamFactory(
+            CachedStreamFactory streamFactory) {
+        return CommitterContext.build()
+                .setEventManager(eventManager)
+                .setWorkDir(workDir)
+                .setStreamFactory(streamFactory)
+                .create();
     }
 
     public static Builder build() {
@@ -76,6 +94,10 @@ public final class CommitterContext {
             ctx.eventManager = eventManager;
             return this;
         }
+        public Builder setStreamFactory(CachedStreamFactory streamFactory) {
+            ctx.streamFactory = streamFactory;
+            return this;
+        }
         public CommitterContext create() {
             if (ctx.workDir == null) {
                 ctx.workDir = new File(FileUtils.getTempDirectory(),
@@ -83,6 +105,9 @@ public final class CommitterContext {
             }
             if (ctx.eventManager == null) {
                 ctx.eventManager = new EventManager();
+            }
+            if (ctx.streamFactory == null) {
+                ctx.streamFactory = new CachedStreamFactory();
             }
             return ctx;
         }
