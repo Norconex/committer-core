@@ -70,7 +70,7 @@ public abstract class AbstractBatchCommitter extends AbstractCommitter
 //    private static final Logger LOG =
 //            LoggerFactory.getLogger(AbstractBatchCommitter.class);
 
-    private ICommitterQueue queue;
+    private ICommitterQueue queue = new FSQueue();
 
     //TODO add support for these?
 //    private int maxRetries;
