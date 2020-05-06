@@ -100,9 +100,9 @@ public abstract class AbstractBatchCommitter extends AbstractCommitter
     @Override
     protected void doClose() throws CommitterException {
         try {
-            closeBatchCommitter();
-        } finally {
             this.queue.close();
+        } finally {
+            closeBatchCommitter();
         }
     }
     @Override
