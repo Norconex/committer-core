@@ -70,7 +70,7 @@ import com.norconex.commons.lang.xml.XML;
  * </restrictTo>
  * <fieldMappings>
  *   <!-- Add as many field mappings as needed -->
- *   <field source="(source field name" target="(target field name)"/>
+ *   <mapping fromField="(source field name)" toField="(target field name)"/>
  * </fieldMappings>
  * }
  * <p>
@@ -145,11 +145,11 @@ public abstract class AbstractCommitter
     }
     /**
      * Sets a metadata field mapping.
-     * @param sourceField source field
-     * @param targetField target field
+     * @param fromField source field
+     * @param toField target field
      */
-    public void setMetadataMapping(String sourceField, String targetField) {
-        fieldMappings.put(sourceField, targetField);
+    public void setMetadataMapping(String fromField, String toField) {
+        fieldMappings.put(fromField, toField);
     }
     /**
      * Sets a metadata field mappings, where the key is the source field and
@@ -159,8 +159,8 @@ public abstract class AbstractCommitter
     public void setFieldMappings(Map<String, String> mappings) {
         fieldMappings.putAll(mappings);
     }
-    public String removeMetadataMapping(String sourceField) {
-        return fieldMappings.remove(sourceField);
+    public String removeMetadataMapping(String fromField) {
+        return fieldMappings.remove(fromField);
     }
     public void clearMetadataMappings() {
         fieldMappings.clear();
@@ -227,15 +227,15 @@ public abstract class AbstractCommitter
     protected void applyFieldMappings(ICommitterRequest req) {
         Properties props = new Properties();
         for (Entry<String, List<String>> en : req.getMetadata().entrySet()) {
-            String sourceField = en.getKey();
-            if (fieldMappings.containsKey(sourceField)) {
-                String targetField = fieldMappings.get(sourceField);
+            String fromField = en.getKey();
+            if (fieldMappings.containsKey(fromField)) {
+                String toField = fieldMappings.get(fromField);
                 // if target undefined, do not set
-                if (StringUtils.isNotBlank(targetField)) {
-                    props.addList(targetField, en.getValue());
+                if (StringUtils.isNotBlank(toField)) {
+                    props.addList(toField, en.getValue());
                 }
             } else {
-                props.addList(sourceField, en.getValue());
+                props.addList(fromField, en.getValue());
             }
         }
         req.getMetadata().clear();
@@ -349,11 +349,11 @@ public abstract class AbstractCommitter
             }
         }
 
-        List<XML> xmlMappings = xml.getXMLList("fieldMappings/field");
+        List<XML> xmlMappings = xml.getXMLList("fieldMappings/mapping");
         for (XML xmlMapping : xmlMappings) {
             setMetadataMapping(
-                    xmlMapping.getString("@source", null),
-                    xmlMapping.getString("@target", null));
+                    xmlMapping.getString("@fromField", null),
+                    xmlMapping.getString("@toField", null));
         }
     }
     @Override
@@ -365,9 +365,9 @@ public abstract class AbstractCommitter
 
         XML fieldsXml = xml.addElement("fieldMappings");
         for (Entry<String, String> en : fieldMappings.entrySet()) {
-            fieldsXml.addElement("field")
-                    .setAttribute("source", en.getKey())
-                    .setAttribute("target", en.getValue());
+            fieldsXml.addElement("mapping")
+                    .setAttribute("fromField", en.getKey())
+                    .setAttribute("toField", en.getValue());
         }
     }
 

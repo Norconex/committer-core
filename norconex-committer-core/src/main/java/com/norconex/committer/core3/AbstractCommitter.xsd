@@ -20,7 +20,19 @@
 
   <xs:complexType name="AbstractCommitter" abstract="true">
     <xs:all>
-      <xs:element name="restrictTo" type="PropertyMatcherType" minOccurs="0" maxOccurs="unbounded" />              
+      <xs:element name="restrictTo" type="PropertyMatcherType" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="fieldMappings" minOccurs="0" maxOccurs="1">
+        <xs:complexType>
+          <xs:all>
+            <xs:element name="mapping" minOccurs="0" maxOccurs="unbounded">
+              <xs:complexType>
+                <xs:attribute name="fromField" type="xs:string"/>
+                <xs:attribute name="toField" type="xs:string" />
+              </xs:complexType>
+            </xs:element>
+          </xs:all>
+        </xs:complexType>
+      </xs:element>
     </xs:all>
     <xs:attribute name="class" type="xs:string" use="required"></xs:attribute>
   </xs:complexType>
