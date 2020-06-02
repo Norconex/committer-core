@@ -130,7 +130,7 @@ public class JSONFileCommitter extends AbstractFSCommitter<Writer> {
         return writer;
     }
     @Override
-    protected void writeUpsert(
+    protected synchronized void writeUpsert(
             Writer writer, UpsertRequest upsertRequest) throws IOException {
 
         if (!first) {
@@ -156,7 +156,7 @@ public class JSONFileCommitter extends AbstractFSCommitter<Writer> {
     }
 
     @Override
-    protected void writeDelete(
+    protected synchronized void writeDelete(
             Writer writer, DeleteRequest deleteRequest) throws IOException {
 
         if (!first) {
