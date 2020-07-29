@@ -118,6 +118,7 @@
                 <artifactId>sonar-maven-plugin</artifactId>
                 <version>2.5</version>
             </plugin>
+<!-- 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-site-plugin</artifactId>
@@ -148,6 +149,7 @@
                   </dependency>
                 </dependencies>               
             </plugin>
+ -->
         </plugins>
     </pluginManagement>
     <plugins>
@@ -213,7 +215,7 @@
           <source>1.7</source>
           <detectLinks>false</detectLinks>
           <links>
-            <link>https://www.norconex.com/product/commons-lang/apidocs/</link>
+            <link>https://opensource.norconex.com/commons/lang/apidocs/v1</link>
             <link>https://commons.apache.org/proper/commons-configuration/javadocs/v1.10/apidocs/</link>
           </links>
         </configuration>
@@ -344,7 +346,7 @@
   <distributionManagement>
     <site>
       <id>norconex-site-deployment</id>
-      <url>${site.baseurl}/collectors/committer-core/latest</url>
+      <url>${site.baseurl}/committers/core/v2</url>
     </site>
     <snapshotRepository>
       <id>ossrh</id>
@@ -356,6 +358,7 @@
     </repository>    
   </distributionManagement>
   
+  <!-- 
   <reporting>
     <plugins>
       <plugin>
@@ -411,7 +414,7 @@
           <source>1.7</source>
           <detectLinks>false</detectLinks>
           <links>
-            <link>https://www.norconex.com/product/commons-lang/apidocs/</link>
+            <link>https://opensource.norconex.com/commons/lang/apidocs/v1/</link>
             <link>https://commons.apache.org/proper/commons-configuration/javadocs/v1.10/apidocs/</link>
           </links>
         </configuration>
@@ -428,12 +431,13 @@
       </plugin>
     </plugins>
   </reporting>  
+   -->
 
   <organization>
     <name>Norconex Inc.</name>
     <url>https://www.norconex.com</url>
   </organization>
-  <url>http://norconex.com/collectors/committer-core</url>
+  <url>https://norconex.com/committers/core</url>
   <description>Norconex Committer is a java library and command line application used to route content to local or remote target repositories, such as a search engine index.   </description>
   <issueManagement>
   	<url>https://github.com/Norconex/committer-core/issues</url>
