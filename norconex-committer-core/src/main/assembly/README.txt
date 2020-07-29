@@ -8,7 +8,7 @@ For any inquiries about Norconex Committer Core,
 please contact Norconex Inc. at info@norconex.com.
 
 This product website and documentation is located at:
-https://www.norconex.com/collectors/committer-core/
+https://opensource.norconex.com/committers/core/
 
 Norconex licenses:
 ==================
