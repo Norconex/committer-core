@@ -118,6 +118,7 @@ public class LogCommitter extends AbstractCommitter
 
     @Override
     protected void doInit() throws CommitterException {
+        watch.reset();
         watch.start();
     }
     @Override
