@@ -55,7 +55,7 @@ import com.norconex.commons.lang.xml.XML;
  *
  * {@nx.xml.usage
  * <committer class="com.norconex.committer.core3.impl.MemoryCommitter">
- *   {@nx.include com.norconex.committer.core3.AbstractCommitter#options}
+ *   {@nx.include com.norconex.committer.core3.AbstractCommitter@nx.xml.usage}
  * </committer>
  * }
  *

@@ -14,8 +14,6 @@
  */
 package com.norconex.committer.core3;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +21,6 @@ import java.util.Map.Entry;
 import java.util.Objects;
 
 import org.apache.commons.collections4.map.ListOrderedMap;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -45,18 +42,29 @@ import com.norconex.commons.lang.xml.XML;
  * and adding support for filtering unwanted requests.
  * </p>
  *
- * <h3>Field mapping</h3>
+ * {@nx.block #restrictTo
+ * <h3>Restricting committer to specific documents</h3>
+ * <p>
+ * Optionally apply a committer only to certain type of documents.
+ * Documents are restricted based on their
+ * metadata field names and values. This option can be used to
+ * perform document routing when you have multiple committers defined.
+ * </p>
+ * }
+ *
+ * {@nx.block #fieldMappings
+ * <h3>Field mappings</h3>
  * <p>
  * By default, this abstract class applies field mappings for metadata fields,
  * but leaves the document reference and content (input stream) for concrete
  * implementations to handle. In other words, they only apply to
- * {@link ICommitterRequest#getMetadata()}.
- * Field mappings are performed on committer requests before calls
- * to {@link #doUpsert(UpsertRequest)}
- * and {@link #doDelete(DeleteRequest)} are made.
+ * a committer request metadata.
+ * Field mappings are performed on committer requests before upserts and
+ * deletes are actually performed.
  * </p>
+ * }
  *
- * {@nx.xml.usage #restrictTo
+ * {@nx.xml.usage
  * <!-- multiple "restrictTo" tags allowed (only one needs to match) -->
  * <restrictTo>
  *   <fieldMatcher
@@ -148,7 +156,7 @@ public abstract class AbstractCommitter
      * @param fromField source field
      * @param toField target field
      */
-    public void setMetadataMapping(String fromField, String toField) {
+    public void setFieldMapping(String fromField, String toField) {
         fieldMappings.put(fromField, toField);
     }
     /**
@@ -159,10 +167,10 @@ public abstract class AbstractCommitter
     public void setFieldMappings(Map<String, String> mappings) {
         fieldMappings.putAll(mappings);
     }
-    public String removeMetadataMapping(String fromField) {
+    public String removeFieldMapping(String fromField) {
         return fieldMappings.remove(fromField);
     }
-    public void clearMetadataMappings() {
+    public void clearFieldMappings() {
         fieldMappings.clear();
     }
 
@@ -242,22 +250,6 @@ public abstract class AbstractCommitter
         req.getMetadata().putAll(props);
     }
 
-    protected final String getContentAsString(ICommitterRequest req)
-            throws CommitterException {
-        if (req instanceof UpsertRequest) {
-            try {
-                return IOUtils.toString(
-                        ((UpsertRequest) req).getContent(),
-                                StandardCharsets.UTF_8);
-            } catch (IOException e) {
-                throw new CommitterException(
-                        "Could not load document content for : "
-                                + req.getReference(), e);
-            }
-        }
-        return null;
-    }
-
     @Override
     public final void close() throws CommitterException {
         fireInfo(CommitterEvent.COMMITTER_CLOSE_BEGIN);
@@ -283,7 +275,7 @@ public abstract class AbstractCommitter
     }
 
 
-    protected CommitterContext getCommitterContext() {
+    public CommitterContext getCommitterContext() {
         return this.committerContext;
     }
 
@@ -351,7 +343,7 @@ public abstract class AbstractCommitter
 
         List<XML> xmlMappings = xml.getXMLList("fieldMappings/mapping");
         for (XML xmlMapping : xmlMappings) {
-            setMetadataMapping(
+            setFieldMapping(
                     xmlMapping.getString("@fromField", null),
                     xmlMapping.getString("@toField", null));
         }

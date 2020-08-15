@@ -67,7 +67,7 @@ import com.norconex.commons.lang.xml.XML;
  *     (Expression matching fields to log. Default logs all.)
  *   </fieldMatcher>
  *   <ignoreContent>[false|true]</ignoreContent>
- *   {@nx.include com.norconex.committer.core3.AbstractCommitter#options}
+ *   {@nx.include com.norconex.committer.core3.AbstractCommitter@nx.xml.usage}
  * </committer>
  * }
  *

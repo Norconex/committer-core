@@ -75,10 +75,10 @@ import com.norconex.commons.lang.xml.XML;
  *     (Optional number of documents queued after which we process a batch.
  *      Default is 20.)
  *   </batchSize>
- *   <maxItemsPerFolder>
+ *   <maxPerFolder>
  *     (Optional maximum number of files or directories that can be queued
  *      in a single folder before a new one gets created. Default is 500.)
- *   </maxItemsPerFolder>
+ *   </maxPerFolder>
  * </queue>
  * }
  *
@@ -87,8 +87,7 @@ import com.norconex.commons.lang.xml.XML;
  */
 public class FSQueue implements ICommitterQueue, IXMLConfigurable {
 
-    private static final Logger LOG = LoggerFactory.getLogger(
-            FSQueue.class);
+    private static final Logger LOG = LoggerFactory.getLogger(FSQueue.class);
 
     public static final int DEFAULT_BATCH_SIZE = 20;
     public static final int DEFAULT_MAX_PER_FOLDER = 500;

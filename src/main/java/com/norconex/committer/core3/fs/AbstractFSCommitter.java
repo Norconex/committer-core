@@ -59,7 +59,7 @@ import com.norconex.commons.lang.xml.XML;
  *   <splitUpsertDelete>[false|true]</splitUpsertDelete>
  *   <fileNamePrefix>(optional prefix to created file names)</fileNamePrefix>
  *   <fileNameSuffix>(optional suffix to created file names)</fileNameSuffix>
- *   {@nx.include com.norconex.committer.core3.AbstractCommitter#options}
+ *   {@nx.include com.norconex.committer.core3.AbstractCommitter@nx.xml.usage}
  * }
  *
  * @param <T> type of file serializer

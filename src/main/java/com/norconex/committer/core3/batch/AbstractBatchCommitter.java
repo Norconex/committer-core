@@ -51,13 +51,17 @@ import com.norconex.commons.lang.xml.XML;
  * The default queue is {@link FSQueue} (file-system queue).
  * </p>
  *
+ * {@nx.include com.norconex.committer.core3.AbstractCommitter#restrictTo}
+ *
+ * {@nx.include com.norconex.committer.core3.AbstractCommitter#fieldMappings}
+ *
  * <p>Subclasses inherits this {@link IXMLConfigurable} configuration:</p>
  *
  * {@nx.xml #options
- *   <!-- Settings for default queue implementation ("class" is optional): -->
- *   {@nx.include com.norconex.committer.core3.batch.queue.impl.FSQueue@@nx.xml.usage}
+ *   {@nx.include com.norconex.committer.core3.AbstractCommitter@nx.xml.usage}
  *
- *   {@nx.include com.norconex.committer.core3.AbstractCommitter#options}
+ *   <!-- Settings for default queue implementation ("class" is optional): -->
+ *   {@nx.include com.norconex.committer.core3.batch.queue.impl.FSQueue@nx.xml.usage}
  * }
  *
  * @author Pascal Essiembre
@@ -66,9 +70,6 @@ import com.norconex.commons.lang.xml.XML;
 @SuppressWarnings("javadoc")
 public abstract class AbstractBatchCommitter extends AbstractCommitter
         implements IXMLConfigurable, IBatchConsumer {
-
-//    private static final Logger LOG =
-//            LoggerFactory.getLogger(AbstractBatchCommitter.class);
 
     private ICommitterQueue queue = new FSQueue();
 
