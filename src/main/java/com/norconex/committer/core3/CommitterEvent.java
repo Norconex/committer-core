@@ -24,10 +24,9 @@ import com.norconex.commons.lang.event.Event;
 /**
  * Default committer events.
  * @author Pascal Essiembre
- * @param <T> Committer for this event
  * @since 3.0.0
  */
-public class CommitterEvent<T extends ICommitter> extends Event<T> {
+public class CommitterEvent extends Event {
 
     private static final long serialVersionUID = 1L;
 
@@ -100,35 +99,32 @@ public class CommitterEvent<T extends ICommitter> extends Event<T> {
 
     private final ICommitterRequest request;
 
-    /**
-     * New crawler event.
-     * @param name event name
-     * @param committer Committer responsible for triggering the event
-     * @param request the entity being upserted/deleted
-     * @param exception exception tied to this event (may be <code>null</code>)
-     */
-    public CommitterEvent(String name, T committer,
-            ICommitterRequest request, Throwable exception) {
-        super(name, committer, exception);
-        this.request = request;
+    public static class Builder extends Event.Builder<Builder> {
+
+        private ICommitterRequest request;
+
+        public Builder(String name, ICommitter source) {
+            super(name, source);
+        }
+
+        public Builder committerRequest(ICommitterRequest request) {
+            this.request = request;
+            return this;
+        }
+
+        @Override
+        public CommitterEvent build() {
+            return new CommitterEvent(this);
+        }
     }
 
-    public static CommitterEvent<ICommitter> create(
-            String name, ICommitter committer) {
-        return create(name, committer, (ICommitterRequest) null);
-    }
-    public static CommitterEvent<ICommitter> create(
-            String name, ICommitter committer, ICommitterRequest request) {
-        return new CommitterEvent<>(name, committer, request, null);
-    }
-    public static CommitterEvent<ICommitter> create(
-            String name, ICommitter committer, Throwable exception) {
-        return new CommitterEvent<>(name, committer, null, exception);
-    }
-    public static CommitterEvent<ICommitter> create(
-            String name, ICommitter committer,
-            ICommitterRequest request, Throwable exception) {
-        return new CommitterEvent<>(name, committer, request, exception);
+    /**
+     * New event.
+     * @param b builder
+     */
+    protected CommitterEvent(Builder b) {
+        super(b);
+        this.request = b.request;
     }
 
     public ICommitterRequest getRequest() {

@@ -311,14 +311,17 @@ public abstract class AbstractCommitter
     }
     protected final void fireDebug(String name, ICommitterRequest req) {
         committerContext.getEventManager().fire(
-                CommitterEvent.create(name, this, req), Level.DEBUG);
+                new CommitterEvent.Builder(name, this)
+                    .committerRequest(req)
+                    .build(),
+                Level.DEBUG);
     }
     protected final void fireInfo(String name) {
         fireInfo(name, null);
     }
     protected final void fireInfo(String name, ICommitterRequest req) {
-        committerContext.getEventManager().fire(
-                CommitterEvent.create(name, this, req));
+        committerContext.getEventManager().fire(new CommitterEvent.Builder(
+                name, this).committerRequest(req).build());
     }
     protected final void fireError(String name, Exception e) {
         fireError(name, null, e);
@@ -326,7 +329,11 @@ public abstract class AbstractCommitter
     protected final void fireError(
             String name, ICommitterRequest req, Exception e) {
         committerContext.getEventManager().fire(
-                CommitterEvent.create(name, this, req, e), Level.ERROR);
+                new CommitterEvent.Builder(name, this)
+                        .committerRequest(req)
+                        .exception(e)
+                        .build(),
+                Level.ERROR);
     }
 
     @Override

@@ -42,7 +42,7 @@ import com.norconex.commons.lang.xml.XML;
  * @author Pascal Essiembre
  * @since 3.0.0
  */
-public class CSVFileCommitterTest  {
+class CSVFileCommitterTest  {
 
     @TempDir
     public Path folder;
@@ -50,7 +50,7 @@ public class CSVFileCommitterTest  {
     //TODO check that formatting is ok by comparing output to a predefined string.
 
     @Test
-    public void testMergedCSVFileCommitter()
+    void testMergedCSVFileCommitter()
             throws CommitterException, IOException {
         String expected =
                 "type,URL,title,content\n"
@@ -71,7 +71,7 @@ public class CSVFileCommitterTest  {
     }
 
     @Test
-    public void testSplitCSVFileCommitter()
+    void testSplitCSVFileCommitter()
             throws CommitterException, IOException {
 
         String expectedUpsert =
@@ -94,7 +94,7 @@ public class CSVFileCommitterTest  {
         String actualDelete = FileUtils.readFileToString(
                 TestUtil.listFSDeleteFiles(
                         c.getDirectory()).iterator().next(), UTF_8);
-System.err.println(actualDelete);
+
         Assertions.assertEquals(expectedUpsert, actualUpsert);
         Assertions.assertEquals(expectedDelete, actualDelete);
     }
@@ -137,7 +137,7 @@ System.err.println(actualDelete);
     }
 
     @Test
-    public void testWriteRead() {
+    void testWriteRead() {
         CSVFileCommitter c = new CSVFileCommitter();
         c.setCompress(true);
         c.setDirectory(Paths.get("c:\\temp"));

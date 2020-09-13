@@ -18,6 +18,10 @@
 
 <!-- This is a config file with as many configuration options being set
      as possible, to test validation as much we can.
+     
+     
+     
+TODO: migrate this     
      -->
 <committer class="com.norconex.committer.core.impl.MultiCommitter">
   <committer class="com.norconex.committer.core.impl.FileSystemCommitter">
