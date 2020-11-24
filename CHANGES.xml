@@ -25,13 +25,17 @@
         Batch and queuing now separate to favor reuse.
       </action>
       <action dev="essiembre" type="add">
-        New "init", "close", "accept", and "clean" methods for committers.
+        New "init", "close", "accept", and "clean" methods for Committers.
       </action>
       <action dev="essiembre" type="add">
         Now fire Committer events for interested consuming classes.
       </action>
       <action dev="essiembre" type="add">
         New support for field mappings.
+      </action>
+      <action dev="essiembre" type="add">
+        New option to commit leftovers (e.g., from being stopped early)
+        from previous execution at initialization time.
       </action>
       <action dev="essiembre" type="update">
         No more "commit" method.  Batching has the concept of batch "consumer"
@@ -47,7 +51,7 @@
         objects.
       </action>
       <action dev="essiembre" type="update">
-        On Committers supporting batches, "queueSize" and "commitBatchSize" 
+        For Committers supporting batches, "queueSize" and "commitBatchSize" 
         configuration options are now merged into "batchSize".
         Now when a batch queue is full, the whole batch is sent.
       </action>

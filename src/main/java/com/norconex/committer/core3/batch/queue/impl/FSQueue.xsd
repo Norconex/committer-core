@@ -21,6 +21,7 @@
       <xs:all>
         <xs:element name="batchSize" type="xs:int" minOccurs="0" maxOccurs="1"/>
         <xs:element name="maxPerFolder" type="xs:int" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="commitLeftoversOnInit" type="xs:boolean" minOccurs="0" maxOccurs="1"/>
       </xs:all>
       <xs:attribute name="class" type="xs:string"></xs:attribute>
     </xs:complexType>

@@ -79,6 +79,10 @@ import com.norconex.commons.lang.xml.XML;
  *     (Optional maximum number of files or directories that can be queued
  *      in a single folder before a new one gets created. Default is 500.)
  *   </maxPerFolder>
+ *   <commitLeftoversOnInit>
+ *     (Optionally force to commit any leftover documents from a previous
+ *      execution (e.g., prematurely ended).
+ *   </commitLeftoversOnInit>
  * </queue>
  * }
  *
@@ -118,6 +122,7 @@ public class FSQueue implements ICommitterQueue, IXMLConfigurable {
     // configurables;
     private int batchSize = DEFAULT_BATCH_SIZE;
     private int maxPerFolder = DEFAULT_MAX_PER_FOLDER;
+    private boolean commitLeftoversOnInit = false;
 
     @ToStringExclude
     @EqualsExclude
@@ -157,14 +162,18 @@ public class FSQueue implements ICommitterQueue, IXMLConfigurable {
                             + workDir.toAbsolutePath());
         }
 
-        // Resume by first processing existing batches not yet committed,
-        // so we start clean.
-        LOG.info("Committing any leftovers...");
-        int cnt = consumeBatch(queueDir);
-        if (cnt == 0) {
-            LOG.info("No leftovers.");
-        } else {
-            LOG.info("{} leftovers committed.", cnt);
+        if (commitLeftoversOnInit) {
+            // Resume by first processing existing batches not yet committed
+            // from previous execution.
+            // "false" by default since we do not want to commit leftovers
+            // when doing initialization for a "clean" operation.
+            LOG.info("Committing any leftovers...");
+            int cnt = consumeBatch(queueDir);
+            if (cnt == 0) {
+                LOG.info("No leftovers.");
+            } else {
+                LOG.info("{} leftovers committed.", cnt);
+            }
         }
 
         // Start for real
@@ -187,6 +196,12 @@ public class FSQueue implements ICommitterQueue, IXMLConfigurable {
     }
     public void setMaxPerFolder(int maxPerFolder) {
         this.maxPerFolder = maxPerFolder;
+    }
+    public boolean isCommitLeftoversOnInit() {
+        return commitLeftoversOnInit;
+    }
+    public void setCommitLeftoversOnInit(boolean commitLeftoversOnInit) {
+        this.commitLeftoversOnInit = commitLeftoversOnInit;
     }
 
     @Override
@@ -213,11 +228,15 @@ public class FSQueue implements ICommitterQueue, IXMLConfigurable {
     public void loadFromXML(XML xml) {
         setBatchSize(xml.getInteger("batchSize", batchSize));
         setMaxPerFolder(xml.getInteger("maxPerFolder", maxPerFolder));
+        setCommitLeftoversOnInit(
+                xml.getBoolean("commitLeftoversOnInit", commitLeftoversOnInit));
+
     }
     @Override
     public void saveToXML(XML xml) {
         xml.addElement("batchSize", batchSize);
         xml.addElement("maxPerFolder", maxPerFolder);
+        xml.addElement("commitLeftoversOnInit", commitLeftoversOnInit);
     }
 
     // delete directory/files after read
