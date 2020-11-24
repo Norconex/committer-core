@@ -81,7 +81,7 @@ import com.norconex.commons.lang.xml.XML;
  *   </maxPerFolder>
  *   <commitLeftoversOnInit>
  *     (Optionally force to commit any leftover documents from a previous
- *      execution (e.g., prematurely ended).
+ *      execution. E.g., prematurely ended.  Default is "false").
  *   </commitLeftoversOnInit>
  * </queue>
  * }
