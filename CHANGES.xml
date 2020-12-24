@@ -9,6 +9,11 @@
 
     <release version="3.0.0-SNAPSHOT" date="2020-??-??" description="Major release">
       <action dev="essiembre" type="add">
+        Most Committers (those relying on FSQueue) now have the ability to 
+        retry failing batches as is, as well as reducing their size before 
+        retrying again. 
+      </action>
+      <action dev="essiembre" type="add">
         New CSVFileCommitter (comma-separated values).
       </action>
       <action dev="essiembre" type="add">

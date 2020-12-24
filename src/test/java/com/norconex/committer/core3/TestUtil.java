@@ -41,7 +41,7 @@ public final class TestUtil {
         super();
     }
 
-    // create test a arguments instance with the object as the first agrument
+    // Create Arguments instance with the object as the first argument
     // and the simple class name of the object as the second.  For nicer
     // display in test reports.
     public static Arguments args(Object obj) {
@@ -83,7 +83,7 @@ public final class TestUtil {
 
 
     public static CommitterContext committerContext(Path folder) {
-        return CommitterContext.build().setWorkDir(folder).create();
+        return CommitterContext.builder().setWorkDir(folder).build();
     }
 
     // 1+ = upserts; 0- = delete

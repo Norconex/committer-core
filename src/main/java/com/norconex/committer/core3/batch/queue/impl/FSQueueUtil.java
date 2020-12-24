@@ -24,6 +24,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Enumeration;
 import java.util.Optional;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
@@ -33,6 +34,7 @@ import org.apache.commons.io.IOUtils;
 import com.norconex.committer.core3.DeleteRequest;
 import com.norconex.committer.core3.ICommitterRequest;
 import com.norconex.committer.core3.UpsertRequest;
+import com.norconex.commons.lang.file.FileUtil;
 import com.norconex.commons.lang.io.CachedInputStream;
 import com.norconex.commons.lang.io.CachedStreamFactory;
 import com.norconex.commons.lang.map.Properties;
@@ -50,6 +52,30 @@ public final class FSQueueUtil {
 
     private FSQueueUtil() {
         super();
+    }
+
+
+    /**
+     * Recursively gets whether a queue directory is empty of
+     * queue files.
+     * @param dir directory to start looking
+     * @return <code>true</code> if empty
+     * @throws IOException if an I/O error occurs
+     */
+    public static boolean isEmpty(Path dir) throws IOException {
+        return !FileUtil.dirHasFile(dir.toFile(), FILTER);
+    }
+
+    /**
+     * Finds all files with the ".zip" extension from within a given
+     * directory, recursively.
+     * @param dir directory to start looking
+     * @return a stream of Zip files.
+     * @throws IOException problem occurred searching for files.
+     */
+    public static Stream<Path> findZipFiles(Path dir) throws IOException {
+        return Files.find(dir,  Integer.MAX_VALUE,
+                (f, a) -> FILTER.accept(f.toFile()));
     }
 
     public static void toZipFile(

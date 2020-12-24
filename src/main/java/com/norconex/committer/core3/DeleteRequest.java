@@ -17,6 +17,7 @@ package com.norconex.committer.core3;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringExclude;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import com.norconex.commons.lang.map.Properties;
@@ -31,6 +32,7 @@ import com.norconex.commons.lang.map.Properties;
 public class DeleteRequest implements ICommitterRequest {
 
     private final String reference;
+    @ToStringExclude
     private final Properties metadata = new Properties();
 
     public DeleteRequest(String reference, Properties metadata) {

@@ -58,34 +58,37 @@ public final class CommitterContext {
     }
 
     public CommitterContext withEventManager(EventManager eventManager) {
-        return CommitterContext.build()
+        return CommitterContext.builder()
                 .setEventManager(eventManager)
                 .setWorkDir(workDir)
                 .setStreamFactory(streamFactory)
-                .create();
+                .build();
     }
     public CommitterContext withWorkdir(Path workDir) {
-        return CommitterContext.build()
+        return CommitterContext.builder()
                 .setEventManager(eventManager)
                 .setWorkDir(workDir)
                 .setStreamFactory(streamFactory)
-                .create();
+                .build();
     }
     public CommitterContext withStreamFactory(
             CachedStreamFactory streamFactory) {
-        return CommitterContext.build()
+        return CommitterContext.builder()
                 .setEventManager(eventManager)
                 .setWorkDir(workDir)
                 .setStreamFactory(streamFactory)
-                .create();
+                .build();
     }
 
-    public static Builder build() {
+    public static Builder builder() {
         return new Builder();
     }
 
     public static class Builder {
         private final CommitterContext ctx = new CommitterContext();
+        private Builder() {
+            super();
+        }
         public Builder setWorkDir(Path workDir) {
             ctx.workDir = workDir;
             return this;
@@ -98,7 +101,7 @@ public final class CommitterContext {
             ctx.streamFactory = streamFactory;
             return this;
         }
-        public CommitterContext create() {
+        public CommitterContext build() {
             if (ctx.workDir == null) {
                 ctx.workDir = new File(FileUtils.getTempDirectory(),
                         "committer-" + TimeIdGenerator.next()).toPath();

@@ -35,7 +35,7 @@ import com.norconex.commons.lang.xml.XML;
 /**
  * @author Pascal Essiembre
  */
-public class FSQueueTest {
+class FSQueueTest {
 
     @TempDir
     static Path folder;
@@ -45,12 +45,12 @@ public class FSQueueTest {
 
     @BeforeEach
     public void setup() {
-        this.ctx = CommitterContext.build().setWorkDir(folder).create();
+        this.ctx = CommitterContext.builder().setWorkDir(folder).build();
         this.queue = new FSQueue();
     }
 
     @Test
-    public void testQueue() throws CommitterException, IOException {
+    void testQueue() throws CommitterException, IOException {
 
         final MutableInt batchQty = new MutableInt();
         final Set<String> batchRefs = new TreeSet<>();
@@ -79,15 +79,18 @@ public class FSQueueTest {
         // Queue directory should be empty.
         Assertions.assertEquals(0, Files.find(folder,  1,
                 (f, a) -> f.toFile().getName().endsWith(
-                        FSQueue.EXT)).count());
+                        FSQueueUtil.EXT)).count());
     }
 
-
     @Test
-    public void testWriteRead() {
+    void testWriteRead() {
         FSQueue q = new FSQueue();
         q.setBatchSize(50);
         q.setMaxPerFolder(100);
+        q.setCommitLeftoversOnInit(true);
+        q.setIgnoreErrors(true);
+        q.setMaxRetries(6);
+        q.setRetryDelay(666);
         XML.assertWriteRead(q, "queue");
     }
 }

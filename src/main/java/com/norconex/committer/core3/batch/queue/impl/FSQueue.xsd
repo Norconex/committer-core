@@ -22,6 +22,27 @@
         <xs:element name="batchSize" type="xs:int" minOccurs="0" maxOccurs="1"/>
         <xs:element name="maxPerFolder" type="xs:int" minOccurs="0" maxOccurs="1"/>
         <xs:element name="commitLeftoversOnInit" type="xs:boolean" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="onCommitFailure" minOccurs="0" maxOccurs="1">
+          <xs:complexType>
+            <xs:all>
+              <xs:element name="splitBatch" minOccurs="0" maxOccurs="1">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:enumeration value="OFF"/>
+                    <xs:enumeration value="off"/>
+                    <xs:enumeration value="HALF"/>
+                    <xs:enumeration value="half"/>
+                    <xs:enumeration value="ONE"/>
+                    <xs:enumeration value="one"/>
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="maxRetries" type="xs:int" minOccurs="0" maxOccurs="1"/>
+              <xs:element name="retryDelay" type="xs:long" minOccurs="0" maxOccurs="1"/>
+              <xs:element name="ignoreErrors" type="xs:boolean" minOccurs="0" maxOccurs="1"/>
+            </xs:all>
+          </xs:complexType>
+        </xs:element>
       </xs:all>
       <xs:attribute name="class" type="xs:string"></xs:attribute>
     </xs:complexType>

@@ -15,7 +15,6 @@
 package com.norconex.committer.core3.batch.queue;
 
 import com.norconex.committer.core3.CommitterContext;
-import com.norconex.committer.core3.CommitterException;
 import com.norconex.committer.core3.ICommitterRequest;
 import com.norconex.committer.core3.batch.IBatchConsumer;
 
@@ -29,17 +28,17 @@ public interface ICommitterQueue extends AutoCloseable {
 
     //TODO have abstract committer queue that takes care of initialization?
     void init(CommitterContext committerContext, IBatchConsumer iBatchConsumer)
-            throws CommitterException;
+            throws CommitterQueueException;
 
     //TODO Return new queue size after this queue request?
-    void queue(ICommitterRequest request) throws CommitterException;
+    void queue(ICommitterRequest request) throws CommitterQueueException;
 
     /**
      * Cleans any persisted information specific to this queue.
-     * @throws CommitterException could not clean queue
+     * @throws CommitterQueueException could not clean queue
      */
-    void clean() throws CommitterException;
+    void clean() throws CommitterQueueException;
 
     @Override
-    void close() throws CommitterException;
+    void close() throws CommitterQueueException;
 }

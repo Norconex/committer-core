@@ -19,6 +19,7 @@ import java.io.InputStream;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringExclude;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import com.norconex.commons.lang.map.Properties;
@@ -31,7 +32,9 @@ import com.norconex.commons.lang.map.Properties;
 public class UpsertRequest implements ICommitterRequest {
 
     private final String reference;
+    @ToStringExclude
     private final Properties metadata = new Properties();
+    @ToStringExclude
     private final InputStream content;
 
     //TODO do we allow null content? If so, document it.

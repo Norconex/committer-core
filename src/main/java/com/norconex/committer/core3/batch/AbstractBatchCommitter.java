@@ -67,18 +67,10 @@ import com.norconex.commons.lang.xml.XML;
  * @author Pascal Essiembre
  * @since 3.0.0
  */
-@SuppressWarnings("javadoc")
 public abstract class AbstractBatchCommitter extends AbstractCommitter
         implements IXMLConfigurable, IBatchConsumer {
 
     private ICommitterQueue queue = new FSQueue();
-
-    //TODO add support for these?
-//    private int maxRetries;
-//    private long maxRetryWait;
-//    *   <maxRetries>(max retries upon commit failures)</maxRetries>
-//    *   <maxRetryWait>(max delay in milliseconds between retries)</maxRetryWait>
-
 
     @Override
     protected final void doInit() throws CommitterException {
