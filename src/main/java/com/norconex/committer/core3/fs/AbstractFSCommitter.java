@@ -66,7 +66,6 @@ import com.norconex.commons.lang.xml.XML;
  * @author Pascal Essiembre
  * @since 3.0.0
  */
-@SuppressWarnings("javadoc")
 public abstract class AbstractFSCommitter<T> extends AbstractCommitter
         implements IXMLConfigurable  {
 
@@ -151,9 +150,6 @@ public abstract class AbstractFSCommitter<T> extends AbstractCommitter
     protected void doInit() throws CommitterException {
         if (directory == null) {
             this.directory = getCommitterContext().getWorkDir();
-//                    .resolveSibling(
-//                    getCommitterContext().getWorkDir().getFileName()
-//                    + "-" + getFileExtension());
         }
 
         try {
@@ -175,7 +171,7 @@ public abstract class AbstractFSCommitter<T> extends AbstractCommitter
         }
     }
     @Override
-    protected void doUpsert(UpsertRequest upsertRequest)
+    protected synchronized void doUpsert(UpsertRequest upsertRequest)
             throws CommitterException {
         try {
             writeUpsert(upsertHandler.getDocWriter(), upsertRequest);
@@ -185,7 +181,7 @@ public abstract class AbstractFSCommitter<T> extends AbstractCommitter
         }
     }
     @Override
-    protected void doDelete(DeleteRequest deleteRequest)
+    protected synchronized void doDelete(DeleteRequest deleteRequest)
             throws CommitterException {
         try {
             writeDelete(deleteHandler.getDocWriter(), deleteRequest);
