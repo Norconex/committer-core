@@ -7,7 +7,8 @@
   </properties>
   <body>
 
-    <release version="3.0.0-SNAPSHOT" date="2020-??-??" description="Major release">
+    <release version="3.0.0-M1" date="2021-03-01" 
+         description="Milestone towards next major release.">
       <action dev="essiembre" type="add">
         Most Committers (those relying on FSQueue) now have the ability to 
         retry failing batches as is, as well as reducing their size before 
