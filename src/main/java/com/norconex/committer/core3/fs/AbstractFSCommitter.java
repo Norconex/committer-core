@@ -66,6 +66,7 @@ import com.norconex.commons.lang.xml.XML;
  * @author Pascal Essiembre
  * @since 3.0.0
  */
+@SuppressWarnings("javadoc")
 public abstract class AbstractFSCommitter<T> extends AbstractCommitter
         implements IXMLConfigurable  {
 
