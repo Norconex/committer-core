@@ -16,7 +16,7 @@ package com.norconex.committer.core3;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import com.norconex.commons.lang.event.Event;
@@ -137,13 +137,20 @@ public class CommitterEvent extends Event {
     }
     @Override
     public int hashCode() {
-        return HashCodeBuilder.reflectionHashCode(this);
+        // Cannot use HashCodeBuilder.reflectionHashCode here to prevent
+        // "An illegal reflective access operation has occurred"
+        return new HashCodeBuilder()
+                .appendSuper(super.hashCode())
+                .append(request)
+                .build();
     }
     @Override
     public String toString() {
-        ReflectionToStringBuilder b = new ReflectionToStringBuilder(
-                this, ToStringStyle.SHORT_PREFIX_STYLE);
-        b.setExcludeNullValues(true);
-        return b.toString();
+        // Cannot use ReflectionToStringBuilder here to prevent
+        // "An illegal reflective access operation has occurred"
+        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+                .appendSuper(super.toString())
+                .append("request", request)
+                .build();
     }
 }

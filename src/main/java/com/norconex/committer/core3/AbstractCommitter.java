@@ -24,7 +24,7 @@ import org.apache.commons.collections4.map.ListOrderedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.slf4j.event.Level;
 
@@ -383,7 +383,12 @@ public abstract class AbstractCommitter
     }
     @Override
     public String toString() {
-        return new ReflectionToStringBuilder(
-                this, ToStringStyle.SHORT_PREFIX_STYLE).toString();
+        // Cannot use ReflectionToStringBuilder here to prevent
+        // "An illegal reflective access operation has occurred"
+        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+                .append("committerContext", committerContext)
+                .append("restrictions", restrictions)
+                .append("fieldMappings", fieldMappings)
+                .build();
     }
 }

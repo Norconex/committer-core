@@ -25,10 +25,8 @@ import java.util.stream.Collectors;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringExclude;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.apache.commons.lang3.builder.ToStringSummary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,15 +66,12 @@ public class MemoryCommitter extends AbstractCommitter {
     private static final Logger LOG =
             LoggerFactory.getLogger(MemoryCommitter.class);
 
-    @ToStringSummary
     private final List<ICommitterRequest> requests = new ArrayList<>();
 
     private int upsertCount = 0;
     private int deleteCount = 0;
 
-    @ToStringExclude
     private boolean ignoreContent;
-    @ToStringExclude
     private final TextMatcher fieldMatcher = new TextMatcher();
 
     /**
@@ -205,8 +200,14 @@ public class MemoryCommitter extends AbstractCommitter {
     }
     @Override
     public String toString() {
-        return new ReflectionToStringBuilder(
-                this, ToStringStyle.SHORT_PREFIX_STYLE).toString();
+        // Cannot use ReflectionToStringBuilder here to prevent
+        // "An illegal reflective access operation has occurred"
+        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+                .appendSuper(super.toString())
+                .append("requests", requests, false)
+                .append("upsertCount", upsertCount)
+                .append("deleteCount", deleteCount)
+                .build();
     }
 
     @Override
