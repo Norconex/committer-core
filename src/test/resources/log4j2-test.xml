@@ -8,14 +8,14 @@
   </Appenders>
   <Loggers>
 
-    <Root level="INFO">
+    <Root level="WARN">
       <AppenderRef ref="Console"/>
     </Root>
 
-    <Logger name="com.norconex.committer.core" level="INFO" additivity="false">
+    <Logger name="com.norconex.committer.core" level="WARN" additivity="false">
       <AppenderRef ref="Console"/>
     </Logger>
-    <Logger name="com.norconex.commons.lang" level="INFO" additivity="false">
+    <Logger name="com.norconex.commons.lang" level="WARN" additivity="false">
       <AppenderRef ref="Console"/>
     </Logger>
 
