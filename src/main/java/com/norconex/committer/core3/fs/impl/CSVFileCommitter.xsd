@@ -63,7 +63,7 @@
                 <xs:enumeration value="PostgreSQLCsv"/>
                 <xs:enumeration value="PostgreSQLText"/>
                 <xs:enumeration value="RFC4180"/>
-                <xs:enumeration value="TDF"/>
+                <xs:enumeration value="tdf"/>
               </xs:restriction>
             </xs:simpleType>
           </xs:attribute>

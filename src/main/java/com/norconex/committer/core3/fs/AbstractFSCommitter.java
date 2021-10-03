@@ -315,7 +315,9 @@ public abstract class AbstractFSCommitter<T> extends AbstractCommitter
         public synchronized void close() throws IOException {
             writeCount = 0;
             try {
-                closeDocWriter(docWriter);
+                if (writer != null) {
+                    closeDocWriter(docWriter);
+                }
             } finally {
                 if (writer != null) {
                     writer.close();

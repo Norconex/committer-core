@@ -47,8 +47,6 @@ class CSVFileCommitterTest  {
     @TempDir
     public Path folder;
 
-    //TODO check that formatting is ok by comparing output to a predefined string.
-
     @Test
     void testMergedCSVFileCommitter()
             throws CommitterException, IOException {

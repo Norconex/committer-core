@@ -101,7 +101,9 @@ public class FSCommitterTest  {
     }
 
     @CommitterTest
-    public void testWriteRead(AbstractFSCommitter<?> c, String name) {
+    public void testWriteRead(AbstractFSCommitter<?> c, String name)
+            throws CommitterException {
+
         c.setCompress(true);
         c.setDirectory(Paths.get("c:\\temp"));
         c.setDocsPerFile(5);

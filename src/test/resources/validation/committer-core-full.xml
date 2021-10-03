@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE xml>
 <!-- 
-   Copyright 2017 Norconex Inc.
+   Copyright 2017-2021 Norconex Inc.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -15,46 +15,57 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 -->
+<committers>
 
-<!-- This is a config file with as many configuration options being set
-     as possible, to test validation as much we can.
-     
-     
-     
-TODO: migrate this     
-     -->
-<committer class="com.norconex.committer.core.impl.MultiCommitter">
-  <committer class="com.norconex.committer.core.impl.FileSystemCommitter">
-    <directory>/tmp/somedir</directory>
-  </committer>
-  <committer class="com.norconex.committer.core.impl.NilCommitter"/>
-  <committer class="com.norconex.committer.core.MockAbstractMappedCommitter">
-    <sourceReferenceField keep="true">sourceReferenceField</sourceReferenceField>
-    <targetReferenceField>targetReferenceField</targetReferenceField>
-    <sourceContentField keep="true">sourceContentField</sourceContentField>
-    <targetContentField>targetContentField</targetContentField>
-    <commitBatchSize>10</commitBatchSize>
-    <queueDir>/tmp/somedir</queueDir>
-    <queueSize>10</queueSize>
-    <maxRetries>3</maxRetries>
-    <maxRetryWait>3000</maxRetryWait>
-  </committer>
-  <committer class="com.norconex.committer.core.impl.JSONFileCommitter">
-    <directory>/tmp/somejsondir</directory>
-    <pretty>true</pretty>
-    <docsPerFile>10</docsPerFile>
+  <committer class="CSVFileCommitter"
+      format="EXCEL"
+      showHeaders="true"
+      delimiter="|"
+      quote="_"
+      escape="%"
+      multiValueJoinDelimiter="+"
+      typeHeader="Upsert or Delete?"
+      truncateAt="123">
+    <col field="field1" header="Field One" truncateAt="111"/>
+    <col field="field2" header="Field Tow" truncateAt="222"/>
+    <col header="Body" truncateAt="666"/>
+
+    <directory>/somewhere/there</directory>
+    <docsPerFile>33</docsPerFile>
     <compress>true</compress>
-    <splitAddDelete>true</splitAddDelete>
-    <fileNamePrefix></fileNamePrefix>
-    <fileNameSuffix></fileNameSuffix>
+    <splitUpsertDelete>true</splitUpsertDelete>
+    <fileNamePrefix>someprefix</fileNamePrefix>
+    <fileNameSuffix>somesuffix</fileNameSuffix> 
+
+    <restrictTo>
+      <fieldMatcher method="regex">.*potato.*</fieldMatcher>
+      <valueMatcher method="wildcard">*tomato*</valueMatcher>
+    </restrictTo>
+    <restrictTo>
+      <fieldMatcher method="basic">apple</fieldMatcher>
+      <valueMatcher method="csv">orange</valueMatcher>
+    </restrictTo>
+
+    <fieldMappings>
+      <mapping fromField="field1" toField="FirstField"/>
+      <mapping fromField="field2" toField="SecondField"/>
+    </fieldMappings>
   </committer>
-  <committer class="com.norconex.committer.core.impl.XMLFileCommitter">
-    <directory>/tmp/somexmldir</directory>
-    <pretty>false</pretty>
-    <docsPerFile>1</docsPerFile>
-    <compress>false</compress>
-    <splitAddDelete>false</splitAddDelete>
-    <fileNamePrefix>my prefix</fileNamePrefix>
-    <fileNameSuffix>my suffix</fileNameSuffix>
+
+  <committer class="JSONFileCommitter">
+    <indent>8</indent>
   </committer>
-</committer>
+
+  <committer class="XMLFileCommitter">
+    <indent>6</indent>
+  </committer>
+
+  <committer class="LogCommitter">
+    <logLevel>STDERR</logLevel>
+    <fieldMatcher>document.reference</fieldMatcher>
+    <ignoreContent>true</ignoreContent>
+  </committer>
+
+  <committer class="MemoryCommitter"/>
+
+</committers>

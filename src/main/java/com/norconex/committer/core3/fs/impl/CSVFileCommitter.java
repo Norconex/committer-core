@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVFormat.Builder;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -214,28 +215,24 @@ public class CSVFileCommitter extends AbstractFSCommitter<CSVPrinter> {
     }
     @Override
     protected CSVPrinter createDocWriter(Writer writer) throws IOException {
-
-        CSVFormat fmt;
-        if (StringUtils.isBlank(format)) {
-            fmt = CSVFormat.newFormat(',');
-        } else {
-            fmt = new EnumConverter().toType(
-                    format, CSVFormat.Predefined.class).getFormat();
-        }
+        Builder builder = Builder.create(StringUtils.isBlank(format)
+                ? CSVFormat.newFormat(',')
+                : new EnumConverter().toType(
+                        format, CSVFormat.Predefined.class).getFormat());
 
         if (delimiter != null) {
-            fmt = fmt.withDelimiter(delimiter);
+            builder.setDelimiter(delimiter);
         }
         if (quote != null) {
-            fmt = fmt.withQuote(quote);
+            builder.setQuote(quote);
         }
         if (escape != null) {
-            fmt = fmt.withEscape(escape);
+            builder.setEscape(escape);
         }
 
-        fmt = fmt.withRecordSeparator('\n');
+        builder.setRecordSeparator('\n');
 
-        CSVPrinter csv = new CSVPrinter(writer, fmt);
+        CSVPrinter csv = new CSVPrinter(writer, builder.build());
 
         printHeaders(csv);
 

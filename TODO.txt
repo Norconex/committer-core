@@ -3,35 +3,12 @@
 - Do a memory committer queue and test swapping one for the other behaving
   just fine.
 
-- Have option to retry batches by breaking them down into smaller chunks
-  up to 1 at a time.
-
 - Ensure no workDir collision (either in this project or caller).  Append
   committer index in case of multiple committers (or always)?
 
 - Have installer for other committer?
 
-- Make sur logging is sufficient when batching so people know what is going on.
-
-- Rename maxRetryWait to retryDelay to avoid confusion.
-- Add init and close methods.
-- Have listeners for commit events.  
-- Have a "clearQueue" method.
-- Have a "clearRepository" method.
-- Allow for multiple committers (and remove MultiCommitter?)
 - Committer server (and a committer "client" that can round-robin between 
   committer servers?)
-
-
-- Maybe: have a way to "route" documents to the proper committer based on 
-  metadata field values. Either by having a "restrictTo" equivalent to those 
-  found in Importer handlers, or else.
-  This has to account for deletions, that do not have metadata properties, so
-  could break the routing.  Maybe sending the deletion to all defined committers
-  for deletions could do it.  
-
-- Create a CSV/Spreadsheet Committer, with support for how to join multi-values.
-
-- Add committer server
 
 - Add chainable committers??

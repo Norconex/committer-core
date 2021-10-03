@@ -93,10 +93,6 @@ public class CommitterEvent extends Event {
     /** The Committer encountered an error when cleaning. */
     public static final String COMMITTER_CLEAN_ERROR = "COMMITTER_CLEAN_ERROR";
 
-
-    //TODO add a constant for "commit_error" and maybe "commit_warning"?
-
-
     private final ICommitterRequest request;
 
     public static class Builder extends Event.Builder<Builder> {

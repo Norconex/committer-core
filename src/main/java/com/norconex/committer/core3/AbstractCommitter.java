@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Optional;
 
 import org.apache.commons.collections4.map.ListOrderedMap;
 import org.apache.commons.lang3.StringUtils;
@@ -289,12 +290,9 @@ public abstract class AbstractCommitter
     protected abstract void doInit()
             throws CommitterException;
 
-    //TODO pass Properties instead, since field mappping would have taken place
     protected abstract void doUpsert(UpsertRequest upsertRequest)
             throws CommitterException;
 
-
-    //TODO pass Properties instead, since field mappping would have taken place
     protected abstract void doDelete(DeleteRequest deleteRequest)
             throws CommitterException;
     /**
@@ -310,30 +308,35 @@ public abstract class AbstractCommitter
         fireInfo(name, null);
     }
     protected final void fireDebug(String name, ICommitterRequest req) {
-        committerContext.getEventManager().fire(
-                new CommitterEvent.Builder(name, this)
-                    .committerRequest(req)
-                    .build(),
+        fire(new CommitterEvent.Builder(name, this)
+                .committerRequest(req)
+                .build(),
                 Level.DEBUG);
     }
     protected final void fireInfo(String name) {
         fireInfo(name, null);
     }
     protected final void fireInfo(String name, ICommitterRequest req) {
-        committerContext.getEventManager().fire(new CommitterEvent.Builder(
-                name, this).committerRequest(req).build());
+        fire(new CommitterEvent.Builder(name, this)
+                .committerRequest(req)
+                .build(),
+                Level.INFO);
     }
     protected final void fireError(String name, Exception e) {
         fireError(name, null, e);
     }
     protected final void fireError(
             String name, ICommitterRequest req, Exception e) {
-        committerContext.getEventManager().fire(
-                new CommitterEvent.Builder(name, this)
-                        .committerRequest(req)
-                        .exception(e)
-                        .build(),
+        fire(new CommitterEvent.Builder(name, this)
+                .committerRequest(req)
+                .exception(e)
+                .build(),
                 Level.ERROR);
+    }
+    private void fire(CommitterEvent e, Level level) {
+        Optional.ofNullable(committerContext)
+            .map(ctx -> ctx.getEventManager())
+            .ifPresent(em -> em.fire(e, level));
     }
 
     @Override
