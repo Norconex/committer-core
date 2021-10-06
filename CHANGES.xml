@@ -7,7 +7,7 @@
   </properties>
   <body>
 
-    <release version="3.0.0-SNAPSHOT" date="2021-??-??" 
+    <release version="3.0.0-RC1" date="2021-??-??" 
         description="Changes since last milestone for this upcoming major release.">
       <action dev="essiembre" type="update">
         Maven dependency updates: Apache Commons CSV 1.9.0.
