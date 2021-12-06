@@ -20,11 +20,11 @@
   <parent>
     <groupId>com.norconex.commons</groupId>
     <artifactId>norconex-commons-maven-parent</artifactId>
-    <version>1.0.0-RC1</version>
+    <version>1.0.0-SNAPSHOT</version>
   </parent>  
   <groupId>com.norconex.collectors</groupId>
   <artifactId>norconex-committer-core</artifactId>
-  <version>3.0.0-RC1</version>
+  <version>3.0.0-SNAPSHOT</version>
   <name>Norconex Committer Core</name>
 
   <properties>
@@ -134,7 +134,7 @@
     </site>
   </distributionManagement>
   
-  <url>https://norconex.com/committers/core</url>
+  <url>https://opensource.norconex.com/committers/core</url>
   <description>Norconex Committer is a java library and command line application used to route content to local or remote target repositories, such as a search engine index.   </description>
   <issueManagement>
   	<url>https://github.com/Norconex/committer-core/issues</url>
