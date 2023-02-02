@@ -14,12 +14,16 @@
  */
 package com.norconex.committer.core;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.collections4.set.ListOrderedSet;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -54,6 +58,7 @@ import com.norconex.commons.lang.config.IXMLConfigurable;
  *      &lt;queueSize&gt;(max queue size before committing)&lt;/queueSize&gt;
  *      &lt;maxRetries&gt;(max retries upon commit failures)&lt;/maxRetries&gt;
  *      &lt;maxRetryWait&gt;(max delay in milliseconds between retries)&lt;/maxRetryWait&gt;
+ *      &lt;failedQueueDir&gt;(optional path where to move batch files on commit failure)&lt;/failedQueueDir&gt;
  * </pre>
  * 
  * @author Pascal Essiembre
@@ -71,8 +76,9 @@ public abstract class AbstractBatchCommitter
     private int commitBatchSize;
     private int maxRetries;
     private long maxRetryWait;
+    private String failedQueueDir;
 
-    private final Set<ICommitOperation> operations = 
+	private final Set<ICommitOperation> operations = 
             Collections.synchronizedSet(new ListOrderedSet<ICommitOperation>());
 
     /**
@@ -138,6 +144,25 @@ public abstract class AbstractBatchCommitter
     public void setMaxRetryWait(long maxRetryWait) {
         this.maxRetryWait = maxRetryWait;
     }
+    
+    /**
+     * Sets the directory where files in a failed commit batch will be moved to.
+     * @param failedQueueDir  
+     * @since 2.1.4
+     */    
+    public String getFailedQueueDir() {
+		return failedQueueDir;
+	}
+    
+    /**
+     * Gets the directory where files in a failed commit batch will be moved to.
+     * @param failedQueueDir  
+     * @since 2.1.4
+     */    
+	public void setFailedQueueDir(String failedQueueDir) {
+		this.failedQueueDir = failedQueueDir;
+	}
+	
     @Override
     protected final void commitAddition(IAddOperation operation) {
         cacheOperationAndCommitIfReady(operation);
@@ -178,13 +203,15 @@ public abstract class AbstractBatchCommitter
             try {
                 commitBatch(batch);
                 success = true;
-            } catch (Exception e) {
+            }
+            catch (Exception e) {
                 if (numTries < maxRetries) {
                     LOG.error("Could not commit batched operations.", e);
                     Sleeper.sleepMillis(maxRetryWait);
                     numTries++;
                 } else {
-                    throw (RuntimeException) e;
+                	handleFailedCommit(batch);
+                	throw (RuntimeException) e;
                 }
             }
         }
@@ -194,6 +221,22 @@ public abstract class AbstractBatchCommitter
             op.delete();
         }
         batch.clear();
+    }
+    
+    private void handleFailedCommit(List<ICommitOperation> batch) {
+    	
+    	if(StringUtils.isBlank(failedQueueDir)) {
+    		return;
+    	}
+    	
+    	LOG.error("Commit failed. Moving failed batch to " + failedQueueDir);
+    	File moveTo = new File(failedQueueDir + "/" + System.currentTimeMillis());
+    	
+    	for(ICommitOperation item : batch) {
+    		item.moveTo(moveTo);
+//    		item.delete();
+    	}
+//    	batch.clear();
     }
     
     private void cacheOperationAndCommitIfReady(ICommitOperation operation) {

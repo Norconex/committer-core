@@ -162,4 +162,16 @@ public class FileAddOperation implements IAddOperation {
         builder.append("metadata", metadata);
         return builder.toString();
     }
+
+	@Override
+	public void moveTo(File path) {
+		try {
+			FileUtils.moveFileToDirectory(refFile, path, true);
+			FileUtils.moveFileToDirectory(contentFile, path, true);
+			FileUtils.moveFileToDirectory(metaFile, path, true);
+		} catch (IOException e) {
+			LOG.error("Unable to move files. " + e);
+			LOG.error(refFile + "," + contentFile + "," + metaFile);
+		}		
+	}
 }

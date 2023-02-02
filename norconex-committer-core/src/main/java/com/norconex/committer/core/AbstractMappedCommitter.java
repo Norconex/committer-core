@@ -333,6 +333,7 @@ public abstract class AbstractMappedCommitter
                     "commitBatchSize", getCommitBatchSize());
             writer.writeElementInteger("maxRetries", getMaxRetries());
             writer.writeElementLong("maxRetryWait", getMaxRetryWait());
+            writer.writeElementString("failedQueueDir", getFailedQueueDir());
 
             saveToXML(writer);
 
@@ -376,6 +377,8 @@ public abstract class AbstractMappedCommitter
         setMaxRetries(xml.getInt("maxRetries", 0));
         setMaxRetryWait(XMLConfigurationUtil.getDuration(
                 xml, "maxRetryWait", 0));
+        
+        setFailedQueueDir(xml.getString("failedQueueDir", ""));
 
         loadFromXml(xml);
     }
