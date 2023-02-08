@@ -14,6 +14,7 @@
  */
 package com.norconex.committer.core;
 
+import java.io.File;
 import java.io.Serializable;
 
 /**
@@ -34,4 +35,9 @@ public interface ICommitOperation extends Serializable {
      * a memory or filesystem queue, or others
      */
     void delete();
+    
+    /**
+     * Moves files to given path
+     */
+    void moveTo(File path);
 }
