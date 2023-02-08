@@ -103,13 +103,13 @@ public class FileDeleteOperation implements IDeleteOperation {
         return builder.toString();
     }
 
-	@Override
-	public void moveTo(File path) {
-		try {
-			FileUtils.moveFileToDirectory(refFile, path, true);
-		} catch (IOException e) {
-			LOG.error("Unable to move files. " + e);
-			LOG.error(refFile);
-		}		
-	}
+    @Override
+    public void moveTo(File path) {
+        try {
+            FileUtils.moveFileToDirectory(refFile, path, true);
+        } catch (IOException e) {
+            LOG.error("Unable to move files. " + e);
+            LOG.error(refFile);
+        }
+    }
 }

@@ -15,14 +15,12 @@
 package com.norconex.committer.core;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.collections4.set.ListOrderedSet;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -147,21 +145,23 @@ public abstract class AbstractBatchCommitter
     
     /**
      * Sets the directory where files in a failed commit batch will be moved to.
-     * @param failedQueueDir  
+     * 
+     * @param failedQueueDir
      * @since 2.1.4
-     */    
+     */
     public String getFailedQueueDir() {
-		return failedQueueDir;
-	}
-    
+        return failedQueueDir;
+    }
+
     /**
      * Gets the directory where files in a failed commit batch will be moved to.
-     * @param failedQueueDir  
+     * 
+     * @param failedQueueDir
      * @since 2.1.4
-     */    
-	public void setFailedQueueDir(String failedQueueDir) {
-		this.failedQueueDir = failedQueueDir;
-	}
+     */
+    public void setFailedQueueDir(String failedQueueDir) {
+        this.failedQueueDir = failedQueueDir;
+    }
 	
     @Override
     protected final void commitAddition(IAddOperation operation) {
@@ -210,8 +210,8 @@ public abstract class AbstractBatchCommitter
                     Sleeper.sleepMillis(maxRetryWait);
                     numTries++;
                 } else {
-                	handleFailedCommit(batch);
-                	throw (RuntimeException) e;
+                    handleFailedCommit(batch);
+                    throw (RuntimeException) e;
                 }
             }
         }
@@ -224,19 +224,17 @@ public abstract class AbstractBatchCommitter
     }
     
     private void handleFailedCommit(List<ICommitOperation> batch) {
-    	
-    	if(StringUtils.isBlank(failedQueueDir)) {
-    		return;
-    	}
-    	
-    	LOG.error("Commit failed. Moving failed batch to " + failedQueueDir);
-    	File moveTo = new File(failedQueueDir + "/" + System.currentTimeMillis());
-    	
-    	for(ICommitOperation item : batch) {
-    		item.moveTo(moveTo);
-//    		item.delete();
-    	}
-//    	batch.clear();
+
+        if (StringUtils.isBlank(failedQueueDir)) {
+            return;
+        }
+
+        LOG.error("Commit failed. Moving failed batch to " + failedQueueDir);
+        File moveTo = new File(failedQueueDir + "/" + System.currentTimeMillis());
+
+        for (ICommitOperation item : batch) {
+            item.moveTo(moveTo);
+        }
     }
     
     private void cacheOperationAndCommitIfReady(ICommitOperation operation) {
