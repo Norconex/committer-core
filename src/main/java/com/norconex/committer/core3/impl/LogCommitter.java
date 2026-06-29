@@ -54,7 +54,7 @@ import com.norconex.commons.lang.xml.XML;
  * uses application logger with INFO log level.
  * </p>
  * <p>
- * This Committer can be useful for troubleshooting.  Given how much
+ * This Committer can be useful for troubleshooting. Given how much
  * information this could represent, it is recommended
  * you do not use in a production environment. At a minimum, if you are
  * logging to file, make sure to rotate/clean the logs regularly.
@@ -62,12 +62,13 @@ import com.norconex.commons.lang.xml.XML;
  *
  * {@nx.xml.usage
  * <committer class="com.norconex.committer.core3.impl.LogCommitter">
- *   <logLevel>[TRACE|DEBUG|INFO|WARN|ERROR|STDOUT|STDERR]</logLevel>
- *   <fieldMatcher {@nx.include com.norconex.commons.lang.text.TextMatcher#matchAttributes}>
- *     (Expression matching fields to log. Default logs all.)
- *   </fieldMatcher>
- *   <ignoreContent>[false|true]</ignoreContent>
- *   {@nx.include com.norconex.committer.core3.AbstractCommitter@nx.xml.usage}
+ * <logLevel>[TRACE|DEBUG|INFO|WARN|ERROR|STDOUT|STDERR]</logLevel>
+ * <fieldMatcher
+ * {@nx.include com.norconex.commons.lang.text.TextMatcher#matchAttributes}>
+ * (Expression matching fields to log. Default logs all.)
+ * </fieldMatcher>
+ * <ignoreContent>[false|true]</ignoreContent>
+ * {@nx.include com.norconex.committer.core3.AbstractCommitter@nx.xml.usage}
  * </committer>
  * }
  *
@@ -76,10 +77,9 @@ import com.norconex.commons.lang.xml.XML;
  */
 @SuppressWarnings("javadoc")
 public class LogCommitter extends AbstractCommitter
-        implements IXMLConfigurable  {
+        implements IXMLConfigurable {
 
-    private static final Logger LOG =
-            LoggerFactory.getLogger(LogCommitter.class);
+    private static final Logger LOG = LoggerFactory.getLogger(LogCommitter.class);
 
     private static final int LOG_TIME_BATCH_SIZE = 100;
 
@@ -95,23 +95,56 @@ public class LogCommitter extends AbstractCommitter
     private final TextMatcher fieldMatcher = new TextMatcher();
     private String logLevel;
 
+    /**
+     * Whether document content is omitted from logs.
+     * 
+     * @return {@code true} when content is ignored
+     */
     public boolean isIgnoreContent() {
         return ignoreContent;
     }
+
+    /**
+     * Sets whether document content should be omitted from logs.
+     * 
+     * @param ignoreContent {@code true} to ignore content
+     */
     public void setIgnoreContent(boolean ignoreContent) {
         this.ignoreContent = ignoreContent;
     }
 
+    /**
+     * Gets the metadata field matcher used to select logged metadata fields.
+     * 
+     * @return field matcher
+     */
     public TextMatcher getFieldMatcher() {
         return fieldMatcher;
     }
+
+    /**
+     * Sets the metadata field matcher used to select logged metadata fields.
+     * 
+     * @param fieldMatcher field matcher
+     */
     public void setFieldMatcher(TextMatcher fieldMatcher) {
         this.fieldMatcher.copyFrom(fieldMatcher);
     }
 
+    /**
+     * Gets output log level.
+     * 
+     * @return log level (TRACE, DEBUG, INFO, WARN, ERROR, STDOUT, STDERR)
+     */
     public String getLogLevel() {
         return logLevel;
     }
+
+    /**
+     * Sets output log level.
+     * 
+     * @param logLevel log level (TRACE, DEBUG, INFO, WARN, ERROR, STDOUT, STDERR)
+     */
     public void setLogLevel(String logLevel) {
         this.logLevel = logLevel;
     }
@@ -121,6 +154,7 @@ public class LogCommitter extends AbstractCommitter
         watch.reset();
         watch.start();
     }
+
     @Override
     protected void doUpsert(UpsertRequest upsertRequest)
             throws CommitterException {
@@ -146,6 +180,7 @@ public class LogCommitter extends AbstractCommitter
             LOG.info("{} upsert logged in: {}", addCount, watch);
         }
     }
+
     @Override
     protected void doDelete(DeleteRequest deleteRequest)
             throws CommitterException {
@@ -160,6 +195,7 @@ public class LogCommitter extends AbstractCommitter
             LOG.info("{} delete logged in {}", removeCount, watch);
         }
     }
+
     @Override
     protected void doClose() throws CommitterException {
         watch.stop();
@@ -206,21 +242,25 @@ public class LogCommitter extends AbstractCommitter
     public boolean equals(final Object other) {
         return EqualsBuilder.reflectionEquals(this, other);
     }
+
     @Override
     public int hashCode() {
         return HashCodeBuilder.reflectionHashCode(this);
     }
+
     @Override
     public String toString() {
         return new ReflectionToStringBuilder(
                 this, ToStringStyle.SHORT_PREFIX_STYLE).toString();
     }
+
     @Override
     public void loadCommitterFromXML(XML xml) {
         setLogLevel(xml.getString("logLevel", logLevel));
         setIgnoreContent(xml.getBoolean("ignoreContent", ignoreContent));
         fieldMatcher.loadFromXML(xml.getXML("fieldMatcher"));
     }
+
     @Override
     public void saveCommitterToXML(XML xml) {
         xml.addElement("logLevel", logLevel);

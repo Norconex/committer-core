@@ -69,29 +69,29 @@ import com.norconex.commons.lang.xml.XML;
  * for failed batches.
  * </p>
  *
- * <h3>Handling Failures</h3>
+ * <h2>Handling Failures</h2>
  * <p>
  * Before moving a failed batch to the "error" folder you have the opportunity
- * to have this queue tell the Committer to retry the batch.  This can be
+ * to have this queue tell the Committer to retry the batch. This can be
  * particularly useful if you experience issues such as:
  * </p>
  * <ul>
- *   <li>The target repository momentarily failed to respond.</li>
- *   <li>A specific document was rejected by the target repository.</li>
- *   <li>The batch was too big for the repository to handle.</li>
- *   <li>Etc.</li>
+ * <li>The target repository momentarily failed to respond.</li>
+ * <li>A specific document was rejected by the target repository.</li>
+ * <li>The batch was too big for the repository to handle.</li>
+ * <li>Etc.</li>
  * </ul>
  * <p>
  * In addition to specifying how many time to retry and how long to wait
  * between each attempts, you can also break the batch size into smaller
- * chunks.  The "splitBatch" setting offers the following options:
+ * chunks. The "splitBatch" setting offers the following options:
  * </p>
  * <ul>
- *   <li><b>OFF</b> - Default. The failing batch is not split.</li>
- *   <li><b>HALF</b> - The batch is split in half at each failure
- *       (after maxRetries is reached), up until batches are of size 1
- *       (committing documents individually).</li>
- *   <li><b>ONE</b> - Documents from the failing batch are sent one by one.</li>
+ * <li><b>OFF</b> - Default. The failing batch is not split.</li>
+ * <li><b>HALF</b> - The batch is split in half at each failure
+ * (after maxRetries is reached), up until batches are of size 1
+ * (committing documents individually).</li>
+ * <li><b>ONE</b> - Documents from the failing batch are sent one by one.</li>
  * </ul>
  * <p>
  * When "splitBatch" is not OFF and used in combination with a non-zero
@@ -101,35 +101,35 @@ import com.norconex.commons.lang.xml.XML;
  *
  * {@nx.xml.usage
  * <queue class="com.norconex.committer.core3.batch.queue.impl.FSQueue">
- *   <batchSize>
- *     (Optional number of documents queued after which we process a batch.
- *      Default is 20.)
- *   </batchSize>
- *   <maxPerFolder>
- *     (Optional maximum number of files or directories that can be queued
- *      in a single folder before a new one gets created. Default is 500.)
- *   </maxPerFolder>
- *   <commitLeftoversOnInit>
- *     (Optionally force to commit any leftover documents from a previous
- *      execution. E.g., prematurely ended.  Default is "false").
- *   </commitLeftoversOnInit>
- *   <onCommitFailure>
- *     <splitBatch>[OFF|HALF|ONE]</splitBatch>
- *     <maxRetries>
- *       (Max retries upon commit failures. Default is 0.)
- *     </maxRetries>
- *     <retryDelay>
- *       (Delay in milliseconds between retries. Default is 0.)
- *     </retryDelay>
- *     <ignoreErrors>
- *       [false|true]
- *       (When true, non-critical exceptions when interacting with the target
- *        repository won't be thrown to try continue the execution with other
- *        files to be committed. Instead, errors will be logged.
- *        In both cases the failing batch/files are moved to an
- *        "error" folder. Other types of exceptions may still be thrown.)
- *     </ignoreErrors>
- *   </onCommitFailure>
+ * <batchSize>
+ * (Optional number of documents queued after which we process a batch.
+ * Default is 20.)
+ * </batchSize>
+ * <maxPerFolder>
+ * (Optional maximum number of files or directories that can be queued
+ * in a single folder before a new one gets created. Default is 500.)
+ * </maxPerFolder>
+ * <commitLeftoversOnInit>
+ * (Optionally force to commit any leftover documents from a previous
+ * execution. E.g., prematurely ended. Default is "false").
+ * </commitLeftoversOnInit>
+ * <onCommitFailure>
+ * <splitBatch>[OFF|HALF|ONE]</splitBatch>
+ * <maxRetries>
+ * (Max retries upon commit failures. Default is 0.)
+ * </maxRetries>
+ * <retryDelay>
+ * (Delay in milliseconds between retries. Default is 0.)
+ * </retryDelay>
+ * <ignoreErrors>
+ * [false|true]
+ * (When true, non-critical exceptions when interacting with the target
+ * repository won't be thrown to try continue the execution with other
+ * files to be committed. Instead, errors will be logged.
+ * In both cases the failing batch/files are moved to an
+ * "error" folder. Other types of exceptions may still be thrown.)
+ * </ignoreErrors>
+ * </onCommitFailure>
  * </queue>
  * }
  *
@@ -140,10 +140,22 @@ public class FSQueue implements ICommitterQueue, IXMLConfigurable {
 
     private static final Logger LOG = LoggerFactory.getLogger(FSQueue.class);
 
+    /** Default number of requests per batch. */
     public static final int DEFAULT_BATCH_SIZE = 20;
+    /** Default maximum number of entries per queue sub-folder. */
     public static final int DEFAULT_MAX_PER_FOLDER = 500;
 
-    public enum SplitBatch { OFF, HALF, ONE }
+    /**
+     * Batch splitting strategy when a batch commit fails.
+     */
+    public enum SplitBatch {
+        /** Do not split failing batches. */
+        OFF,
+        /** Split failing batches in half on each failure cycle. */
+        HALF,
+        /** Split failing batches down to one request at a time. */
+        ONE
+    }
 
     // defaults to system temp dir
     @ToStringExclude
@@ -183,6 +195,13 @@ public class FSQueue implements ICommitterQueue, IXMLConfigurable {
     @HashCodeExclude
     private CachedStreamFactory streamFactory;
 
+    /**
+     * Initializes this file-system queue.
+     * 
+     * @param committerContext committer context
+     * @param batchConsumer    consumer used to commit batches
+     * @throws CommitterQueueException initialization failure
+     */
     @Override
     public void init(CommitterContext committerContext,
             IBatchConsumer batchConsumer) throws CommitterQueueException {
@@ -205,7 +224,7 @@ public class FSQueue implements ICommitterQueue, IXMLConfigurable {
             FileUtils.forceMkdir(workDir.toFile());
             FileUtils.forceMkdir(queueDir.toFile());
             FileUtils.forceMkdir(errorDir.toFile());
-            //TODO create README.txt in delete directory to explain
+            // TODO create README.txt in delete directory to explain
             // how files can be copied back if wanting to resume
             // them?
 
@@ -229,9 +248,9 @@ public class FSQueue implements ICommitterQueue, IXMLConfigurable {
             }
         }
         // else {
-        //TODO Probably needs to read the directories to reset batch counter
+        // TODO Probably needs to read the directories to reset batch counter
         // to honor maxPerDoc
-        //}
+        // }
 
         // Start for real
         this.activeDir = createActiveDir();
@@ -239,78 +258,157 @@ public class FSQueue implements ICommitterQueue, IXMLConfigurable {
         LOG.info("File system Committer queue initialized.");
     }
 
+    /**
+     * Gets the currently configured batch consumer.
+     * 
+     * @return batch consumer
+     */
     public IBatchConsumer getBatchConsumer() {
         return batchConsumer;
     }
+
     /**
      * Gets the number of documents to be queued in a batch on disk before
      * consuming that batch.
+     * 
      * @return batch size
      */
     public int getBatchSize() {
         return batchSize;
     }
+
     /**
      * Sets the number of documents to be queued in a batch on disk before
      * consuming that batch.
+     * 
      * @param batchSize the batch size
      */
     public void setBatchSize(int batchSize) {
         this.batchSize = batchSize;
     }
+
     /**
      * Gets the maximum number of files to be queued on disk in a given folders.
      * A batch size can sometimes be too big for some file systems to handle
-     * efficiently.  Having this number lower than the batch size allows
+     * efficiently. Having this number lower than the batch size allows
      * to have large batches without having too many files in a single
      * directory.
+     * 
      * @return maximum number of files queued per directory
      */
     public int getMaxPerFolder() {
         return maxPerFolder;
     }
+
     /**
      * Sets the maximum number of files to be queued on disk in a given folders.
      * A batch size can sometimes be too big for some file systems to handle
-     * efficiently.  Having this number lower than the batch size allows
+     * efficiently. Having this number lower than the batch size allows
      * to have large batches without having too many files in a single
      * directory.
+     * 
      * @param maxPerFolder number of files queued per directory
      */
     public void setMaxPerFolder(int maxPerFolder) {
         this.maxPerFolder = maxPerFolder;
     }
+
+    /**
+     * Whether leftover batches are committed during initialization.
+     * 
+     * @return {@code true} if leftovers are committed on init
+     */
     public boolean isCommitLeftoversOnInit() {
         return commitLeftoversOnInit;
     }
+
+    /**
+     * Sets whether leftover batches are committed during initialization.
+     * 
+     * @param commitLeftoversOnInit {@code true} to commit leftovers on init
+     */
     public void setCommitLeftoversOnInit(boolean commitLeftoversOnInit) {
         this.commitLeftoversOnInit = commitLeftoversOnInit;
     }
+
+    /**
+     * Gets the maximum number of retries on batch commit failure.
+     * 
+     * @return maximum retries
+     */
     public int getMaxRetries() {
         return retrier.getMaxRetries();
     }
+
+    /**
+     * Sets the maximum number of retries on batch commit failure.
+     * 
+     * @param maxRetries maximum retries
+     */
     public void setMaxRetries(int maxRetries) {
         this.retrier.setMaxRetries(maxRetries);
     }
+
+    /**
+     * Gets the delay between retry attempts in milliseconds.
+     * 
+     * @return retry delay in milliseconds
+     */
     public long getRetryDelay() {
         return retrier.getRetryDelay();
     }
+
+    /**
+     * Sets the delay between retry attempts in milliseconds.
+     * 
+     * @param retryDelay retry delay in milliseconds
+     */
     public void setRetryDelay(long retryDelay) {
         this.retrier.setRetryDelay(retryDelay);
     }
+
+    /**
+     * Gets the strategy used to split failing batches.
+     * 
+     * @return split strategy
+     */
     public SplitBatch getSplitBatch() {
         return splitBatch;
     }
+
+    /**
+     * Sets the strategy used to split failing batches.
+     * 
+     * @param splitBatch split strategy
+     */
     public void setSplitBatch(SplitBatch splitBatch) {
         this.splitBatch = splitBatch;
     }
+
+    /**
+     * Whether commit errors should be logged and ignored.
+     * 
+     * @return {@code true} if commit errors are ignored
+     */
     public boolean isIgnoreErrors() {
         return ignoreErrors;
     }
+
+    /**
+     * Sets whether commit errors should be logged and ignored.
+     * 
+     * @param ignoreErrors {@code true} to ignore commit errors
+     */
     public void setIgnoreErrors(boolean ignoreErrors) {
         this.ignoreErrors = ignoreErrors;
     }
 
+    /**
+     * Queues a request on disk and triggers batch consumption when needed.
+     * 
+     * @param request request to queue
+     * @throws CommitterQueueException queueing or commit failure
+     */
     @Override
     public void queue(ICommitterRequest request)
             throws CommitterQueueException {
@@ -341,6 +439,7 @@ public class FSQueue implements ICommitterQueue, IXMLConfigurable {
                     + "from directory " + dir.toAbsolutePath());
         }
     }
+
     private int consumeSplitableBatchDirectory(Path dir)
             throws CommitterQueueException, IOException {
 
@@ -383,7 +482,8 @@ public class FSQueue implements ICommitterQueue, IXMLConfigurable {
         } catch (IOException e) {
             throw new CommitterQueueException(
                     "Could not delete consumed committer "
-                            + "batch located at " + dir.toAbsolutePath(), e);
+                            + "batch located at " + dir.toAbsolutePath(),
+                    e);
         }
 
         return totalConsumed;
@@ -404,7 +504,8 @@ public class FSQueue implements ICommitterQueue, IXMLConfigurable {
         } catch (RetriableException e) {
             throw new CommitterQueueException(
                     "Could not consume batch. Number of attempts: "
-                            + (retrier.getMaxRetries() + 1), e);
+                            + (retrier.getMaxRetries() + 1),
+                    e);
         }
     }
 
@@ -414,10 +515,11 @@ public class FSQueue implements ICommitterQueue, IXMLConfigurable {
             batch.move(errorDir);
         } catch (IOException e1) {
             throw new CommitterQueueException(
-                      "Could not process one or more files form committer "
-                    + "batch located at " + batch.getDir().toAbsolutePath()
-                    + " and could not copy it under "
-                    + errorDir.toAbsolutePath(), e);
+                    "Could not process one or more files form committer "
+                            + "batch located at " + batch.getDir().toAbsolutePath()
+                            + " and could not copy it under "
+                            + errorDir.toAbsolutePath(),
+                    e);
         }
         String msg = "Could not process one or more files form committer batch "
                 + "located at " + batch.getDir().toAbsolutePath()
@@ -438,17 +540,17 @@ public class FSQueue implements ICommitterQueue, IXMLConfigurable {
 
         SplitBatch sb = ofNullable(splitBatch).orElse(SplitBatch.OFF);
         switch (sb) {
-        case HALF:
-            int newMaxSize = (lastTriedSize + 1) / 2;
-            LOG.error("Could not process batch of max size {}. Trying "
-                    + "again with max size {}...", lastTriedSize, newMaxSize);
-            return newMaxSize;
-        case ONE:
-            LOG.error("Could not process batch of max size {}. Trying "
-                    + "again one by one...", lastTriedSize);
-            return 1;
-        default:
-            return -1;
+            case HALF:
+                int newMaxSize = (lastTriedSize + 1) / 2;
+                LOG.error("Could not process batch of max size {}. Trying "
+                        + "again with max size {}...", lastTriedSize, newMaxSize);
+                return newMaxSize;
+            case ONE:
+                LOG.error("Could not process batch of max size {}. Trying "
+                        + "again one by one...", lastTriedSize);
+                return 1;
+            default:
+                return -1;
         }
     }
 
@@ -467,6 +569,7 @@ public class FSQueue implements ICommitterQueue, IXMLConfigurable {
             setIgnoreErrors(x.getBoolean("ignoreErrors", isIgnoreErrors()));
         });
     }
+
     @Override
     public void saveToXML(XML xml) {
         xml.addElement("batchSize", batchSize);
@@ -491,8 +594,7 @@ public class FSQueue implements ICommitterQueue, IXMLConfigurable {
     private int consumeRemainingBatches() throws CommitterQueueException {
         // Process all batch dirs one by one:
         int cnt = 0;
-        try (DirectoryStream<Path> directory =
-                Files.newDirectoryStream(queueDir, Files::isDirectory)) {
+        try (DirectoryStream<Path> directory = Files.newDirectoryStream(queueDir, Files::isDirectory)) {
             for (Path d : directory) {
                 cnt += consumeBatchDirectory(d);
             }
@@ -527,7 +629,7 @@ public class FSQueue implements ICommitterQueue, IXMLConfigurable {
 
     private synchronized Path createQueueFile(
             ICommitterRequest req, MutableObject<Path> consumeBatchDir)
-                    throws CommitterQueueException {
+            throws CommitterQueueException {
         try {
             // If starting a new batch, create the folder for it
             if (batchCount.get() == batchSize) {
@@ -544,7 +646,7 @@ public class FSQueue implements ICommitterQueue, IXMLConfigurable {
 
         Path file = activeDir.resolve(filePath(batchCount.get())
                 + (req instanceof DeleteRequest ? "-delete" : "-upsert")
-                        + FSQueueUtil.EXT);
+                + FSQueueUtil.EXT);
         try {
             Files.createDirectories(file.getParent());
         } catch (IOException e) {
@@ -571,10 +673,12 @@ public class FSQueue implements ICommitterQueue, IXMLConfigurable {
     public boolean equals(final Object other) {
         return EqualsBuilder.reflectionEquals(this, other);
     }
+
     @Override
     public int hashCode() {
         return HashCodeBuilder.reflectionHashCode(this);
     }
+
     @Override
     public String toString() {
         return new ReflectionToStringBuilder(

@@ -23,6 +23,7 @@ import com.norconex.commons.lang.event.Event;
 
 /**
  * Default committer events.
+ * 
  * @author Pascal Essiembre
  * @since 3.0.0
  */
@@ -42,26 +43,21 @@ public class CommitterEvent extends Event {
     /** The Committer has rejected a request and it will not commit it. */
     public static final String COMMITTER_ACCEPT_NO = "COMMITTER_ACCEPT_NO";
     /** The Committer acceptance check produced an error. */
-    public static final String COMMITTER_ACCEPT_ERROR =
-            "COMMITTER_ACCEPT_ERROR";
+    public static final String COMMITTER_ACCEPT_ERROR = "COMMITTER_ACCEPT_ERROR";
 
     /** The Committer is receiving a document to be updated or inserted. */
-    public static final String COMMITTER_UPSERT_BEGIN =
-            "COMMITTER_UPSERT_BEGIN";
-    /** The Committer has received a document to be updated or inserted.*/
+    public static final String COMMITTER_UPSERT_BEGIN = "COMMITTER_UPSERT_BEGIN";
+    /** The Committer has received a document to be updated or inserted. */
     public static final String COMMITTER_UPSERT_END = "COMMITTER_UPSERT_END";
     /** The Committer entity update/upsert produced an error. */
-    public static final String COMMITTER_UPSERT_ERROR =
-            "COMMITTER_UPSERT_ERROR";
+    public static final String COMMITTER_UPSERT_ERROR = "COMMITTER_UPSERT_ERROR";
 
     /** The Committer is receiving document to be removed. */
-    public static final String COMMITTER_DELETE_BEGIN =
-            "COMMITTER_DELETE_BEGIN";
+    public static final String COMMITTER_DELETE_BEGIN = "COMMITTER_DELETE_BEGIN";
     /** The Committer has received a document to be removed. */
     public static final String COMMITTER_DELETE_END = "COMMITTER_DELETE_END";
     /** The Committer entity removal produced an error. */
-    public static final String COMMITTER_DELETE_ERROR =
-            "COMMITTER_DELETE_ERROR";
+    public static final String COMMITTER_DELETE_ERROR = "COMMITTER_DELETE_ERROR";
 
     /**
      * The Committer is about to commit a request batch.
@@ -93,21 +89,42 @@ public class CommitterEvent extends Event {
     /** The Committer encountered an error when cleaning. */
     public static final String COMMITTER_CLEAN_ERROR = "COMMITTER_CLEAN_ERROR";
 
+    /** Request associated with this event, when applicable. */
     private final ICommitterRequest request;
 
+    /**
+     * Builder for {@link CommitterEvent}.
+     */
     public static class Builder extends Event.Builder<Builder> {
 
         private ICommitterRequest request;
 
+        /**
+         * Creates a new builder.
+         * 
+         * @param name   event name
+         * @param source event source
+         */
         public Builder(String name, ICommitter source) {
             super(name, source);
         }
 
+        /**
+         * Attaches the committer request associated with this event.
+         * 
+         * @param request committer request
+         * @return this builder
+         */
         public Builder committerRequest(ICommitterRequest request) {
             this.request = request;
             return this;
         }
 
+        /**
+         * Builds the event instance.
+         * 
+         * @return built committer event
+         */
         @Override
         public CommitterEvent build() {
             return new CommitterEvent(this);
@@ -116,6 +133,7 @@ public class CommitterEvent extends Event {
 
     /**
      * New event.
+     * 
      * @param b builder
      */
     protected CommitterEvent(Builder b) {
@@ -123,6 +141,11 @@ public class CommitterEvent extends Event {
         this.request = b.request;
     }
 
+    /**
+     * Gets the request associated with this event.
+     * 
+     * @return associated request, or {@code null}
+     */
     public ICommitterRequest getRequest() {
         return request;
     }
@@ -131,6 +154,7 @@ public class CommitterEvent extends Event {
     public boolean equals(final Object other) {
         return EqualsBuilder.reflectionEquals(this, other);
     }
+
     @Override
     public int hashCode() {
         // Cannot use HashCodeBuilder.reflectionHashCode here to prevent
@@ -140,6 +164,7 @@ public class CommitterEvent extends Event {
                 .append(request)
                 .build();
     }
+
     @Override
     public String toString() {
         // Cannot use ReflectionToStringBuilder here to prevent

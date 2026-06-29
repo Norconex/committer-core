@@ -21,24 +21,44 @@ import com.norconex.committer.core3.batch.IBatchConsumer;
 /**
  * A committer queue, accumulating requests before they are committed
  * in one or multiple batches.
+ * 
  * @author Pascal Essiembre
  * @since 3.0.0
  */
 public interface ICommitterQueue extends AutoCloseable {
 
-    //TODO have abstract committer queue that takes care of initialization?
+    // TODO have abstract committer queue that takes care of initialization?
+    /**
+     * Initializes this queue.
+     * 
+     * @param committerContext committer context
+     * @param iBatchConsumer   consumer used to process full batches
+     * @throws CommitterQueueException initialization failure
+     */
     void init(CommitterContext committerContext, IBatchConsumer iBatchConsumer)
             throws CommitterQueueException;
 
-    //TODO Return new queue size after this queue request?
+    // TODO Return new queue size after this queue request?
+    /**
+     * Queues a single request for later batch processing.
+     * 
+     * @param request request to queue
+     * @throws CommitterQueueException queueing failure
+     */
     void queue(ICommitterRequest request) throws CommitterQueueException;
 
     /**
      * Cleans any persisted information specific to this queue.
+     * 
      * @throws CommitterQueueException could not clean queue
      */
     void clean() throws CommitterQueueException;
 
+    /**
+     * Closes this queue and flushes remaining queued requests.
+     * 
+     * @throws CommitterQueueException close failure
+     */
     @Override
     void close() throws CommitterQueueException;
 }

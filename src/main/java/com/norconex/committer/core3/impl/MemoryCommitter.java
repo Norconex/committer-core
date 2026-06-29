@@ -53,7 +53,7 @@ import com.norconex.commons.lang.xml.XML;
  *
  * {@nx.xml.usage
  * <committer class="com.norconex.committer.core3.impl.MemoryCommitter">
- *   {@nx.include com.norconex.committer.core3.AbstractCommitter@nx.xml.usage}
+ * {@nx.include com.norconex.committer.core3.AbstractCommitter@nx.xml.usage}
  * </committer>
  * }
  *
@@ -63,8 +63,7 @@ import com.norconex.commons.lang.xml.XML;
 @SuppressWarnings("javadoc")
 public class MemoryCommitter extends AbstractCommitter {
 
-    private static final Logger LOG =
-            LoggerFactory.getLogger(MemoryCommitter.class);
+    private static final Logger LOG = LoggerFactory.getLogger(MemoryCommitter.class);
 
     private final List<ICommitterRequest> requests = new ArrayList<>();
 
@@ -81,38 +80,83 @@ public class MemoryCommitter extends AbstractCommitter {
         super();
     }
 
+    /**
+     * Whether request content is ignored when storing requests in memory.
+     * 
+     * @return {@code true} when content is ignored
+     */
     public boolean isIgnoreContent() {
         return ignoreContent;
     }
+
+    /**
+     * Sets whether request content is ignored when storing requests in memory.
+     * 
+     * @param ignoreContent {@code true} to ignore request content
+     */
     public void setIgnoreContent(boolean ignoreContent) {
         this.ignoreContent = ignoreContent;
     }
 
+    /**
+     * Gets the metadata field matcher used to keep request metadata.
+     * 
+     * @return field matcher
+     */
     public TextMatcher getFieldMatcher() {
         return fieldMatcher;
     }
+
+    /**
+     * Sets the metadata field matcher used to keep request metadata.
+     * 
+     * @param fieldMatcher field matcher
+     */
     public void setFieldMatcher(TextMatcher fieldMatcher) {
         this.fieldMatcher.copyFrom(fieldMatcher);
     }
 
     @Override
     protected void doInit() {
-        //NOOP
+        // NOOP
     }
 
+    /**
+     * Removes a stored request from memory.
+     * 
+     * @param req request to remove
+     * @return {@code true} if the request was removed
+     */
     public boolean removeRequest(ICommitterRequest req) {
         return requests.remove(req);
     }
 
+    /**
+     * Gets all stored requests.
+     * 
+     * @return all requests held in memory
+     */
     public List<ICommitterRequest> getAllRequests() {
         return requests;
     }
+
+    /**
+     * Gets stored upsert requests.
+     * 
+     * @return upsert requests held in memory
+     */
     public List<UpsertRequest> getUpsertRequests() {
         return requests.stream()
                 .filter(o -> o instanceof UpsertRequest)
                 .map(o -> (UpsertRequest) o)
                 .collect(Collectors.toList());
     }
+
+    /**
+     * Gets stored delete requests.
+     * 
+     * @return delete requests held in memory
+     */
     public List<DeleteRequest> getDeleteRequests() {
         return requests.stream()
                 .filter(o -> o instanceof DeleteRequest)
@@ -120,12 +164,29 @@ public class MemoryCommitter extends AbstractCommitter {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Gets number of upsert requests committed in this instance.
+     * 
+     * @return upsert count
+     */
     public int getUpsertCount() {
         return upsertCount;
     }
+
+    /**
+     * Gets number of delete requests committed in this instance.
+     * 
+     * @return delete count
+     */
     public int getDeleteCount() {
         return deleteCount;
     }
+
+    /**
+     * Gets total number of requests held in memory.
+     * 
+     * @return request count
+     */
     public int getRequestCount() {
         return requests.size();
     }
@@ -153,6 +214,7 @@ public class MemoryCommitter extends AbstractCommitter {
         requests.add(new UpsertRequest(memReference, memMetadata, memContent));
         upsertCount++;
     }
+
     @Override
     protected void doDelete(DeleteRequest deleteRequest) {
         String memReference = deleteRequest.getReference();
@@ -194,10 +256,12 @@ public class MemoryCommitter extends AbstractCommitter {
     public boolean equals(final Object other) {
         return EqualsBuilder.reflectionEquals(this, other);
     }
+
     @Override
     public int hashCode() {
         return HashCodeBuilder.reflectionHashCode(this);
     }
+
     @Override
     public String toString() {
         // Cannot use ReflectionToStringBuilder here to prevent
@@ -212,11 +276,11 @@ public class MemoryCommitter extends AbstractCommitter {
 
     @Override
     public void loadCommitterFromXML(XML xml) {
-        //NOOP
+        // NOOP
     }
 
     @Override
     public void saveCommitterToXML(XML xml) {
-        //NOOP
+        // NOOP
     }
 }

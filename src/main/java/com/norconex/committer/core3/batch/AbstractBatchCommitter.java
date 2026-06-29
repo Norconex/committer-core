@@ -37,7 +37,7 @@ import com.norconex.commons.lang.xml.XML;
  * A base implementation for doing batch commits. Uses an internal queue
  * for storing update/addition requests and deletion requests.
  * It sends the queued data to the remote target every time a given
- * queue threshold has been reached.  Unless otherwise stated,
+ * queue threshold has been reached. Unless otherwise stated,
  * both additions and deletions count towards that threshold.
  * </p>
  * <p>
@@ -55,13 +55,15 @@ import com.norconex.commons.lang.xml.XML;
  *
  * {@nx.include com.norconex.committer.core3.AbstractCommitter#fieldMappings}
  *
- * <p>Subclasses inherits this {@link IXMLConfigurable} configuration:</p>
+ * <p>
+ * Subclasses inherits this {@link IXMLConfigurable} configuration:
+ * </p>
  *
  * {@nx.xml #options
- *   {@nx.include com.norconex.committer.core3.AbstractCommitter@nx.xml.usage}
+ * {@nx.include com.norconex.committer.core3.AbstractCommitter@nx.xml.usage}
  *
- *   <!-- Settings for default queue implementation ("class" is optional): -->
- *   {@nx.include com.norconex.committer.core3.batch.queue.impl.FSQueue@nx.xml.usage}
+ * <!-- Settings for default queue implementation ("class" is optional): -->
+ * {@nx.include com.norconex.committer.core3.batch.queue.impl.FSQueue@nx.xml.usage}
  * }
  *
  * @author Pascal Essiembre
@@ -81,16 +83,19 @@ public abstract class AbstractBatchCommitter extends AbstractCommitter
         initBatchCommitter();
         this.queue.init(getCommitterContext(), this);
     }
+
     @Override
     protected void doUpsert(UpsertRequest upsertRequest)
             throws CommitterException {
         queue.queue(upsertRequest);
     }
+
     @Override
     protected void doDelete(DeleteRequest deleteRequest)
             throws CommitterException {
         queue.queue(deleteRequest);
     }
+
     @Override
     protected void doClose() throws CommitterException {
         try {
@@ -99,6 +104,7 @@ public abstract class AbstractBatchCommitter extends AbstractCommitter
             closeBatchCommitter();
         }
     }
+
     @Override
     protected void doClean() throws CommitterException {
         this.queue.clean();
@@ -112,7 +118,7 @@ public abstract class AbstractBatchCommitter extends AbstractCommitter
             commitBatch(it);
         } catch (CommitterException | RuntimeException e) {
             fireError(CommitterEvent.COMMITTER_BATCH_ERROR, e);
-            throw  e;
+            throw e;
         }
         fireInfo(CommitterEvent.COMMITTER_BATCH_END);
     }
@@ -123,18 +129,41 @@ public abstract class AbstractBatchCommitter extends AbstractCommitter
         setCommitterQueue(
                 xml.getObjectImpl(ICommitterQueue.class, "queue", queue));
     }
+
     @Override
     public final void saveCommitterToXML(XML xml) {
         saveBatchCommitterToXML(xml);
         xml.addElement("queue", queue);
     }
 
+    /**
+     * Loads batch-committer-specific configuration from XML.
+     * 
+     * @param xml XML to read from
+     */
     protected abstract void loadBatchCommitterFromXML(XML xml);
+
+    /**
+     * Saves batch-committer-specific configuration to XML.
+     * 
+     * @param xml XML to write to
+     */
     protected abstract void saveBatchCommitterToXML(XML xml);
 
+    /**
+     * Gets the queue used to persist and consume commit requests.
+     * 
+     * @return committer queue
+     */
     public ICommitterQueue getCommitterQueue() {
         return this.queue;
     }
+
+    /**
+     * Sets the queue used to persist and consume commit requests.
+     * 
+     * @param queue committer queue
+     */
     public void setCommitterQueue(ICommitterQueue queue) {
         this.queue = queue;
     }
@@ -145,32 +174,43 @@ public abstract class AbstractBatchCommitter extends AbstractCommitter
      * and committer queue will be already initialized when invoking
      * {@link #getCommitterContext()} and {@link #getCommitterQueue()},
      * respectively.
+     * 
      * @throws CommitterException error initializing
      */
     protected void initBatchCommitter()
             throws CommitterException {
-        //NOOP
+        // NOOP
     }
+
+    /**
+     * Commits a batch of queued requests.
+     * 
+     * @param it requests to commit
+     * @throws CommitterException commit failure
+     */
     protected abstract void commitBatch(Iterator<ICommitterRequest> it)
             throws CommitterException;
 
     /**
      * Subclasses can perform additional closing logic by overriding this
      * method. Default implementation does nothing.
+     * 
      * @throws CommitterException error closing committer
      */
     protected void closeBatchCommitter() throws CommitterException {
-        //NOOP
+        // NOOP
     }
 
     @Override
     public boolean equals(final Object other) {
         return EqualsBuilder.reflectionEquals(this, other);
     }
+
     @Override
     public int hashCode() {
         return HashCodeBuilder.reflectionHashCode(this);
     }
+
     @Override
     public String toString() {
         return new ReflectionToStringBuilder(

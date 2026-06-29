@@ -68,18 +68,18 @@ import com.norconex.commons.lang.xml.XML;
  * {@nx.xml.usage
  * <!-- multiple "restrictTo" tags allowed (only one needs to match) -->
  * <restrictTo>
- *   <fieldMatcher
- *     {@nx.include com.norconex.commons.lang.text.TextMatcher#matchAttributes}>
- *       (field-matching expression)
- *   </fieldMatcher>
- *   <valueMatcher
- *     {@nx.include com.norconex.commons.lang.text.TextMatcher#matchAttributes}>
- *       (value-matching expression)
- *   </valueMatcher>
+ * <fieldMatcher
+ * {@nx.include com.norconex.commons.lang.text.TextMatcher#matchAttributes}>
+ * (field-matching expression)
+ * </fieldMatcher>
+ * <valueMatcher
+ * {@nx.include com.norconex.commons.lang.text.TextMatcher#matchAttributes}>
+ * (value-matching expression)
+ * </valueMatcher>
  * </restrictTo>
  * <fieldMappings>
- *   <!-- Add as many field mappings as needed -->
- *   <mapping fromField="(source field name)" toField="(target field name)"/>
+ * <!-- Add as many field mappings as needed -->
+ * <mapping fromField="(source field name)" toField="(target field name)"/>
  * </fieldMappings>
  * }
  * <p>
@@ -99,13 +99,16 @@ public abstract class AbstractCommitter
 
     /**
      * Adds one or more restrictions this committer should be restricted to.
+     * 
      * @param restrictions the restrictions
      */
     public void addRestriction(PropertyMatcher... restrictions) {
         this.restrictions.addAll(restrictions);
     }
+
     /**
      * Adds restrictions this committer should be restricted to.
+     * 
      * @param restrictions the restrictions
      */
     public void addRestrictions(
@@ -114,30 +117,37 @@ public abstract class AbstractCommitter
             this.restrictions.addAll(restrictions);
         }
     }
+
     /**
      * Removes all restrictions on a given field.
+     * 
      * @param field the field to remove restrictions on
      * @return how many elements were removed
      */
     public int removeRestriction(String field) {
         return restrictions.remove(field);
     }
+
     /**
      * Removes a restriction.
+     * 
      * @param restriction the restriction to remove
      * @return <code>true</code> if this committer contained the restriction
      */
     public boolean removeRestriction(PropertyMatcher restriction) {
         return restrictions.remove(restriction);
     }
+
     /**
      * Clears all restrictions.
      */
     public void clearRestrictions() {
         restrictions.clear();
     }
+
     /**
      * Gets all restrictions
+     * 
      * @return the restrictions
      * @since 2.4.0
      */
@@ -147,30 +157,46 @@ public abstract class AbstractCommitter
 
     /**
      * Gets an unmodifiable copy of the metadata mappings.
+     * 
      * @return metadata mappings
      */
     public Map<String, String> getFieldMappings() {
         return Collections.unmodifiableMap(fieldMappings);
     }
+
     /**
      * Sets a metadata field mapping.
+     * 
      * @param fromField source field
-     * @param toField target field
+     * @param toField   target field
      */
     public void setFieldMapping(String fromField, String toField) {
         fieldMappings.put(fromField, toField);
     }
+
     /**
      * Sets a metadata field mappings, where the key is the source field and
      * the value is the target field.
+     * 
      * @param mappings metadata field mappings
      */
     public void setFieldMappings(Map<String, String> mappings) {
         fieldMappings.putAll(mappings);
     }
+
+    /**
+     * Removes a field mapping by source field name.
+     * 
+     * @param fromField source field name
+     * @return mapped target field that was removed, or {@code null}
+     */
     public String removeFieldMapping(String fromField) {
         return fieldMappings.remove(fromField);
     }
+
+    /**
+     * Removes all field mappings.
+     */
     public void clearFieldMappings() {
         fieldMappings.clear();
     }
@@ -219,6 +245,7 @@ public abstract class AbstractCommitter
         }
         fireInfo(CommitterEvent.COMMITTER_UPSERT_END, upsertRequest);
     }
+
     @Override
     public final void delete(
             DeleteRequest deleteRequest) throws CommitterException {
@@ -233,6 +260,11 @@ public abstract class AbstractCommitter
         fireInfo(CommitterEvent.COMMITTER_DELETE_END, deleteRequest);
     }
 
+    /**
+     * Applies configured field mappings to a request metadata.
+     * 
+     * @param req committer request to mutate
+     */
     protected void applyFieldMappings(ICommitterRequest req) {
         Properties props = new Properties();
         for (Entry<String, List<String>> en : req.getMetadata().entrySet()) {
@@ -275,7 +307,11 @@ public abstract class AbstractCommitter
         fireInfo(CommitterEvent.COMMITTER_CLEAN_END);
     }
 
-
+    /**
+     * Gets the current committer context.
+     * 
+     * @return committer context
+     */
     public CommitterContext getCommitterContext() {
         return this.committerContext;
     }
@@ -285,46 +321,106 @@ public abstract class AbstractCommitter
      * method. Default implementation does nothing. The
      * {@link CommitterContext} will be initialized when invoking
      * {@link #getCommitterContext()}
+     * 
      * @throws CommitterException error initializing
      */
     protected abstract void doInit()
             throws CommitterException;
 
+    /**
+     * Performs the concrete upsert operation.
+     * 
+     * @param upsertRequest upsert request
+     * @throws CommitterException commit failure
+     */
     protected abstract void doUpsert(UpsertRequest upsertRequest)
             throws CommitterException;
 
+    /**
+     * Performs the concrete delete operation.
+     * 
+     * @param deleteRequest delete request
+     * @throws CommitterException commit failure
+     */
     protected abstract void doDelete(DeleteRequest deleteRequest)
             throws CommitterException;
+
     /**
      * Subclasses can perform additional closing logic by overriding this
      * method. Default implementation does nothing.
+     * 
      * @throws CommitterException error closing committer
      */
     protected abstract void doClose() throws CommitterException;
 
+    /**
+     * Performs concrete clean-up of persisted committer state.
+     * 
+     * @throws CommitterException clean-up failure
+     */
     protected abstract void doClean() throws CommitterException;
 
+    /**
+     * Fires a debug-level event not tied to a specific request.
+     * 
+     * @param name event name
+     */
     protected final void fireDebug(String name) {
         fireInfo(name, null);
     }
+
+    /**
+     * Fires a debug-level event for a given request.
+     * 
+     * @param name event name
+     * @param req  associated request
+     */
     protected final void fireDebug(String name, ICommitterRequest req) {
         fire(new CommitterEvent.Builder(name, this)
                 .committerRequest(req)
                 .build(),
                 Level.DEBUG);
     }
+
+    /**
+     * Fires an info-level event not tied to a specific request.
+     * 
+     * @param name event name
+     */
     protected final void fireInfo(String name) {
         fireInfo(name, null);
     }
+
+    /**
+     * Fires an info-level event for a given request.
+     * 
+     * @param name event name
+     * @param req  associated request
+     */
     protected final void fireInfo(String name, ICommitterRequest req) {
         fire(new CommitterEvent.Builder(name, this)
                 .committerRequest(req)
                 .build(),
                 Level.INFO);
     }
+
+    /**
+     * Fires an error-level event not tied to a specific request.
+     * 
+     * @param name event name
+     * @param e    exception to attach
+     */
     protected final void fireError(String name, Exception e) {
         fireError(name, null, e);
     }
+
+    /**
+     * Fires an error-level event for a given request.
+     * 
+     * @param name event name
+     * @param req  associated request
+     * @param e    exception to attach
+     */
     protected final void fireError(
             String name, ICommitterRequest req, Exception e) {
         fire(new CommitterEvent.Builder(name, this)
@@ -333,10 +429,11 @@ public abstract class AbstractCommitter
                 .build(),
                 Level.ERROR);
     }
+
     private void fire(CommitterEvent e, Level level) {
         Optional.ofNullable(committerContext)
-            .map(ctx -> ctx.getEventManager())
-            .ifPresent(em -> em.fire(e, level));
+                .map(ctx -> ctx.getEventManager())
+                .ifPresent(em -> em.fire(e, level));
     }
 
     @Override
@@ -358,6 +455,7 @@ public abstract class AbstractCommitter
                     xmlMapping.getString("@toField", null));
         }
     }
+
     @Override
     public final void saveToXML(XML xml) {
         saveCommitterToXML(xml);
@@ -373,17 +471,30 @@ public abstract class AbstractCommitter
         }
     }
 
+    /**
+     * Loads committer-specific configuration.
+     * 
+     * @param xml XML to read from
+     */
     public abstract void loadCommitterFromXML(XML xml);
+
+    /**
+     * Saves committer-specific configuration.
+     * 
+     * @param xml XML to write to
+     */
     public abstract void saveCommitterToXML(XML xml);
 
     @Override
     public boolean equals(final Object other) {
         return EqualsBuilder.reflectionEquals(this, other);
     }
+
     @Override
     public int hashCode() {
         return HashCodeBuilder.reflectionHashCode(this);
     }
+
     @Override
     public String toString() {
         // Cannot use ReflectionToStringBuilder here to prevent

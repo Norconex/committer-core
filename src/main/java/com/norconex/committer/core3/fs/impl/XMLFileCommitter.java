@@ -34,7 +34,7 @@ import com.norconex.commons.lang.xml.XML;
 
 /**
  * <p>
- * Commits documents to XML files.  There are two kinds of document
+ * Commits documents to XML files. There are two kinds of document
  * representations: upserts and deletions.
  * </p>
  * <p>
@@ -43,7 +43,7 @@ import com.norconex.commons.lang.xml.XML;
  * and "delete-" (for deletions).
  * </p>
  * <p>
- * The generated files are never updated.  Sending a modified document with the
+ * The generated files are never updated. Sending a modified document with the
  * same reference will create a new entry and won't modify any existing ones.
  * You can think of the generated files as a set of commit instructions.
  * </p>
@@ -55,44 +55,44 @@ import com.norconex.commons.lang.xml.XML;
  * files that will be created (default does not add any).
  * </p>
  *
- * <h3>Generated XML format:</h3>
+ * <h2>Generated XML format:</h2>
  * {@nx.xml
  * <docs>
- *   <!-- Document additions: -->
- *   <upsert>
- *     <reference>(document reference, e.g., URL)</reference>
- *     <metadata>
- *       <meta name="(meta field name)">(value)</meta>
- *       <meta name="(meta field name)">(value)</meta>
- *       <!-- meta is repeated for each metadata fields -->
- *     </metadata>
- *     <content>
- *       (document content goes here)
- *     </content>
- *   </upsert>
- *   <upsert>
- *     <!-- upsert element is repeated for each additions -->
- *   </upsert>
+ * <!-- Document additions: -->
+ * <upsert>
+ * <reference>(document reference, e.g., URL)</reference>
+ * <metadata>
+ * <meta name="(meta field name)">(value)</meta>
+ * <meta name="(meta field name)">(value)</meta>
+ * <!-- meta is repeated for each metadata fields -->
+ * </metadata>
+ * <content>
+ * (document content goes here)
+ * </content>
+ * </upsert>
+ * <upsert>
+ * <!-- upsert element is repeated for each additions -->
+ * </upsert>
  *
- *   <!-- Document deletions: -->
- *   <delete>
- *     <reference>(document reference, e.g., URL)</reference>
- *     <metadata>
- *       <meta name="(meta field name)">(value)</meta>
- *       <meta name="(meta field name)">(value)</meta>
- *       <!-- meta is repeated for each metadata fields -->
- *     </metadata>
- *   </delete>
- *   <delete>
- *     <!-- delete element is repeated for each deletions -->
- *   </delete>
+ * <!-- Document deletions: -->
+ * <delete>
+ * <reference>(document reference, e.g., URL)</reference>
+ * <metadata>
+ * <meta name="(meta field name)">(value)</meta>
+ * <meta name="(meta field name)">(value)</meta>
+ * <!-- meta is repeated for each metadata fields -->
+ * </metadata>
+ * </delete>
+ * <delete>
+ * <!-- delete element is repeated for each deletions -->
+ * </delete>
  * </docs>
  * }
  *
  * {@nx.xml.usage
  * <committer class="com.norconex.committer.core3.fs.impl.XMLFileCommitter">
- *   {@nx.include com.norconex.committer.core3.fs.AbstractFSCommitter#options}
- *   <indent>(number of indentation spaces, default does not indent)</indent>
+ * {@nx.include com.norconex.committer.core3.fs.AbstractFSCommitter#options}
+ * <indent>(number of indentation spaces, default does not indent)</indent>
  * </committer>
  * }
  *
@@ -105,9 +105,20 @@ public class XMLFileCommitter
 
     private int indent = -1;
 
+    /**
+     * Gets XML indentation level.
+     * 
+     * @return indentation level, negative for compact output
+     */
     public int getIndent() {
         return indent;
     }
+
+    /**
+     * Sets XML indentation level.
+     * 
+     * @param indent indentation level, negative for compact output
+     */
     public void setIndent(int indent) {
         this.indent = indent;
     }
@@ -116,15 +127,16 @@ public class XMLFileCommitter
     protected String getFileExtension() {
         return "xml";
     }
+
     @Override
     protected EnhancedXMLStreamWriter createDocWriter(Writer writer)
             throws IOException {
-        EnhancedXMLStreamWriter xml =
-                new EnhancedXMLStreamWriter(writer, false, indent);
+        EnhancedXMLStreamWriter xml = new EnhancedXMLStreamWriter(writer, false, indent);
         xml.writeStartDocument();
         xml.writeStartElement("docs");
         return xml;
     }
+
     @Override
     protected void writeUpsert(EnhancedXMLStreamWriter xml,
             UpsertRequest upsertRequest) throws IOException {
@@ -134,8 +146,7 @@ public class XMLFileCommitter
         xml.writeElementString("reference", upsertRequest.getReference());
 
         xml.writeStartElement("metadata");
-        for (Entry<String, List<String>> entry
-                : upsertRequest.getMetadata().entrySet()) {
+        for (Entry<String, List<String>> entry : upsertRequest.getMetadata().entrySet()) {
             for (String value : entry.getValue()) {
                 xml.writeStartElement("meta");
                 xml.writeAttributeString("name", entry.getKey());
@@ -143,13 +154,14 @@ public class XMLFileCommitter
                 xml.writeEndElement();
             }
         }
-        xml.writeEndElement();  // </metadata>
+        xml.writeEndElement(); // </metadata>
 
         xml.writeElementString("content", IOUtils.toString(
                 upsertRequest.getContent(), StandardCharsets.UTF_8).trim());
 
-        xml.writeEndElement();  // </upsert>
+        xml.writeEndElement(); // </upsert>
     }
+
     @Override
     protected void writeDelete(EnhancedXMLStreamWriter xml,
             DeleteRequest deleteRequest) throws IOException {
@@ -159,19 +171,19 @@ public class XMLFileCommitter
         xml.writeElementString("reference", deleteRequest.getReference());
 
         xml.writeStartElement("metadata");
-        for (Entry<String, List<String>> entry
-                : deleteRequest.getMetadata().entrySet()) {
+        for (Entry<String, List<String>> entry : deleteRequest.getMetadata().entrySet()) {
             for (String value : entry.getValue()) {
                 xml.writeStartElement("meta");
                 xml.writeAttributeString("name", entry.getKey());
                 xml.writeCharacters(value);
-                xml.writeEndElement(); //meta
+                xml.writeEndElement(); // meta
             }
         }
         xml.writeEndElement(); // </metadata>
 
         xml.writeEndElement(); // </delete>
     }
+
     @Override
     protected void closeDocWriter(EnhancedXMLStreamWriter xml)
             throws IOException {
@@ -187,6 +199,7 @@ public class XMLFileCommitter
     public void loadFSCommitterFromXML(XML xml) {
         setIndent(xml.getInteger("indent", indent));
     }
+
     @Override
     public void saveFSCommitterToXML(XML xml) {
         xml.addElement("indent", indent);
@@ -196,10 +209,12 @@ public class XMLFileCommitter
     public boolean equals(final Object other) {
         return EqualsBuilder.reflectionEquals(this, other);
     }
+
     @Override
     public int hashCode() {
         return HashCodeBuilder.reflectionHashCode(this);
     }
+
     @Override
     public String toString() {
         return new ReflectionToStringBuilder(

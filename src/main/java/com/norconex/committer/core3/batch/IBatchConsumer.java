@@ -22,11 +22,18 @@ import com.norconex.committer.core3.ICommitterRequest;
 /**
  * Functional interface for processing requests in batch (for committers
  * supporting it).
+ * 
  * @author Pascal Essiembre
  * @since 3.0.0
  */
 @FunctionalInterface
 public interface IBatchConsumer {
 
+    /**
+     * Consumes a batch of committer requests.
+     * 
+     * @param it iterator over requests in the batch
+     * @throws CommitterException batch processing failure
+     */
     void consume(Iterator<ICommitterRequest> it) throws CommitterException;
 }

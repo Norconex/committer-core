@@ -30,6 +30,7 @@ import com.norconex.commons.lang.io.CachedStreamFactory;
 /**
  * Holds data defined outside a committer but useful or required for the
  * committer execution.
+ * 
  * @author Pascal Essiembre
  * @since 3.0.0
  */
@@ -43,20 +44,39 @@ public final class CommitterContext {
         super();
     }
 
+    /**
+     * Gets the event manager used to fire committer events.
+     * 
+     * @return event manager
+     */
     public EventManager getEventManager() {
         return eventManager;
     }
+
     /**
      * Gets a unique working directory for a committer (if one is needed).
+     * 
      * @return working directory (never <code>null</code>)
      */
     public Path getWorkDir() {
         return workDir;
     }
+
+    /**
+     * Gets the cached stream factory used by committers.
+     * 
+     * @return cached stream factory
+     */
     public CachedStreamFactory getStreamFactory() {
         return streamFactory;
     }
 
+    /**
+     * Creates a copy of this context with a different event manager.
+     * 
+     * @param eventManager event manager to use
+     * @return new context instance
+     */
     public CommitterContext withEventManager(EventManager eventManager) {
         return CommitterContext.builder()
                 .setEventManager(eventManager)
@@ -64,6 +84,13 @@ public final class CommitterContext {
                 .setStreamFactory(streamFactory)
                 .build();
     }
+
+    /**
+     * Creates a copy of this context with a different working directory.
+     * 
+     * @param workDir working directory to use
+     * @return new context instance
+     */
     public CommitterContext withWorkdir(Path workDir) {
         return CommitterContext.builder()
                 .setEventManager(eventManager)
@@ -71,6 +98,13 @@ public final class CommitterContext {
                 .setStreamFactory(streamFactory)
                 .build();
     }
+
+    /**
+     * Creates a copy of this context with a different stream factory.
+     * 
+     * @param streamFactory stream factory to use
+     * @return new context instance
+     */
     public CommitterContext withStreamFactory(
             CachedStreamFactory streamFactory) {
         return CommitterContext.builder()
@@ -80,27 +114,63 @@ public final class CommitterContext {
                 .build();
     }
 
+    /**
+     * Creates a builder for {@link CommitterContext}.
+     * 
+     * @return context builder
+     */
     public static Builder builder() {
         return new Builder();
     }
 
+    /**
+     * Builder for {@link CommitterContext}.
+     */
     public static class Builder {
         private final CommitterContext ctx = new CommitterContext();
+
         private Builder() {
             super();
         }
+
+        /**
+         * Sets the context working directory.
+         * 
+         * @param workDir working directory
+         * @return this builder
+         */
         public Builder setWorkDir(Path workDir) {
             ctx.workDir = workDir;
             return this;
         }
+
+        /**
+         * Sets the context event manager.
+         * 
+         * @param eventManager event manager
+         * @return this builder
+         */
         public Builder setEventManager(EventManager eventManager) {
             ctx.eventManager = eventManager;
             return this;
         }
+
+        /**
+         * Sets the cached stream factory.
+         * 
+         * @param streamFactory stream factory
+         * @return this builder
+         */
         public Builder setStreamFactory(CachedStreamFactory streamFactory) {
             ctx.streamFactory = streamFactory;
             return this;
         }
+
+        /**
+         * Builds a context and applies defaults where needed.
+         * 
+         * @return a fully initialized context
+         */
         public CommitterContext build() {
             if (ctx.workDir == null) {
                 ctx.workDir = new File(FileUtils.getTempDirectory(),
@@ -120,10 +190,12 @@ public final class CommitterContext {
     public boolean equals(final Object other) {
         return EqualsBuilder.reflectionEquals(this, other);
     }
+
     @Override
     public int hashCode() {
         return HashCodeBuilder.reflectionHashCode(this);
     }
+
     @Override
     public String toString() {
         return new ReflectionToStringBuilder(

@@ -47,17 +47,19 @@ import com.norconex.commons.lang.map.Properties;
  */
 public final class FSQueueUtil {
 
+    /** Queue file extension. */
     static final String EXT = ".zip";
+    /** Filter matching queue zip files. */
     static final FileFilter FILTER = f -> f.getName().endsWith(EXT);
 
     private FSQueueUtil() {
         super();
     }
 
-
     /**
      * Recursively gets whether a queue directory is empty of
      * queue files.
+     * 
      * @param dir directory to start looking
      * @return <code>true</code> if empty
      * @throws IOException if an I/O error occurs
@@ -69,15 +71,23 @@ public final class FSQueueUtil {
     /**
      * Finds all files with the ".zip" extension from within a given
      * directory, recursively.
+     * 
      * @param dir directory to start looking
      * @return a stream of Zip files.
      * @throws IOException problem occurred searching for files.
      */
     public static Stream<Path> findZipFiles(Path dir) throws IOException {
-        return Files.find(dir,  Integer.MAX_VALUE,
+        return Files.find(dir, Integer.MAX_VALUE,
                 (f, a) -> FILTER.accept(f.toFile()));
     }
 
+    /**
+     * Serializes a request to a queue zip file.
+     * 
+     * @param request    request to serialize
+     * @param targetFile target zip file
+     * @throws IOException serialization failure
+     */
     public static void toZipFile(
             ICommitterRequest request, Path targetFile) throws IOException {
 
@@ -106,20 +116,36 @@ public final class FSQueueUtil {
         }
     }
 
+    /**
+     * Deserializes a request from a queue zip file.
+     * 
+     * @param sourceFile source zip file
+     * @return deserialized request
+     * @throws IOException deserialization failure
+     */
     public static ICommitterRequest fromZipFile(Path sourceFile)
             throws IOException {
         return fromZipFile(sourceFile, null);
     }
+
+    /**
+     * Deserializes a request from a queue zip file.
+     * 
+     * @param sourceFile    source zip file
+     * @param streamFactory optional stream factory for request content caching
+     * @return deserialized request
+     * @throws IOException deserialization failure
+     */
     public static ICommitterRequest fromZipFile(
             Path sourceFile, CachedStreamFactory streamFactory)
-                    throws IOException {
+            throws IOException {
         String ref = null;
         Properties meta = new Properties();
         CachedInputStream content = null;
 
         try (ZipFile zipFile = new ZipFile(sourceFile.toFile())) {
             Enumeration<? extends ZipEntry> entries = zipFile.entries();
-            while(entries.hasMoreElements()){
+            while (entries.hasMoreElements()) {
                 ZipEntry entry = entries.nextElement();
                 String name = entry.getName();
                 try (InputStream is = zipFile.getInputStream(entry)) {

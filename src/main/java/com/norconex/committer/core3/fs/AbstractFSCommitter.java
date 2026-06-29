@@ -48,18 +48,18 @@ import com.norconex.commons.lang.xml.XML;
  * Base class for committers writing to the local file system.
  * </p>
  *
- * <h3>XML configuration usage:</h3>
+ * <h2>XML configuration usage:</h2>
  * <p>
  * The following are configuration options inherited by subclasses:
  * </p>
  * {@nx.xml #options
- *   <directory>(path where to save the files)</directory>
- *   <docsPerFile>(max number of docs per file)</docsPerFile>
- *   <compress>[false|true]</compress>
- *   <splitUpsertDelete>[false|true]</splitUpsertDelete>
- *   <fileNamePrefix>(optional prefix to created file names)</fileNamePrefix>
- *   <fileNameSuffix>(optional suffix to created file names)</fileNameSuffix>
- *   {@nx.include com.norconex.committer.core3.AbstractCommitter@nx.xml.usage}
+ * <directory>(path where to save the files)</directory>
+ * <docsPerFile>(max number of docs per file)</docsPerFile>
+ * <compress>[false|true]</compress>
+ * <splitUpsertDelete>[false|true]</splitUpsertDelete>
+ * <fileNamePrefix>(optional prefix to created file names)</fileNamePrefix>
+ * <fileNameSuffix>(optional suffix to created file names)</fileNameSuffix>
+ * {@nx.include com.norconex.committer.core3.AbstractCommitter@nx.xml.usage}
  * }
  *
  * @param <T> type of file serializer
@@ -68,10 +68,9 @@ import com.norconex.commons.lang.xml.XML;
  */
 @SuppressWarnings("javadoc")
 public abstract class AbstractFSCommitter<T> extends AbstractCommitter
-        implements IXMLConfigurable  {
+        implements IXMLConfigurable {
 
-    private static final Logger LOG =
-            LoggerFactory.getLogger(AbstractFSCommitter.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractFSCommitter.class);
 
     // These will share the same instance if not split.
     private DocWriterHandler upsertHandler;
@@ -87,45 +86,88 @@ public abstract class AbstractFSCommitter<T> extends AbstractCommitter
 
     /**
      * Gets the directory where files are committed.
+     * 
      * @return directory
      */
     public Path getDirectory() {
         return directory;
     }
+
+    /**
+     * Sets the directory where files are committed.
+     * 
+     * @param directory target directory
+     */
     public void setDirectory(Path directory) {
         this.directory = directory;
     }
 
+    /**
+     * Gets the maximum number of documents written per output file.
+     * 
+     * @return max documents per file
+     */
     public int getDocsPerFile() {
         return docsPerFile;
     }
+
+    /**
+     * Sets the maximum number of documents written per output file.
+     * 
+     * @param docsPerFile max documents per file
+     */
     public void setDocsPerFile(int docsPerFile) {
         this.docsPerFile = docsPerFile;
     }
 
+    /**
+     * Whether output files are gzip-compressed.
+     * 
+     * @return {@code true} if output is compressed
+     */
     public boolean isCompress() {
         return compress;
     }
+
+    /**
+     * Enables or disables gzip compression of output files.
+     * 
+     * @param compress {@code true} to compress output files
+     */
     public void setCompress(boolean compress) {
         this.compress = compress;
     }
 
+    /**
+     * Whether upsert and delete requests are written to separate files.
+     * 
+     * @return {@code true} if upserts and deletes are split
+     */
     public boolean isSplitUpsertDelete() {
         return splitUpsertDelete;
     }
+
+    /**
+     * Sets whether upserts and deletes should be written to separate files.
+     * 
+     * @param separateAddDelete {@code true} to split upsert and delete files
+     */
     public void setSplitUpsertDelete(boolean separateAddDelete) {
         this.splitUpsertDelete = separateAddDelete;
     }
 
     /**
      * Gets the file name prefix (default is <code>null</code>).
+     * 
      * @return file name prefix
      */
     public String getFileNamePrefix() {
         return fileNamePrefix;
     }
+
     /**
      * Sets an optional file name prefix.
+     * 
      * @param fileNamePrefix file name prefix
      */
     public void setFileNamePrefix(String fileNamePrefix) {
@@ -134,13 +176,16 @@ public abstract class AbstractFSCommitter<T> extends AbstractCommitter
 
     /**
      * Gets the file name suffix (default is <code>null</code>).
+     * 
      * @return file name suffix
      */
     public String getFileNameSuffix() {
         return fileNameSuffix;
     }
+
     /**
      * Sets an optional file name suffix.
+     * 
      * @param fileNameSuffix file name suffix
      */
     public void setFileNameSuffix(String fileNameSuffix) {
@@ -171,6 +216,7 @@ public abstract class AbstractFSCommitter<T> extends AbstractCommitter
             this.deleteHandler = upsertHandler;
         }
     }
+
     @Override
     protected synchronized void doUpsert(UpsertRequest upsertRequest)
             throws CommitterException {
@@ -181,6 +227,7 @@ public abstract class AbstractFSCommitter<T> extends AbstractCommitter
                     + upsertRequest.getReference());
         }
     }
+
     @Override
     protected synchronized void doDelete(DeleteRequest deleteRequest)
             throws CommitterException {
@@ -191,6 +238,7 @@ public abstract class AbstractFSCommitter<T> extends AbstractCommitter
                     + deleteRequest.getReference());
         }
     }
+
     @Override
     protected void doClose() throws CommitterException {
         try {
@@ -223,6 +271,7 @@ public abstract class AbstractFSCommitter<T> extends AbstractCommitter
         setFileNamePrefix(xml.getString("fileNamePrefix", fileNamePrefix));
         setFileNameSuffix(xml.getString("fileNameSuffix", fileNameSuffix));
     }
+
     @Override
     public final void saveCommitterToXML(XML xml) {
         saveFSCommitterToXML(xml);
@@ -234,20 +283,66 @@ public abstract class AbstractFSCommitter<T> extends AbstractCommitter
         xml.addElement("fileNameSuffix", fileNameSuffix);
     }
 
+    /**
+     * Loads file-system-committer-specific settings from XML.
+     * 
+     * @param xml XML to read from
+     */
     public void loadFSCommitterFromXML(XML xml) {
-        //NOOP
+        // NOOP
     }
+
+    /**
+     * Saves file-system-committer-specific settings to XML.
+     * 
+     * @param xml XML to write to
+     */
     public void saveFSCommitterToXML(XML xml) {
-        //NOOP
+        // NOOP
     }
 
-
+    /**
+     * Gets the output file extension (without leading dot).
+     * 
+     * @return output file extension
+     */
     protected abstract String getFileExtension();
+
+    /**
+     * Creates a document writer wrapping the provided character writer.
+     * 
+     * @param writer low-level character writer
+     * @return document writer
+     * @throws IOException writer creation failure
+     */
     protected abstract T createDocWriter(Writer writer) throws IOException;
+
+    /**
+     * Writes an upsert request to the current output writer.
+     * 
+     * @param docWriter     document writer
+     * @param upsertRequest request to serialize
+     * @throws IOException write failure
+     */
     protected abstract void writeUpsert(
             T docWriter, UpsertRequest upsertRequest) throws IOException;
+
+    /**
+     * Writes a delete request to the current output writer.
+     * 
+     * @param docWriter     document writer
+     * @param deleteRequest request to serialize
+     * @throws IOException write failure
+     */
     protected abstract void writeDelete(
             T docWriter, DeleteRequest deleteRequest) throws IOException;
+
+    /**
+     * Closes and flushes the document writer abstraction.
+     * 
+     * @param docWriter document writer
+     * @throws IOException close failure
+     */
     protected abstract void closeDocWriter(T docWriter)
             throws IOException;
 
@@ -255,10 +350,12 @@ public abstract class AbstractFSCommitter<T> extends AbstractCommitter
     public boolean equals(final Object other) {
         return EqualsBuilder.reflectionEquals(this, other);
     }
+
     @Override
     public int hashCode() {
         return HashCodeBuilder.reflectionHashCode(this);
     }
+
     @Override
     public String toString() {
         return new ReflectionToStringBuilder(
@@ -273,14 +370,15 @@ public abstract class AbstractFSCommitter<T> extends AbstractCommitter
         private File file;
         private T docWriter;
         private Writer writer = null;
+
         public DocWriterHandler(String fileBaseName) {
             super();
             this.fileBaseName = fileBaseName;
         }
+
         private synchronized T getDocWriter() throws IOException {
 
-            boolean docPerFileReached =
-                    docsPerFile > 0 && writeCount == docsPerFile;
+            boolean docPerFileReached = docsPerFile > 0 && writeCount == docsPerFile;
 
             if (docPerFileReached) {
                 close();
@@ -302,15 +400,17 @@ public abstract class AbstractFSCommitter<T> extends AbstractCommitter
             writeCount++;
             return docWriter;
         }
+
         private String buildFileName() {
             String fileName = stripToEmpty(toSafeFileName(fileNamePrefix))
-                  + fileBaseName + stripToEmpty(toSafeFileName(fileNameSuffix))
-                  + "_" + fileNumber + "." + getFileExtension();
+                    + fileBaseName + stripToEmpty(toSafeFileName(fileNameSuffix))
+                    + "_" + fileNumber + "." + getFileExtension();
             if (compress) {
                 fileName += ".gz";
             }
             return fileName;
         }
+
         @Override
         public synchronized void close() throws IOException {
             writeCount = 0;
@@ -326,14 +426,17 @@ public abstract class AbstractFSCommitter<T> extends AbstractCommitter
             file = null;
             writer = null;
         }
+
         @Override
         public boolean equals(final Object other) {
             return EqualsBuilder.reflectionEquals(this, other);
         }
+
         @Override
         public int hashCode() {
             return HashCodeBuilder.reflectionHashCode(this);
         }
+
         @Override
         public String toString() {
             return new ReflectionToStringBuilder(

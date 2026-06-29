@@ -35,7 +35,7 @@ import com.norconex.commons.lang.xml.XML;
 
 /**
  * <p>
- * Commits documents to JSON files.  There are two kinds of document
+ * Commits documents to JSON files. There are two kinds of document
  * representations: upserts and deletions.
  * </p>
  * <p>
@@ -44,7 +44,7 @@ import com.norconex.commons.lang.xml.XML;
  * and "delete-" (for deletions).
  * </p>
  * <p>
- * The generated files are never updated.  Sending a modified document with the
+ * The generated files are never updated. Sending a modified document with the
  * same reference will create a new entry and won't modify any existing ones.
  * You can think of the generated files as a set of commit instructions.
  * </p>
@@ -56,46 +56,46 @@ import com.norconex.commons.lang.xml.XML;
  * files that will be created (default does not add any).
  * </p>
  *
- * <h3>Generated JSON format:</h3>
+ * <h2>Generated JSON format:</h2>
  * {@nx.json
  * [
- *   {"upsert": {
- *     "reference": "document reference, e.g., URL",
- *     "metadata": {
- *       "name": ["value"],
- *       "anothername": [
- *         "multivalue1",
- *         "multivalue2"
- *       ],
- *       "anyname": ["name-value is repeated as necessary"]
- *     },
- *     "content": "Document Content Goes here"
- *   }},
- *   {"upsert": {
- *     // upsert is repeated as necessary
- *   }},
- *   {"delete": {
- *     "reference": "document reference, e.g., URL",
- *     "metadata": {
- *       "name": ["value"],
- *       "anothername": [
- *         "multivalue1",
- *         "multivalue2"
- *       ],
- *       "anyname": ["name-value is repeated as necessary"]
- *     }
- *   }},
- *   {"delete": {
- *     // delete is repeated as necessary
- *   }}
+ * {"upsert": {
+ * "reference": "document reference, e.g., URL",
+ * "metadata": {
+ * "name": ["value"],
+ * "anothername": [
+ * "multivalue1",
+ * "multivalue2"
+ * ],
+ * "anyname": ["name-value is repeated as necessary"]
+ * },
+ * "content": "Document Content Goes here"
+ * }},
+ * {"upsert": {
+ * // upsert is repeated as necessary
+ * }},
+ * {"delete": {
+ * "reference": "document reference, e.g., URL",
+ * "metadata": {
+ * "name": ["value"],
+ * "anothername": [
+ * "multivalue1",
+ * "multivalue2"
+ * ],
+ * "anyname": ["name-value is repeated as necessary"]
+ * }
+ * }},
+ * {"delete": {
+ * // delete is repeated as necessary
+ * }}
  * ]
  *
  * }
  *
  * {@nx.xml.usage
  * <committer class="com.norconex.committer.core3.fs.impl.JSONFileCommitter">
- *   {@nx.include com.norconex.committer.core3.fs.AbstractFSCommitter#options}
- *   <indent>(number of indentation spaces, default does not indent)</indent>
+ * {@nx.include com.norconex.committer.core3.fs.AbstractFSCommitter#options}
+ * <indent>(number of indentation spaces, default does not indent)</indent>
  * </committer>
  * }
  *
@@ -112,9 +112,20 @@ public class JSONFileCommitter extends AbstractFSCommitter<Writer> {
     @EqualsExclude
     private boolean first = true;
 
+    /**
+     * Gets JSON indentation level.
+     * 
+     * @return indentation level, negative for compact output
+     */
     public int getIndent() {
         return indent;
     }
+
+    /**
+     * Sets JSON indentation level.
+     * 
+     * @param indent indentation level, negative for compact output
+     */
     public void setIndent(int indent) {
         this.indent = indent;
     }
@@ -123,12 +134,14 @@ public class JSONFileCommitter extends AbstractFSCommitter<Writer> {
     protected String getFileExtension() {
         return "json";
     }
+
     @Override
     protected Writer createDocWriter(Writer writer) throws IOException {
         writer.write("[");
         newLine(writer);
         return writer;
     }
+
     @Override
     protected synchronized void writeUpsert(
             Writer writer, UpsertRequest upsertRequest) throws IOException {
@@ -201,6 +214,7 @@ public class JSONFileCommitter extends AbstractFSCommitter<Writer> {
     public void loadFSCommitterFromXML(XML xml) {
         setIndent(xml.getInteger("indent", indent));
     }
+
     @Override
     public void saveFSCommitterToXML(XML xml) {
         xml.addElement("indent", indent);
@@ -210,10 +224,12 @@ public class JSONFileCommitter extends AbstractFSCommitter<Writer> {
     public boolean equals(final Object other) {
         return EqualsBuilder.reflectionEquals(this, other);
     }
+
     @Override
     public int hashCode() {
         return HashCodeBuilder.reflectionHashCode(this);
     }
+
     @Override
     public String toString() {
         return new ReflectionToStringBuilder(

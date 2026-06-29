@@ -49,11 +49,11 @@ import com.norconex.commons.lang.xml.XML;
  * the generated files will start with "upsert-" (for additions/modifications)
  * and "delete-" (for deletions).
  * A request "type" field is always added when both upserts and deletes are
- * added to the same file.  Default header name for it is <code>type</code>,
+ * added to the same file. Default header name for it is <code>type</code>,
  * but you can supply your own name with {@link #setTypeHeader(String)}.
  * </p>
  * <p>
- * The generated files are never updated.  Sending a modified document with the
+ * The generated files are never updated. Sending a modified document with the
  * same reference will create a new entry and won't modify any existing ones.
  * You can think of the generated files as a set of commit instructions.
  * </p>
@@ -65,7 +65,7 @@ import com.norconex.commons.lang.xml.XML;
  * files that will be created (default does not add any).
  * </p>
  *
- * <h3>Content handling</h3>
+ * <h2>Content handling</h2>
  * <p>
  * The document content is represented by creating a column with a blank or
  * <code>null</code> field name. When requested, the "content" column
@@ -90,18 +90,18 @@ import com.norconex.commons.lang.xml.XML;
  * you can chose from:
  * </p>
  * <ul>
- *   <li>DEFAULT</li>
- *   <li>EXCEL</li>
- *   <li>INFORMIX_UNLOAD1.3</li>
- *   <li>INFORMIX_UNLOAD_CSV1.3</li>
- *   <li>MONGO_CSV1.7</li>
- *   <li>MONGO_TSV1.7</li>
- *   <li>MYSQL</li>
- *   <li>ORACLE1.6</li>
- *   <li>POSTGRESSQL_CSV1.5</li>
- *   <li>POSTGRESSQL_TEXT1.5</li>
- *   <li>RFC-4180</li>
- *   <li>TDF</li>
+ * <li>DEFAULT</li>
+ * <li>EXCEL</li>
+ * <li>INFORMIX_UNLOAD1.3</li>
+ * <li>INFORMIX_UNLOAD_CSV1.3</li>
+ * <li>MONGO_CSV1.7</li>
+ * <li>MONGO_TSV1.7</li>
+ * <li>MYSQL</li>
+ * <li>ORACLE1.6</li>
+ * <li>POSTGRESSQL_CSV1.5</li>
+ * <li>POSTGRESSQL_TEXT1.5</li>
+ * <li>RFC-4180</li>
+ * <li>TDF</li>
  * </ul>
  *
  * <p>
@@ -114,21 +114,21 @@ import com.norconex.commons.lang.xml.XML;
  *
  * {@nx.xml.usage
  * <committer class="com.norconex.committer.core3.fs.impl.CSVFileCommitter"
- *     format="(see class documentation)"
- *     showHeaders="[false|true]"
- *     delimiter="(single delimiter character)"
- *     quote="(single quote character)"
- *     escape="(single escape character)"
- *     multiValueJoinDelimiter="(delimiter string)"
- *     typeHeader="(header name for commit request type column)"
- *     truncateAt="(truncate after N characters, default: 5096, unlimited: -1)">
- *   <!-- Repeat "col" for every desired column. -->
- *   <col
- *       field="(source field name, omit or leave blank for document content)"
- *       header="(optional column header name)"
- *       truncateAt="(overwrite truncate)"/>
+ * format="(see class documentation)"
+ * showHeaders="[false|true]"
+ * delimiter="(single delimiter character)"
+ * quote="(single quote character)"
+ * escape="(single escape character)"
+ * multiValueJoinDelimiter="(delimiter string)"
+ * typeHeader="(header name for commit request type column)"
+ * truncateAt="(truncate after N characters, default: 5096, unlimited: -1)">
+ * <!-- Repeat "col" for every desired column. -->
+ * <col
+ * field="(source field name, omit or leave blank for document content)"
+ * header="(optional column header name)"
+ * truncateAt="(overwrite truncate)"/>
  *
- *   {@nx.include com.norconex.committer.core3.fs.AbstractFSCommitter#options}
+ * {@nx.include com.norconex.committer.core3.fs.AbstractFSCommitter#options}
  *
  * </committer>
  * }
@@ -139,6 +139,7 @@ import com.norconex.commons.lang.xml.XML;
 @SuppressWarnings("javadoc")
 public class CSVFileCommitter extends AbstractFSCommitter<CSVPrinter> {
 
+    /** Default truncate length for column values. */
     public static final int DEFAULT_TRUNCATE_AT = 5096;
 
     private String format;
@@ -151,60 +152,173 @@ public class CSVFileCommitter extends AbstractFSCommitter<CSVPrinter> {
     private String typeHeader;
     private final List<Column> columns = new ArrayList<>();
 
+    /**
+     * Gets the preset CSV format name.
+     * 
+     * @return CSV format name
+     */
     public String getFormat() {
         return format;
     }
+
+    /**
+     * Sets the preset CSV format name.
+     * 
+     * @param format CSV format name
+     */
     public void setFormat(String format) {
         this.format = format;
     }
+
+    /**
+     * Gets the CSV delimiter character.
+     * 
+     * @return delimiter character
+     */
     public Character getDelimiter() {
         return delimiter;
     }
+
+    /**
+     * Sets the CSV delimiter character.
+     * 
+     * @param delimiter delimiter character
+     */
     public void setDelimiter(Character delimiter) {
         this.delimiter = delimiter;
     }
+
+    /**
+     * Gets the CSV quote character.
+     * 
+     * @return quote character
+     */
     public Character getQuote() {
         return quote;
     }
+
+    /**
+     * Sets the CSV quote character.
+     * 
+     * @param quote quote character
+     */
     public void setQuote(Character quote) {
         this.quote = quote;
     }
+
+    /**
+     * Whether a header row is written.
+     * 
+     * @return {@code true} when headers are emitted
+     */
     public boolean isShowHeaders() {
         return showHeaders;
     }
+
+    /**
+     * Sets whether a header row is written.
+     * 
+     * @param showHeaders {@code true} to emit headers
+     */
     public void setShowHeaders(boolean showHeaders) {
         this.showHeaders = showHeaders;
     }
+
+    /**
+     * Gets the CSV escape character.
+     * 
+     * @return escape character
+     */
     public Character getEscape() {
         return escape;
     }
+
+    /**
+     * Sets the CSV escape character.
+     * 
+     * @param escape escape character
+     */
     public void setEscape(Character escape) {
         this.escape = escape;
     }
+
+    /**
+     * Gets the global truncate length for values.
+     * 
+     * @return truncate length; negative means unlimited
+     */
     public int getTruncateAt() {
         return truncateAt;
     }
+
+    /**
+     * Sets the global truncate length for values.
+     * 
+     * @param truncateAt truncate length; negative means unlimited
+     */
     public void setTruncateAt(int truncateAt) {
         this.truncateAt = truncateAt;
     }
+
+    /**
+     * Gets the delimiter used to join multi-valued metadata.
+     * 
+     * @return multi-value join delimiter
+     */
     public String getMultiValueJoinDelimiter() {
         return multiValueJoinDelimiter;
     }
+
+    /**
+     * Sets the delimiter used to join multi-valued metadata.
+     * 
+     * @param multiValueJoinDelimiter join delimiter
+     */
     public void setMultiValueJoinDelimiter(String multiValueJoinDelimiter) {
         this.multiValueJoinDelimiter = multiValueJoinDelimiter;
     }
+
+    /**
+     * Gets configured CSV columns.
+     * 
+     * @return immutable list of configured columns
+     */
     public List<Column> getColumns() {
         return Collections.unmodifiableList(columns);
     }
+
+    /**
+     * Replaces configured columns.
+     * 
+     * @param columns columns to use
+     */
     public void setColumns(List<Column> columns) {
         CollectionUtil.setAll(this.columns, columns);
     }
+
+    /**
+     * Replaces configured columns.
+     * 
+     * @param columns columns to use
+     */
     public void setColumns(Column... columns) {
         CollectionUtil.setAll(this.columns, columns);
     }
+
+    /**
+     * Gets the header name used for commit request type.
+     * 
+     * @return type header name
+     */
     public String getTypeHeader() {
         return typeHeader;
     }
+
+    /**
+     * Sets the header name used for commit request type.
+     * 
+     * @param typeHeader type header name
+     */
     public void setTypeHeader(String typeHeader) {
         this.typeHeader = typeHeader;
     }
@@ -213,6 +327,7 @@ public class CSVFileCommitter extends AbstractFSCommitter<CSVPrinter> {
     protected String getFileExtension() {
         return "csv";
     }
+
     @Override
     protected CSVPrinter createDocWriter(Writer writer) throws IOException {
         Builder builder = Builder.create(StringUtils.isBlank(format)
@@ -243,7 +358,8 @@ public class CSVFileCommitter extends AbstractFSCommitter<CSVPrinter> {
         if (showHeaders) {
             if (StringUtils.isNotBlank(typeHeader) || !isSplitUpsertDelete()) {
                 csv.print(StringUtils.isNotBlank(typeHeader)
-                        ? typeHeader : "type");
+                        ? typeHeader
+                        : "type");
             }
             for (Column column : columns) {
                 String header = column.getHeader();
@@ -323,7 +439,7 @@ public class CSVFileCommitter extends AbstractFSCommitter<CSVPrinter> {
     @Override
     protected void closeDocWriter(CSVPrinter csv)
             throws IOException {
-        if (csv!= null) {
+        if (csv != null) {
             csv.flush();
             csv.close();
         }
@@ -350,6 +466,7 @@ public class CSVFileCommitter extends AbstractFSCommitter<CSVPrinter> {
         }
         setColumns(cols);
     }
+
     @Override
     public void saveFSCommitterToXML(XML xml) {
         xml.setAttribute("format", getFormat());
@@ -373,53 +490,106 @@ public class CSVFileCommitter extends AbstractFSCommitter<CSVPrinter> {
     public boolean equals(final Object other) {
         return EqualsBuilder.reflectionEquals(this, other);
     }
+
     @Override
     public int hashCode() {
         return HashCodeBuilder.reflectionHashCode(this);
     }
+
     @Override
     public String toString() {
         return new ReflectionToStringBuilder(
                 this, ToStringStyle.SHORT_PREFIX_STYLE).toString();
     }
 
+    /**
+     * Column mapping definition for generated CSV files.
+     */
     public static class Column {
         private final String field;
         private final String header;
         private final int truncateAt; // -1 is unlimited, 0 is using default.
 
+        /**
+         * Creates a column where header defaults to field and global truncate is used.
+         * 
+         * @param field source field name, blank for document content
+         */
         public Column(String field) {
             this(field, field, 0);
         }
+
+        /**
+         * Creates a column where header defaults to field.
+         * 
+         * @param field      source field name, blank for document content
+         * @param truncateAt truncate length override
+         */
         public Column(String field, int truncateAt) {
             this(field, field, truncateAt);
         }
+
+        /**
+         * Creates a column with a custom header.
+         * 
+         * @param field  source field name, blank for document content
+         * @param header output header name
+         */
         public Column(String field, String header) {
             this(field, header, 0);
         }
+
+        /**
+         * Creates a column with full control over field, header, and truncation.
+         * 
+         * @param field      source field name, blank for document content
+         * @param header     output header name
+         * @param truncateAt truncate length override
+         */
         public Column(String field, String header, int truncateAt) {
             super();
             this.field = field;
             this.header = header;
             this.truncateAt = truncateAt;
         }
+
+        /**
+         * Gets the source field name.
+         * 
+         * @return source field name
+         */
         public String getField() {
             return field;
         }
+
+        /**
+         * Gets the output header name.
+         * 
+         * @return header name
+         */
         public String getHeader() {
             return header;
         }
+
+        /**
+         * Gets the truncate length override for this column.
+         * 
+         * @return truncate length override
+         */
         public int getTruncateAt() {
             return truncateAt;
         }
+
         @Override
         public boolean equals(final Object other) {
             return EqualsBuilder.reflectionEquals(this, other);
         }
+
         @Override
         public int hashCode() {
             return HashCodeBuilder.reflectionHashCode(this);
         }
+
         @Override
         public String toString() {
             return new ReflectionToStringBuilder(

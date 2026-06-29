@@ -26,6 +26,7 @@ import com.norconex.commons.lang.map.Properties;
 
 /**
  * A committer upsert request (update or insert).
+ * 
  * @author Pascal Essiembre
  * @since 3.0.0
  */
@@ -37,8 +38,15 @@ public class UpsertRequest implements ICommitterRequest {
     @ToStringExclude
     private final InputStream content;
 
-    //TODO do we allow null content? If so, document it.
+    // TODO do we allow null content? If so, document it.
 
+    /**
+     * Creates an upsert request.
+     * 
+     * @param reference unique document reference
+     * @param metadata  request metadata
+     * @param content   request content stream
+     */
     public UpsertRequest(
             String reference, Properties metadata, InputStream content) {
         super();
@@ -57,6 +65,11 @@ public class UpsertRequest implements ICommitterRequest {
         return metadata;
     }
 
+    /**
+     * Gets request content stream.
+     * 
+     * @return content stream, possibly {@code null}
+     */
     public InputStream getContent() {
         return content;
     }
@@ -65,10 +78,12 @@ public class UpsertRequest implements ICommitterRequest {
     public boolean equals(final Object other) {
         return EqualsBuilder.reflectionEquals(this, other);
     }
+
     @Override
     public int hashCode() {
         return HashCodeBuilder.reflectionHashCode(this);
     }
+
     @Override
     public String toString() {
         return new ReflectionToStringBuilder(
