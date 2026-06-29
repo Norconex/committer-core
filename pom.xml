@@ -1,4 +1,4 @@
-<!-- 
+﻿<!-- 
    Copyright 2014-2021 Norconex Inc.
 
    Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,46 +13,39 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" 
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>com.norconex.commons</groupId>
-    <artifactId>norconex-commons-maven-parent</artifactId>
-    <version>1.0.0</version>
-  </parent>  
-  <groupId>com.norconex.collectors</groupId>
+    <groupId>com.norconex.collectors.v3</groupId>
+    <artifactId>norconex-collector-parent</artifactId>
+    <version>3.2.0-SNAPSHOT</version>
+  </parent>
+  <groupId>com.norconex.collectors.v3</groupId>
   <artifactId>norconex-committer-core</artifactId>
-  <version>3.0.0</version>
+  <version>3.2.0-SNAPSHOT</version>
   <name>Norconex Committer Core</name>
-
-  <properties>
-  </properties>
+  <properties></properties>
   <inceptionYear>2009</inceptionYear>
-
   <dependencies>
     <dependency>
-        <groupId>com.norconex.commons</groupId>
-        <artifactId>norconex-commons-lang</artifactId>
+      <groupId>com.norconex.commons</groupId>
+      <artifactId>norconex-commons-lang</artifactId>
     </dependency>
     <dependency>
-        <groupId>com.norconex.commons</groupId>
-        <artifactId>norconex-commons-lang</artifactId>
-        <classifier>resources</classifier>
-        <type>zip</type>
-        <scope>provided</scope>
+      <groupId>com.norconex.commons</groupId>
+      <artifactId>norconex-commons-lang</artifactId>
+      <classifier>resources</classifier>
+      <type>zip</type>
+      <scope>provided</scope>
     </dependency>
     <dependency>
-        <groupId>com.tdunning</groupId>
-        <artifactId>json</artifactId>
+      <groupId>com.tdunning</groupId>
+      <artifactId>json</artifactId>
     </dependency>
-
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-csv</artifactId>
     </dependency>
-
     <!-- Tests and provided. -->
     <dependency>
       <groupId>org.junit.jupiter</groupId>
@@ -68,42 +61,35 @@
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-core</artifactId>
       <scope>test</scope>
-    </dependency>     
+    </dependency>
   </dependencies>
- 
   <build>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
       </plugin>
-     
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
       </plugin>
-
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
       </plugin>
-    
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
       </plugin>
-      
       <!--  Use VM argument -Dgpg.skip=true to disable GPG signing. -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-gpg-plugin</artifactId>
       </plugin>
-
       <plugin>
         <groupId>org.sonatype.plugins</groupId>
         <artifactId>nexus-staging-maven-plugin</artifactId>
       </plugin>
-      
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
@@ -126,24 +112,21 @@
       </plugin>
     </plugins>
   </build>
-
   <distributionManagement>
     <site>
       <id>norconex-site-deployment</id>
       <url>${site.baseurl}/committers/core/v3</url>
     </site>
   </distributionManagement>
-  
   <url>https://opensource.norconex.com/committers/core</url>
   <description>Norconex Committer is a java library and command line application used to route content to local or remote target repositories, such as a search engine index.   </description>
   <issueManagement>
-  	<url>https://github.com/Norconex/committer-core/issues</url>
-  	<system>GitHub</system>
+    <url>https://github.com/Norconex/committer-core/issues</url>
+    <system>GitHub</system>
   </issueManagement>
   <scm>
     <url>https://github.com/Norconex/committer-core</url>
     <connection>scm:git:git@github.com:Norconex/committer-core.git</connection>
     <developerConnection>scm:git:git@github.com:Norconex/committer-core.git</developerConnection>
   </scm>
-
 </project>
